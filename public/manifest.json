@@ -1,0 +1,10 @@
+{
+  "short_name": "SnookerScore",
+  "name": "Snooker Match Analytics & Referee System",
+  "icons": [],
+  "start_url": ".",
+  "background_color": "#030712",
+  "theme_color": "#030712",
+  "display": "standalone",
+  "orientation": "landscape"
+}
