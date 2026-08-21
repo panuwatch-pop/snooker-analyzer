@@ -196,6 +196,7 @@ export default function App() {
           setCurrentPlayerIndex={match.setCurrentPlayerIndex}
           switchTurn={match.switchTurn}
           remainingReds={match.remainingReds}
+          pottedRedsCount={match.pottedRedsCount}
           pointsRemaining={match.pointsRemaining}
           scoreDiff={match.scoreDiff}
           isPointsDeficit={match.isPointsDeficit}
@@ -235,6 +236,7 @@ export default function App() {
                   isMobileStatsOpen={isMobileStatsOpen}
                   setIsMobileStatsOpen={setIsMobileStatsOpen}
                   remainingReds={match.remainingReds}
+                  pottedRedsCount={match.pottedRedsCount}
                   pointsRemaining={match.pointsRemaining}
                   adjustRemainingReds={match.adjustRemainingReds}
                 />

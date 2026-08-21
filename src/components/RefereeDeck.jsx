@@ -29,8 +29,9 @@ export function RefereeDeck({
   setCurrentPlayerIndex,
   isMobileStatsOpen,
   setIsMobileStatsOpen,
-  // 🎱 6-Red Snooker Points Remaining Props
+  // 🎱 6-Red Snooker Points Remaining & Potted Reds Props
   remainingReds,
+  pottedRedsCount,
   pointsRemaining,
   adjustRemainingReds,
 }) {
@@ -131,7 +132,7 @@ export function RefereeDeck({
           </button>
         </div>
 
-        {/* 📊 3. แถบสรุปในแถบเดียวกัน: แทงอยู่ + FRAME + เวลาช็อต + แต้มคงเหลือ 6-Red + AST/POT/SAF */}
+        {/* 📊 3. แถบสรุปในแถบเดียวกัน: แทงอยู่ + FRAME + เวลาช็อต + ลูกแดง 6 เม็ด + แต้มคงเหลือ 6-Red + AST/POT/SAF */}
         <div className="pt-1 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-[9px] sm:text-[10px] font-mono text-slate-300 px-1 bg-slate-900/90 rounded">
           
           {/* ฝ่ายแทงอยู่ */}
@@ -152,12 +153,12 @@ export function RefereeDeck({
             <span>FRAME {currentFrame}</span>
           </div>
 
-          {/* 🎱 แต้มคงเหลือบนโต๊ะ (6-Red Snooker Points Remaining) */}
+          {/* 🎱 แต้มคงเหลือบนโต๊ะ + สรุปลูกแดง 6 เม็ด (6-Red Snooker Points Remaining) */}
           <div className="flex items-center gap-1 bg-slate-950 px-1.5 py-0.2 rounded border border-emerald-600/60 font-bold shrink-0 text-emerald-300">
             <span>บนโต๊ะ: <strong className="text-amber-300 font-extrabold">{pointsRemaining}</strong> แต้ม</span>
             {adjustRemainingReds && (
               <div className="flex items-center gap-0.5 ml-1 border-l border-slate-800 pl-1">
-                <span className="text-[8px] text-red-400 font-semibold">🔴{remainingReds}</span>
+                <span className="text-[8px] text-red-400 font-semibold">🔴{pottedRedsCount}/6 เม็ด</span>
                 <button
                   onClick={() => adjustRemainingReds(-1)}
                   disabled={remainingReds <= 0}

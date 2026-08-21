@@ -19,6 +19,7 @@ export function ScoreboardHeader({
   switchTurn,
   // 🎱 แต้มคงเหลือ 6-Red Snooker
   remainingReds,
+  pottedRedsCount,
   pointsRemaining,
   scoreDiff,
   isPointsDeficit,
@@ -119,7 +120,7 @@ export function ScoreboardHeader({
             </div>
           </div>
 
-          {/* Center Match Frame Score + 🎱 6-Red Snooker Remaining Points (แต้มคงเหลือบนโต๊ะ) */}
+          {/* Center Match Frame Score + 🎱 6-Red Snooker Remaining Points (นับลูกแดง 6 เม็ด + แต้มขาด) */}
           <div className="shrink-0 flex flex-col items-center justify-center text-center px-1">
             <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-0.2">
               FRAMES
@@ -130,17 +131,19 @@ export function ScoreboardHeader({
               <span>{players[1].frameScore}</span>
             </div>
             
-            {/* 🎱 แต้มคงเหลือบนโต๊ะ (Points Remaining) */}
+            {/* 🎱 สรุปลูกแดง 6 เม็ด + แต้มคงเหลือบนโต๊ะ (Points Remaining) */}
             <div className="mt-0.5 flex flex-col items-center gap-0.5">
-              <div className="text-[9px] sm:text-[10px] font-bold font-mono text-emerald-300 bg-emerald-950/90 px-1.5 py-0.2 rounded border border-emerald-700/80 shadow">
+              <div className="text-[9px] sm:text-[10px] font-bold font-mono text-emerald-300 bg-emerald-950/90 px-1.5 py-0.2 rounded border border-emerald-700/80 shadow flex items-center gap-1">
                 <span>บนโต๊ะ: <strong className="text-amber-300 font-black">{pointsRemaining}</strong> แต้ม</span>
-                {remainingReds > 0 && <span className="text-slate-400 text-[8px] ml-1">(🔴 {remainingReds} ลูก)</span>}
+                <span className="text-slate-400 text-[8.5px] border-l border-emerald-800 pl-1">
+                  🔴 <strong className="text-red-400 font-bold">{pottedRedsCount}</strong>/6 เม็ด
+                </span>
               </div>
 
-              {/* แบรนด์แจ้งเตือนแต้มขาด / ต้องการกี่สนุ๊ก */}
+              {/* ⚠️ แบรนด์แจ้งเตือนแต้มขาด / ต้องการกี่สนุ๊ก */}
               {isPointsDeficit ? (
-                <div className="text-[8px] font-bold text-red-300 bg-red-950/90 border border-red-700 px-1 py-0.2 rounded animate-pulse shadow">
-                  ⚠️ แต้มขาด {scoreDiff - pointsRemaining} แต้ม (ต้องการ {snookersRequired} สนุ๊ก)
+                <div className="text-[8.5px] sm:text-[9.5px] font-black text-red-300 bg-red-950/95 border-2 border-red-600 px-1.5 py-0.3 rounded-md animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+                  🚨 แต้มขาดแล้ว! (นำ {scoreDiff} แต้ม / ต้องการ {snookersRequired} สนุ๊ก)
                 </div>
               ) : (
                 currentPlayerIndex === 0 ? (
