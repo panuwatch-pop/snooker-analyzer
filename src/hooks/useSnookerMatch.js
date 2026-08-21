@@ -300,20 +300,25 @@ export function useSnookerMatch() {
   };
 
   /**
-   * เริ่มเฟรมถัดไป
+   * เริ่มเฟรมถัดไป (พร้อมบันทึกจบเฟรมลงใน Shot History Log)
    */
   const nextFrame = (winnerIndex = null) => {
     saveSnapshot();
+
+    const p1Pts = players[0].currentFramePoints;
+    const p2Pts = players[1].currentFramePoints;
+    const computedWinnerIndex = winnerIndex !== null 
+      ? winnerIndex 
+      : p1Pts > p2Pts ? 0 : p2Pts > p1Pts ? 1 : null;
+    
+    const winnerName = computedWinnerIndex !== null 
+      ? players[computedWinnerIndex].name 
+      : 'เสมอแต้ม';
+
     setPlayers((prev) => {
       const newPlayers = [...prev];
-      if (winnerIndex !== null) {
-        newPlayers[winnerIndex].frameScore += 1;
-      } else {
-        if (newPlayers[0].currentFramePoints > newPlayers[1].currentFramePoints) {
-          newPlayers[0].frameScore += 1;
-        } else if (newPlayers[1].currentFramePoints > newPlayers[0].currentFramePoints) {
-          newPlayers[1].frameScore += 1;
-        }
+      if (computedWinnerIndex !== null) {
+        newPlayers[computedWinnerIndex].frameScore += 1;
       }
       newPlayers[0].currentFramePoints = 0;
       newPlayers[1].currentFramePoints = 0;
@@ -321,6 +326,21 @@ export function useSnookerMatch() {
       newPlayers[1].currentBreak = 0;
       return newPlayers;
     });
+
+    // 🏁 บันทึก Log จบเฟรมลงในประวัติย้อนหลัง (Shot Log)
+    const frameEndLog = {
+      id: Date.now().toString(),
+      playerIndex: computedWinnerIndex !== null ? computedWinnerIndex : 0,
+      playerName: winnerName,
+      type: 'FRAME_END',
+      frameCompleted: currentFrame,
+      p1FramePoints: p1Pts,
+      p2FramePoints: p2Pts,
+      duration: 0,
+      timestamp: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    };
+    setShotLog((prev) => [frameEndLog, ...prev.slice(0, 49)]);
+
     setCurrentFrame((prev) => prev + 1);
     setBreakHistory([]);
     setRemainingReds(6); // รีเซ็ตลูกแดงเป็น 6 ลูกเสมอต่อเฟรม
