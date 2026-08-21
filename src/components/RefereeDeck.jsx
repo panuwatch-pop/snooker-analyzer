@@ -1,7 +1,7 @@
 import React from 'react';
 import { BALL_TYPES } from '../utils/snookerCalculator';
 import { StatsDashboard } from './StatsDashboard';
-import { RotateCcw, ArrowRightLeft, Shield, Target, AlertCircle, PlayCircle, Play, Pause, Square, Zap, ShieldCheck, Clock, Trophy, BarChart2, ChevronDown, X } from 'lucide-react';
+import { RotateCcw, ArrowRightLeft, Shield, Target, AlertCircle, PlayCircle, Play, Pause, Square, Zap, ShieldCheck, Clock, Trophy, BarChart2, ChevronDown, X, Plus, Minus } from 'lucide-react';
 
 const getDisplayName = (name) => {
   if (!name) return 'ผู้เล่น';
@@ -29,6 +29,10 @@ export function RefereeDeck({
   setCurrentPlayerIndex,
   isMobileStatsOpen,
   setIsMobileStatsOpen,
+  // 🎱 6-Red Snooker Points Remaining Props
+  remainingReds,
+  pointsRemaining,
+  adjustRemainingReds,
 }) {
   const activePlayer = players[currentPlayerIndex];
 
@@ -117,7 +121,7 @@ export function RefereeDeck({
           </button>
         </div>
 
-        {/* 📊 3. แถบสรุปในแถบเดียวกัน: แทงอยู่ + FRAME + เวลาช็อต + AST/POT/SAF ตามสั่ง */}
+        {/* 📊 3. แถบสรุปในแถบเดียวกัน: แทงอยู่ + FRAME + เวลาช็อต + แต้มคงเหลือ 6-Red + AST/POT/SAF */}
         <div className="pt-1 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-[9px] sm:text-[10px] font-mono text-slate-300 px-1 bg-slate-900/90 rounded">
           
           {/* ฝ่ายแทงอยู่ */}
@@ -136,6 +140,32 @@ export function RefereeDeck({
           <div className="flex items-center gap-1 shrink-0 bg-emerald-950/80 text-emerald-400 border border-emerald-800 px-1.5 py-0.2 rounded font-bold">
             <Trophy className="w-3 h-3 text-amber-400" />
             <span>FRAME {currentFrame}</span>
+          </div>
+
+          {/* 🎱 แต้มคงเหลือบนโต๊ะ (6-Red Snooker Points Remaining) */}
+          <div className="flex items-center gap-1 bg-slate-950 px-1.5 py-0.2 rounded border border-emerald-600/60 font-bold shrink-0 text-emerald-300">
+            <span>บนโต๊ะ: <strong className="text-amber-300 font-extrabold">{pointsRemaining}</strong> แต้ม</span>
+            {adjustRemainingReds && (
+              <div className="flex items-center gap-0.5 ml-1 border-l border-slate-800 pl-1">
+                <span className="text-[8px] text-red-400 font-semibold">🔴{remainingReds}</span>
+                <button
+                  onClick={() => adjustRemainingReds(-1)}
+                  disabled={remainingReds <= 0}
+                  className="p-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded disabled:opacity-30"
+                  title="ลดจำนวนลูกแดง 1 ลูก"
+                >
+                  <Minus className="w-2.5 h-2.5" />
+                </button>
+                <button
+                  onClick={() => adjustRemainingReds(1)}
+                  disabled={remainingReds >= 6}
+                  className="p-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded disabled:opacity-30"
+                  title="เพิ่มจำนวนลูกแดง 1 ลูก"
+                >
+                  <Plus className="w-2.5 h-2.5" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* นาฬิกาจับเวลาช็อต (Shot Duration Clock) */}

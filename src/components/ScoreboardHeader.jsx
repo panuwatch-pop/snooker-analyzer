@@ -16,6 +16,12 @@ export function ScoreboardHeader({
   breakHistory,
   updatePlayerName,
   setCurrentPlayerIndex,
+  // 🎱 แต้มคงเหลือ 6-Red Snooker
+  remainingReds,
+  pointsRemaining,
+  scoreDiff,
+  isPointsDeficit,
+  snookersRequired,
 }) {
   const [isEditingP1, setIsEditingP1] = useState(false);
   const [isEditingP2, setIsEditingP2] = useState(false);
@@ -102,7 +108,7 @@ export function ScoreboardHeader({
             </div>
           </div>
 
-          {/* Center Match Frame Score (คะแนนรวมเฟรม) */}
+          {/* Center Match Frame Score + 🎱 6-Red Snooker Remaining Points (แต้มคงเหลือบนโต๊ะ) */}
           <div className="shrink-0 flex flex-col items-center justify-center text-center px-1">
             <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-0.2">
               FRAMES
@@ -112,16 +118,31 @@ export function ScoreboardHeader({
               <span className="text-slate-600 font-light">-</span>
               <span>{players[1].frameScore}</span>
             </div>
-            {currentPlayerIndex === 0 && (
-              <div className="mt-0.5 text-[8px] font-bold text-sky-300 bg-sky-950 px-1 rounded border border-sky-800">
-                ◀ แทง
+            
+            {/* 🎱 แต้มคงเหลือบนโต๊ะ (Points Remaining) */}
+            <div className="mt-0.5 flex flex-col items-center gap-0.5">
+              <div className="text-[9px] sm:text-[10px] font-bold font-mono text-emerald-300 bg-emerald-950/90 px-1.5 py-0.2 rounded border border-emerald-700/80 shadow">
+                <span>บนโต๊ะ: <strong className="text-amber-300 font-black">{pointsRemaining}</strong> แต้ม</span>
+                {remainingReds > 0 && <span className="text-slate-400 text-[8px] ml-1">(🔴 {remainingReds} ลูก)</span>}
               </div>
-            )}
-            {currentPlayerIndex === 1 && (
-              <div className="mt-0.5 text-[8px] font-bold text-amber-300 bg-amber-950 px-1 rounded border border-amber-800">
-                แทง ▶
-              </div>
-            )}
+
+              {/* แบรนด์แจ้งเตือนแต้มขาด / ต้องการกี่สนุ๊ก */}
+              {isPointsDeficit ? (
+                <div className="text-[8px] font-bold text-red-300 bg-red-950/90 border border-red-700 px-1 py-0.2 rounded animate-pulse shadow">
+                  ⚠️ แต้มขาด {scoreDiff - pointsRemaining} แต้ม (ต้องการ {snookersRequired} สนุ๊ก)
+                </div>
+              ) : (
+                currentPlayerIndex === 0 ? (
+                  <div className="text-[8px] font-bold text-sky-300 bg-sky-950 px-1 rounded border border-sky-800">
+                    ◀ แทง
+                  </div>
+                ) : (
+                  <div className="text-[8px] font-bold text-amber-300 bg-amber-950 px-1 rounded border border-amber-800">
+                    แทง ▶
+                  </div>
+                )
+              )}
+            </div>
           </div>
 
           {/* Player 2 Card (Amber Palette) */}

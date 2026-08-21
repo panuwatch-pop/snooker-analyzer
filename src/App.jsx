@@ -135,7 +135,7 @@ export default function App() {
               </span>
             </div>
 
-            {/* Navigation Tabs (ปรับขนาดปุ่มแท็บแผงควบคุม & สถิติ บนมือถือให้เล็กลงจิ๋วและกระชับ) */}
+            {/* Navigation Tabs */}
             <div className="flex items-center bg-slate-950 p-0.5 rounded border border-slate-800">
               <button
                 onClick={() => setActiveTab('REFEREE')}
@@ -182,7 +182,7 @@ export default function App() {
         </nav>
       )}
 
-      {/* Scoreboard Header Component (1. Top - ตัวเลขคะแนนหลักดั้งเดิมแสดงผลเด่นชัดเสมอ) */}
+      {/* Scoreboard Header Component (1. Top - ตัวเลขคะแนนหลักดั้งเดิม + แต้มคงเหลือ 6-Red Snooker) */}
       <div className="shrink-0">
         <ScoreboardHeader
           players={match.players}
@@ -194,6 +194,11 @@ export default function App() {
           breakHistory={match.breakHistory}
           updatePlayerName={match.updatePlayerName}
           setCurrentPlayerIndex={match.setCurrentPlayerIndex}
+          remainingReds={match.remainingReds}
+          pointsRemaining={match.pointsRemaining}
+          scoreDiff={match.scoreDiff}
+          isPointsDeficit={match.isPointsDeficit}
+          snookersRequired={match.snookersRequired}
         />
       </div>
 
@@ -228,6 +233,9 @@ export default function App() {
                   setCurrentPlayerIndex={match.setCurrentPlayerIndex}
                   isMobileStatsOpen={isMobileStatsOpen}
                   setIsMobileStatsOpen={setIsMobileStatsOpen}
+                  remainingReds={match.remainingReds}
+                  pointsRemaining={match.pointsRemaining}
+                  adjustRemainingReds={match.adjustRemainingReds}
                 />
               </div>
 
