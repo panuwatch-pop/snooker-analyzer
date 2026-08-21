@@ -36,6 +36,16 @@ export function RefereeDeck({
 }) {
   const activePlayer = players[currentPlayerIndex];
 
+  const handleSelectPlayer = (targetIndex) => {
+    if (currentPlayerIndex !== targetIndex) {
+      if (switchTurn) {
+        switchTurn('SWITCH');
+      } else {
+        setCurrentPlayerIndex(targetIndex);
+      }
+    }
+  };
+
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-lg p-1 sm:p-2.5 shadow-xl space-y-1 sm:space-y-2">
       
@@ -239,10 +249,10 @@ export function RefereeDeck({
           )}
         </div>
 
-        {/* Quick Player Switch Toggle */}
+        {/* Quick Player Switch Toggle (กดเพื่อสลับฝั่งเหมือนปุ่มเปลี่ยนฝั่ง) */}
         <div className="flex items-center bg-slate-950 p-0.5 rounded border border-slate-800 text-[10px] font-mono">
           <button
-            onClick={() => setCurrentPlayerIndex(0)}
+            onClick={() => handleSelectPlayer(0)}
             className={`px-1.5 py-0.2 rounded font-bold transition-all ${
               currentPlayerIndex === 0 
                 ? 'bg-sky-600 text-white shadow' 
@@ -252,7 +262,7 @@ export function RefereeDeck({
             P1: {getDisplayName(players[0].name)}
           </button>
           <button
-            onClick={() => setCurrentPlayerIndex(1)}
+            onClick={() => handleSelectPlayer(1)}
             className={`px-1.5 py-0.2 rounded font-bold transition-all ${
               currentPlayerIndex === 1 
                 ? 'bg-amber-600 text-white shadow' 

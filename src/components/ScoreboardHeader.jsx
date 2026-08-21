@@ -16,6 +16,7 @@ export function ScoreboardHeader({
   breakHistory,
   updatePlayerName,
   setCurrentPlayerIndex,
+  switchTurn,
   // 🎱 แต้มคงเหลือ 6-Red Snooker
   remainingReds,
   pointsRemaining,
@@ -38,6 +39,16 @@ export function ScoreboardHeader({
     setIsEditingP2(false);
   };
 
+  const handleSelectPlayer = (targetIndex) => {
+    if (currentPlayerIndex !== targetIndex) {
+      if (switchTurn) {
+        switchTurn('SWITCH');
+      } else {
+        setCurrentPlayerIndex(targetIndex);
+      }
+    }
+  };
+
   return (
     <header className="bg-slate-900/95 border-b border-slate-800 backdrop-blur-md sticky top-0 z-30 shadow-2xl">
       <div className="max-w-7xl mx-auto px-1 sm:px-3 py-0.5">
@@ -45,9 +56,9 @@ export function ScoreboardHeader({
         {/* Flexbox Scoreboard Deck - ขยายขนาดตัวเลขคะแนนให้ใหญ่ยักษ์อลังการมากยิ่งขึ้น text-7xl */}
         <div className="flex items-center justify-between gap-1 sm:gap-2 bg-slate-950 rounded-xl border border-slate-800 p-1 sm:p-2 shadow-2xl">
           
-          {/* Player 1 Card (Cyan Palette) */}
+          {/* Player 1 Card (Cyan Palette) - กดแล้วสลับฝั่งเหมือนปุ่มเปลี่ยนฝั่ง */}
           <div 
-            onClick={() => setCurrentPlayerIndex(0)}
+            onClick={() => handleSelectPlayer(0)}
             className={`flex-1 flex items-center justify-between p-1 sm:p-2.5 rounded-lg border transition-all cursor-pointer ${
               currentPlayerIndex === 0 
                 ? 'bg-slate-900 border-sky-500 ring-2 ring-sky-500/50 shadow-[0_0_20px_rgba(56,189,248,0.25)]' 
@@ -145,9 +156,9 @@ export function ScoreboardHeader({
             </div>
           </div>
 
-          {/* Player 2 Card (Amber Palette) */}
+          {/* Player 2 Card (Amber Palette) - กดแล้วสลับฝั่งเหมือนปุ่มเปลี่ยนฝั่ง */}
           <div 
-            onClick={() => setCurrentPlayerIndex(1)}
+            onClick={() => handleSelectPlayer(1)}
             className={`flex-1 flex items-center justify-between p-1 sm:p-2.5 rounded-lg border transition-all cursor-pointer ${
               currentPlayerIndex === 1 
                 ? 'bg-slate-900 border-amber-500 ring-2 ring-amber-500/50 shadow-[0_0_20px_rgba(251,191,36,0.25)]' 

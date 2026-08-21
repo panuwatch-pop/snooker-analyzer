@@ -194,6 +194,7 @@ export default function App() {
           breakHistory={match.breakHistory}
           updatePlayerName={match.updatePlayerName}
           setCurrentPlayerIndex={match.setCurrentPlayerIndex}
+          switchTurn={match.switchTurn}
           remainingReds={match.remainingReds}
           pointsRemaining={match.pointsRemaining}
           scoreDiff={match.scoreDiff}
@@ -258,7 +259,7 @@ export default function App() {
             )}
           </div>
         ) : (
-          /* Tab 2: Full Head-to-Head Comparison Bar View */
+          /* Tab 2: Full Head-to-Head Comparison View */
           <div className="h-full overflow-y-auto">
             <HeadToHeadComparisonView
               p1Stats={match.p1Stats}
