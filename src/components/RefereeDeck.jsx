@@ -50,11 +50,11 @@ export function RefereeDeck({
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-lg p-1 sm:p-2.5 shadow-xl space-y-1 sm:space-y-2">
       
-      {/* 🔴🟡🟢 1. Ball Score Buttons (1 - 7) ทรงวงกลมลูกสนุ๊กเกอร์ 3D สวยงาม เด่นชัด */}
+      {/* 🔴🟡🟢 1. Ball Score Buttons (1 - 7) ทรงสี่เหลี่ยมผืนผ้าแนวนอน 3D เด่นชัด กดง่าย */}
       <div className="bg-slate-950 p-1 sm:p-2 rounded-lg border border-slate-800 space-y-1 shadow-lg">
         
-        {/* แผงปุ่มตบลูกสี 1-7 ทรงวงกลม 3D */}
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 justify-items-center">
+        {/* แผงปุ่มตบลูกสี 1-7 ทรงสี่เหลี่ยมผืนผ้าแนวนอน */}
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1.5">
           {[1, 2, 3, 4, 5, 6, 7].map((num) => {
             const ball = BALL_TYPES[num];
             return (
@@ -62,12 +62,12 @@ export function RefereeDeck({
                 key={num}
                 onClick={() => scoreBall(num)}
                 disabled={matchState === 'PAUSED' || matchState === 'FINISHED'}
-                className={`relative w-8 h-8 xs:w-9 xs:h-9 sm:w-12 sm:h-12 rounded-full flex flex-col items-center justify-center ${ball.color} ${ball.textColor} border-2 ${ball.border} font-bold shadow-[0_4px_12px_rgba(0,0,0,0.6)] hover:scale-110 active:scale-90 transition-all group disabled:opacity-40 disabled:cursor-not-allowed`}
+                className={`relative flex flex-col sm:flex-row items-center justify-center gap-0.5 py-1 px-1 sm:py-2 sm:px-2 rounded-xl border-2 ${ball.color} ${ball.textColor} ${ball.border} font-bold shadow-[0_3px_8px_rgba(0,0,0,0.5)] hover:scale-105 active:scale-95 transition-all group disabled:opacity-40 disabled:cursor-not-allowed`}
               >
-                <span className="text-sm xs:text-base sm:text-xl font-black font-mono leading-none drop-shadow">
+                <span className="text-base sm:text-2xl font-black font-mono leading-none drop-shadow">
                   {ball.points}
                 </span>
-                <span className="text-[7px] sm:text-[8px] opacity-95 font-bold leading-tight">
+                <span className="text-[7.5px] sm:text-[9px] opacity-95 font-extrabold truncate max-w-full leading-tight">
                   {getDisplayName(ball.name)}
                 </span>
               </button>

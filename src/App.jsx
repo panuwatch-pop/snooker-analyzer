@@ -7,13 +7,14 @@ import { StatsDashboard } from './components/StatsDashboard';
 import { RefereeDeck } from './components/RefereeDeck';
 import { ShotHistoryLog } from './components/ShotHistoryLog';
 import { HeadToHeadComparisonView } from './components/HeadToHeadComparisonView';
+import { RawStatsAuthView } from './components/RawStatsAuthView';
 import { FoulModal } from './components/FoulModal';
-import { Keyboard, BarChart2, Maximize, Minimize, RotateCcw, Smartphone, Monitor, Tablet } from 'lucide-react';
+import { Keyboard, BarChart2, Maximize, Minimize, RotateCcw, Smartphone, Monitor, Tablet, Lock, Calculator } from 'lucide-react';
 
 export default function App() {
   const match = useSnookerMatch();
   const device = useDeviceDetect(); // ตรวจจับอุปกรณ์และขนาดหน้าจอ
-  const [activeTab, setActiveTab] = useState('REFEREE'); // 'REFEREE' | 'HEAD_TO_HEAD'
+  const [activeTab, setActiveTab] = useState('REFEREE'); // 'REFEREE' | 'HEAD_TO_HEAD' | 'RAW_STATS'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
   const [isMobileStatsOpen, setIsMobileStatsOpen] = useState(false); // สเตต Dropdown สถิติตามสั่ง
@@ -135,7 +136,7 @@ export default function App() {
               </span>
             </div>
 
-            {/* Navigation Tabs */}
+            {/* Navigation Tabs (3 แท็บ: แผงควบคุม, แทบสถิติ, 🔒 ข้อมูลดิบ) */}
             <div className="flex items-center bg-slate-950 p-0.5 rounded border border-slate-800">
               <button
                 onClick={() => setActiveTab('REFEREE')}
@@ -158,6 +159,17 @@ export default function App() {
               >
                 <BarChart2 className="w-3 h-3 shrink-0" />
                 <span>แทบสถิติ</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('RAW_STATS')}
+                className={`flex items-center gap-1 px-1.5 sm:px-3 py-0.5 rounded font-bold transition-all text-[10px] sm:text-xs ${
+                  activeTab === 'RAW_STATS'
+                    ? 'bg-amber-600 text-white shadow'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Lock className="w-3 h-3 text-amber-300 shrink-0" />
+                <span>ข้อมูลดิบ</span>
               </button>
             </div>
           </div>
@@ -260,13 +272,22 @@ export default function App() {
               </div>
             )}
           </div>
-        ) : (
+        ) : activeTab === 'HEAD_TO_HEAD' ? (
           /* Tab 2: Full Head-to-Head Comparison View */
           <div className="h-full overflow-y-auto">
             <HeadToHeadComparisonView
               p1Stats={match.p1Stats}
               p2Stats={match.p2Stats}
               players={match.players}
+            />
+          </div>
+        ) : (
+          /* Tab 3: Secured Raw Stats & Calculation Breakdown View */
+          <div className="h-full overflow-y-auto">
+            <RawStatsAuthView
+              players={match.players}
+              p1Stats={match.p1Stats}
+              p2Stats={match.p2Stats}
             />
           </div>
         )}
