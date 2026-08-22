@@ -27,6 +27,10 @@ export function useSnookerMatch() {
   // Match states: 'NOT_STARTED' | 'IN_PROGRESS' | 'PAUSED' | 'FINISHED'
   const [matchState, setMatchState] = useState('NOT_STARTED');
 
+  // 🎱 รูปแบบแมตช์: '15_RED' (สูงสุด 147 แต้ม) | '6_RED' (สูงสุด 75 แต้ม)
+  const [matchFormat, setMatchFormatState] = useState('15_RED'); 
+  const maxReds = matchFormat === '15_RED' ? 15 : 6;
+
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0); // 0 or 1
   const [currentFrame, setCurrentFrame] = useState(1);
   const [lastShotTime, setLastShotTime] = useState(Date.now());
@@ -35,8 +39,8 @@ export function useSnookerMatch() {
   const [shotLog, setShotLog] = useState([]); // Log ประวัติการแทงย้อนหลัง
   const [isFoulModalOpen, setIsFoulModalOpen] = useState(false);
   
-  // 🎱 สนุ๊กเกอร์ 6 แดง: สเตตติดตามแต้มคงเหลือบนโต๊ะ (Max 6 Reds per frame)
-  const [remainingReds, setRemainingReds] = useState(6);
+  // 🎱 สเตตติดตามแต้มคงเหลือบนโต๊ะ (Max Reds per frame)
+  const [remainingReds, setRemainingReds] = useState(15);
   const [colorsPhasePotted, setColorsPhasePotted] = useState([]); // ลูกสีที่ตบหมดไปแล้วในเฟสเก็บสี (2,3,4,5,6,7)
   
   // Pending safety shot tracking
@@ -53,6 +57,18 @@ export function useSnookerMatch() {
     }, 500);
     return () => clearInterval(timer);
   }, [lastShotTime, matchState]);
+
+  /**
+   * สลับรูปแบบแมตช์ (15 แดง 147 แต้ม vs 6 แดง 75 แต้ม)
+   */
+  const setMatchFormat = (format) => {
+    if (format !== '15_RED' && format !== '6_RED') return;
+    saveSnapshot();
+    setMatchFormatState(format);
+    const newMax = format === '15_RED' ? 15 : 6;
+    setRemainingReds(newMax);
+    setColorsPhasePotted([]);
+  };
 
   /**
    * ควบคุมสถานะเกม: เริ่มเกม / หยุดชั่วคราว / เลิกเกม
@@ -79,6 +95,7 @@ export function useSnookerMatch() {
     const snapshot = {
       players: JSON.parse(JSON.stringify(players)),
       matchState,
+      matchFormat,
       currentPlayerIndex,
       currentFrame,
       lastShotTime,
@@ -99,6 +116,7 @@ export function useSnookerMatch() {
     const prev = historyStackRef.current.pop();
     setPlayers(prev.players);
     setMatchState(prev.matchState);
+    if (prev.matchFormat) setMatchFormatState(prev.matchFormat);
     setCurrentPlayerIndex(prev.currentPlayerIndex);
     setCurrentFrame(prev.currentFrame);
     setLastShotTime(prev.lastShotTime);
@@ -128,7 +146,7 @@ export function useSnookerMatch() {
     const duration = Math.max(1, Math.round((now - lastShotTime) / 1000));
     setLastShotTime(now);
 
-    // อัปเดตจำนวนลูกแดง (สูงสุด 6 ลูกต่อเฟรม) หรือลูกสีที่เหลือบนโต๊ะ
+    // อัปเดตจำนวนลูกแดง หรือลูกสีที่เหลือบนโต๊ะ
     if (ballNum === 1 && remainingReds > 0) {
       setRemainingReds((r) => Math.max(0, r - 1));
     } else if (remainingReds === 0 && ballNum >= 2 && ballNum <= 7) {
@@ -343,7 +361,7 @@ export function useSnookerMatch() {
 
     setCurrentFrame((prev) => prev + 1);
     setBreakHistory([]);
-    setRemainingReds(6); // รีเซ็ตลูกแดงเป็น 6 ลูกเสมอต่อเฟรม
+    setRemainingReds(maxReds); // รีเซ็ตลูกแดงเป็น 15 หรือ 6 ลูกเสมอตามกติกาแมตช์
     setColorsPhasePotted([]);
     setLastShotTime(Date.now());
   };
@@ -364,7 +382,7 @@ export function useSnookerMatch() {
       setBreakHistory([]);
       setShotLog([]);
       setPendingSafety(null);
-      setRemainingReds(6);
+      setRemainingReds(maxReds);
       setColorsPhasePotted([]);
       historyStackRef.current = [];
     }
@@ -375,14 +393,14 @@ export function useSnookerMatch() {
    */
   const adjustRemainingReds = (delta) => {
     saveSnapshot();
-    setRemainingReds((r) => Math.max(0, Math.min(6, r + delta)));
+    setRemainingReds((r) => Math.max(0, Math.min(maxReds, r + delta)));
   };
 
-  // 🔴 นับจำนวนลูกแดงที่ตบไปแล้วในเฟรมปัจจุบัน (0 ถึง 6 ลูก)
-  const pottedRedsCount = 6 - remainingReds;
+  // 🔴 นับจำนวนลูกแดงที่ตบไปแล้วในเฟรมปัจจุบัน (0 ถึง 15 หรือ 6 ลูก)
+  const pottedRedsCount = maxReds - remainingReds;
 
   /**
-   * คำนวณแต้มคงเหลือบนโต๊ะ (6-Red Snooker Points Remaining Engine)
+   * คำนวณแต้มคงเหลือบนโต๊ะ (15-Red / 6-Red Snooker Points Remaining Engine)
    */
   let pointsRemaining = 0;
   if (remainingReds > 0) {
@@ -425,6 +443,10 @@ export function useSnookerMatch() {
     p1Stats,
     p2Stats,
     matchState,
+    matchFormat,
+    setMatchFormat,
+    maxReds,
+    maxPointsPossible: maxReds === 15 ? 147 : 75,
     startGame,
     pauseGame,
     endGame,
@@ -444,7 +466,7 @@ export function useSnookerMatch() {
     updatePlayerName,
     setCurrentPlayerIndex,
     canUndo: historyStackRef.current.length > 0,
-    // 🎱 แต้มคงเหลือและการวิเคราะห์เกมส์ 6 แดง
+    // 🎱 แต้มคงเหลือและการวิเคราะห์เกมส์ 15/6 แดง
     remainingReds,
     pottedRedsCount,
     pointsRemaining,

@@ -194,7 +194,7 @@ export default function App() {
         </nav>
       )}
 
-      {/* Scoreboard Header Component (1. Top - ตัวเลขคะแนนหลักดั้งเดิม + แต้มคงเหลือ 6-Red Snooker) */}
+      {/* Scoreboard Header Component (1. Top - ตัวเลขคะแนนหลักดั้งเดิม + แต้มคงเหลือ 15/6-Red Snooker) */}
       <div className="shrink-0">
         <ScoreboardHeader
           players={match.players}
@@ -207,6 +207,9 @@ export default function App() {
           updatePlayerName={match.updatePlayerName}
           setCurrentPlayerIndex={match.setCurrentPlayerIndex}
           switchTurn={match.switchTurn}
+          matchFormat={match.matchFormat}
+          maxReds={match.maxReds}
+          maxPointsPossible={match.maxPointsPossible}
           remainingReds={match.remainingReds}
           pottedRedsCount={match.pottedRedsCount}
           pointsRemaining={match.pointsRemaining}
@@ -247,6 +250,10 @@ export default function App() {
                   setCurrentPlayerIndex={match.setCurrentPlayerIndex}
                   isMobileStatsOpen={isMobileStatsOpen}
                   setIsMobileStatsOpen={setIsMobileStatsOpen}
+                  matchFormat={match.matchFormat}
+                  setMatchFormat={match.setMatchFormat}
+                  maxReds={match.maxReds}
+                  maxPointsPossible={match.maxPointsPossible}
                   remainingReds={match.remainingReds}
                   pottedRedsCount={match.pottedRedsCount}
                   pointsRemaining={match.pointsRemaining}

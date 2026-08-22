@@ -1,7 +1,7 @@
 import React from 'react';
 import { BALL_TYPES } from '../utils/snookerCalculator';
 import { StatsDashboard } from './StatsDashboard';
-import { RotateCcw, ArrowRightLeft, Shield, Target, AlertCircle, PlayCircle, Play, Pause, Square, Zap, ShieldCheck, Clock, Trophy, BarChart2, ChevronDown, X, Plus, Minus } from 'lucide-react';
+import { RotateCcw, ArrowRightLeft, Shield, Target, AlertCircle, PlayCircle, Play, Pause, Square, Zap, ShieldCheck, Clock, Trophy, BarChart2, ChevronDown, X, Plus, Minus, Layers } from 'lucide-react';
 
 const getDisplayName = (name) => {
   if (!name) return 'ผู้เล่น';
@@ -29,7 +29,11 @@ export function RefereeDeck({
   setCurrentPlayerIndex,
   isMobileStatsOpen,
   setIsMobileStatsOpen,
-  // 🎱 6-Red Snooker Points Remaining & Potted Reds Props
+  // 🎱 15-Red / 6-Red Snooker Props
+  matchFormat,
+  setMatchFormat,
+  maxReds,
+  maxPointsPossible,
   remainingReds,
   pottedRedsCount,
   pointsRemaining,
@@ -53,8 +57,39 @@ export function RefereeDeck({
       {/* 🔴🟡🟢 1. Ball Score Buttons (1 - 7) ทรงสี่เหลี่ยมผืนผ้าแนวนอน 3D เด่นชัด กดง่าย */}
       <div className="bg-slate-950 p-1 sm:p-2 rounded-lg border border-slate-800 space-y-1 shadow-lg">
         
+        {/* แผงเลือกโหมดเกมส์: 15 แดง (147 แต้ม) vs 6 แดง (75 แต้ม) */}
+        <div className="flex items-center justify-between pb-1 border-b border-slate-800/80 text-[10px]">
+          <div className="flex items-center gap-1 font-bold text-amber-300">
+            <Layers className="w-3.5 h-3.5 text-amber-400" />
+            <span>โหมดกติกา:</span>
+          </div>
+
+          <div className="flex items-center bg-slate-900 p-0.5 rounded-lg border border-slate-800 font-bold">
+            <button
+              onClick={() => setMatchFormat('15_RED')}
+              className={`px-2 py-0.5 rounded transition-all flex items-center gap-1 ${
+                matchFormat === '15_RED'
+                  ? 'bg-amber-600 text-white shadow font-black'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <span>🔴 15 แดง (147 แต้ม)</span>
+            </button>
+            <button
+              onClick={() => setMatchFormat('6_RED')}
+              className={`px-2 py-0.5 rounded transition-all flex items-center gap-1 ${
+                matchFormat === '6_RED'
+                  ? 'bg-red-600 text-white shadow font-black'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <span>🔴 6 แดง (75 แต้ม)</span>
+            </button>
+          </div>
+        </div>
+
         {/* แผงปุ่มตบลูกสี 1-7 ทรงสี่เหลี่ยมผืนผ้าแนวนอน */}
-        <div className="grid grid-cols-7 gap-0.5 sm:gap-1.5">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1.5 pt-0.5">
           {[1, 2, 3, 4, 5, 6, 7].map((num) => {
             const ball = BALL_TYPES[num];
             return (
@@ -132,7 +167,7 @@ export function RefereeDeck({
           </button>
         </div>
 
-        {/* 📊 3. แถบสรุปในแถบเดียวกัน: แทงอยู่ + FRAME + เวลาช็อต + ลูกแดง 6 เม็ด + แต้มคงเหลือ 6-Red + AST/POT/SAF */}
+        {/* 📊 3. แถบสรุปในแถบเดียวกัน: แทงอยู่ + FRAME + เวลาช็อต + ลูกแดง + แต้มคงเหลือ + AST/POT/SAF */}
         <div className="pt-1 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-[9px] sm:text-[10px] font-mono text-slate-300 px-1 bg-slate-900/90 rounded">
           
           {/* ฝ่ายแทงอยู่ */}
@@ -153,12 +188,12 @@ export function RefereeDeck({
             <span>FRAME {currentFrame}</span>
           </div>
 
-          {/* 🎱 แต้มคงเหลือบนโต๊ะ + สรุปลูกแดง 6 เม็ด (6-Red Snooker Points Remaining) */}
+          {/* 🎱 แต้มคงเหลือบนโต๊ะ + สรุปลูกแดง (15/6 Red Snooker Points Remaining) */}
           <div className="flex items-center gap-1 bg-slate-950 px-1.5 py-0.2 rounded border border-emerald-600/60 font-bold shrink-0 text-emerald-300">
             <span>บนโต๊ะ: <strong className="text-amber-300 font-extrabold">{pointsRemaining}</strong> แต้ม</span>
             {adjustRemainingReds && (
               <div className="flex items-center gap-0.5 ml-1 border-l border-slate-800 pl-1">
-                <span className="text-[8px] text-red-400 font-semibold">🔴{pottedRedsCount}/6 เม็ด</span>
+                <span className="text-[8px] text-red-400 font-semibold">🔴{pottedRedsCount}/{maxReds}</span>
                 <button
                   onClick={() => adjustRemainingReds(-1)}
                   disabled={remainingReds <= 0}
@@ -169,7 +204,7 @@ export function RefereeDeck({
                 </button>
                 <button
                   onClick={() => adjustRemainingReds(1)}
-                  disabled={remainingReds >= 6}
+                  disabled={remainingReds >= maxReds}
                   className="p-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded disabled:opacity-30"
                   title="เพิ่มจำนวนลูกแดง 1 ลูก"
                 >
