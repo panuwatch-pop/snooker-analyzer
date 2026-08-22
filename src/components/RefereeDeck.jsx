@@ -293,20 +293,26 @@ export function RefereeDeck({
         </div>
       </div>
 
-      {/* 📊 5. Box แผงสถิติ คลี่ลงมาด้านล่าง (Downwards Dropdown Box) เมื่อกดปุ่ม [สถิติ] บนมือถือ */}
+      {/* 📊 5. Box แผงสถิติ ปรับเป็น Modal Floating Popup ด้านล่างหน้าจอ ป้องกันการซ้อนกับปุ่ม 1-7 บน Samsung S25FE และมือถือทุกรุ่น */}
       {isMobileStatsOpen && (
-        <div className="mt-2 pt-2 border-t border-slate-800/80 animate-in fade-in slide-in-from-top-2 duration-200 sm:hidden">
-          <div className="bg-slate-950 p-2 rounded-lg border border-slate-800 shadow-2xl space-y-1">
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-1">
-              <div className="flex items-center gap-1">
-                <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-xs font-bold text-amber-300">กล่องสถิติเปรียบเทียบสด</span>
+        <div 
+          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-2 sm:hidden animate-in fade-in duration-200"
+          onClick={() => setIsMobileStatsOpen(false)}
+        >
+          <div 
+            className="bg-slate-950 border border-slate-700 rounded-2xl p-3 shadow-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto space-y-2 animate-in slide-in-from-bottom-4 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+              <div className="flex items-center gap-1.5 font-bold text-amber-400 text-sm">
+                <Trophy className="w-4 h-4 text-amber-400" />
+                <span>กล่องสถิติเปรียบเทียบสด (Live Match Stats)</span>
               </div>
               <button
                 onClick={() => setIsMobileStatsOpen(false)}
-                className="flex items-center gap-0.5 text-[10px] text-slate-400 hover:text-white bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700"
+                className="flex items-center gap-1 text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg border border-slate-600 font-bold active:scale-95 transition-all shadow"
               >
-                <X className="w-3 h-3" />
+                <X className="w-4 h-4" />
                 <span>ปิด</span>
               </button>
             </div>
