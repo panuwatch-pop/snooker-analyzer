@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flame, Edit3, Check, Trophy } from 'lucide-react';
+import { Flame, Edit3, Check, Trophy, PlayCircle } from 'lucide-react';
 
 const getDisplayName = (name) => {
   if (!name) return 'ผู้เล่น';
@@ -57,29 +57,52 @@ export function ScoreboardHeader({
     <header className="bg-slate-900/95 border-b border-slate-800 backdrop-blur-md sticky top-0 z-30 shadow-2xl">
       <div className="max-w-7xl mx-auto px-1 sm:px-3 py-0.5">
         
-        {/* Flexbox Scoreboard Deck - รองรับทั้ง 15 แดง (147 แต้ม) และ 6 แดง (75 แต้ม) */}
+        {/* Flexbox Scoreboard Deck - ไฮไลต์การ์ดผู้เล่นแทงอยู่ด้วยกรอบสว่างวาบและลายพื้นหลังสะท้อนแสง */}
         <div className="flex items-center justify-between gap-1 sm:gap-2 bg-slate-950 rounded-xl border border-slate-800 p-1 sm:p-2 shadow-2xl">
           
           {/* Player 1 Card (Cyan Palette) - กดแล้วสลับฝั่งเหมือนปุ่มเปลี่ยนฝั่ง */}
           <div 
             onClick={() => handleSelectPlayer(0)}
-            className={`flex-1 flex items-center justify-between p-1 sm:p-2.5 rounded-lg border transition-all cursor-pointer ${
+            className={`relative flex-1 flex items-center justify-between p-1.5 sm:p-3 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden ${
               currentPlayerIndex === 0 
-                ? 'bg-slate-900 border-sky-500 ring-2 ring-sky-500/50 shadow-[0_0_20px_rgba(56,189,248,0.25)]' 
-                : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 opacity-75'
+                ? 'bg-gradient-to-r from-sky-950/90 via-slate-900 to-sky-950/90 border-2 border-sky-400 ring-4 ring-sky-500/40 shadow-[0_0_30px_rgba(56,189,248,0.5)] scale-[1.02] z-10' 
+                : 'bg-slate-950/40 border-slate-900 opacity-40 hover:opacity-75 grayscale-[30%]'
             }`}
           >
-            <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
+            {/* ลายพื้นหลัง Mesh Pattern เฉพาะตอนกำลังแทง (Active Player 1 Texture) */}
+            {currentPlayerIndex === 0 && (
+              <div 
+                className="absolute inset-0 opacity-15 pointer-events-none"
+                style={{
+                  backgroundImage: `radial-gradient(#38bdf8 1.5px, transparent 1.5px)`,
+                  backgroundSize: '12px 12px'
+                }}
+              />
+            )}
+
+            <div className="flex items-center gap-1 sm:gap-2 overflow-hidden relative z-10">
               <div className="relative shrink-0">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-sky-950 border border-sky-500/50 flex items-center justify-center text-sky-400 font-extrabold text-[10px] sm:text-xs">
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-[10px] sm:text-xs transition-all ${
+                  currentPlayerIndex === 0
+                    ? 'bg-sky-500 text-slate-950 shadow-[0_0_12px_rgba(56,189,248,0.9)] ring-2 ring-white'
+                    : 'bg-slate-800 text-slate-400 border border-slate-700'
+                }`}>
                   P1
                 </div>
                 {currentPlayerIndex === 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 border border-slate-950 rounded-full animate-ping" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-slate-950 rounded-full animate-ping" />
                 )}
               </div>
 
               <div className="flex-1 min-w-0">
+                {/* 🎯 ป้ายบอกสถานะแทงอยู่ */}
+                {currentPlayerIndex === 0 && (
+                  <div className="inline-flex items-center gap-1 text-[8px] font-black text-sky-300 bg-sky-950/90 px-1.5 py-0.2 rounded border border-sky-500/60 shadow mb-0.5 tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>กำลังแทง 🎯</span>
+                  </div>
+                )}
+
                 {isEditingP1 ? (
                   <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                     <input
@@ -96,7 +119,9 @@ export function ScoreboardHeader({
                   </div>
                 ) : (
                   <div className="flex items-center gap-0.5">
-                    <span className="font-bold text-slate-100 text-xs sm:text-sm truncate">
+                    <span className={`font-black text-xs sm:text-base truncate ${
+                      currentPlayerIndex === 0 ? 'text-white drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]' : 'text-slate-400'
+                    }`}>
                       {getDisplayName(players[0].name)}
                     </span>
                     <button 
@@ -116,8 +141,12 @@ export function ScoreboardHeader({
             </div>
 
             {/* 🎯 Current Frame Points P1 */}
-            <div className="text-right pl-1 sm:pl-2 shrink-0">
-              <div className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-sky-400 font-mono tracking-tighter leading-none select-none drop-shadow-[0_0_20px_rgba(56,189,248,0.8)]">
+            <div className="text-right pl-1 sm:pl-2 shrink-0 relative z-10">
+              <div className={`text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-mono tracking-tighter leading-none select-none transition-all ${
+                currentPlayerIndex === 0
+                  ? 'text-sky-300 drop-shadow-[0_0_25px_rgba(56,189,248,0.95)] scale-105'
+                  : 'text-slate-500'
+              }`}>
                 {players[0].currentFramePoints}
               </div>
             </div>
@@ -153,12 +182,12 @@ export function ScoreboardHeader({
                 </div>
               ) : (
                 currentPlayerIndex === 0 ? (
-                  <div className="text-[8px] font-bold text-sky-300 bg-sky-950 px-1 rounded border border-sky-800">
-                    ◀ แทง
+                  <div className="text-[8px] font-bold text-sky-300 bg-sky-950 px-1 rounded border border-sky-800 animate-pulse">
+                    ◀ P1 แทง
                   </div>
                 ) : (
-                  <div className="text-[8px] font-bold text-amber-300 bg-amber-950 px-1 rounded border border-amber-800">
-                    แทง ▶
+                  <div className="text-[8px] font-bold text-amber-300 bg-amber-950 px-1 rounded border border-amber-800 animate-pulse">
+                    P2 แทง ▶
                   </div>
                 )
               )}
@@ -168,30 +197,57 @@ export function ScoreboardHeader({
           {/* Player 2 Card (Amber Palette) - กดแล้วสลับฝั่งเหมือนปุ่มเปลี่ยนฝั่ง */}
           <div 
             onClick={() => handleSelectPlayer(1)}
-            className={`flex-1 flex items-center justify-between p-1 sm:p-2.5 rounded-lg border transition-all cursor-pointer ${
+            className={`relative flex-1 flex items-center justify-between p-1.5 sm:p-3 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden ${
               currentPlayerIndex === 1 
-                ? 'bg-slate-900 border-amber-500 ring-2 ring-amber-500/50 shadow-[0_0_20px_rgba(251,191,36,0.25)]' 
-                : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 opacity-75'
+                ? 'bg-gradient-to-r from-amber-950/90 via-slate-900 to-amber-950/90 border-2 border-amber-400 ring-4 ring-amber-500/40 shadow-[0_0_30px_rgba(251,191,36,0.5)] scale-[1.02] z-10' 
+                : 'bg-slate-950/40 border-slate-900 opacity-40 hover:opacity-75 grayscale-[30%]'
             }`}
           >
+            {/* ลายพื้นหลัง Mesh Pattern เฉพาะตอนกำลังแทง (Active Player 2 Texture) */}
+            {currentPlayerIndex === 1 && (
+              <div 
+                className="absolute inset-0 opacity-15 pointer-events-none"
+                style={{
+                  backgroundImage: `radial-gradient(#fbbf24 1.5px, transparent 1.5px)`,
+                  backgroundSize: '12px 12px'
+                }}
+              />
+            )}
+
             {/* 🎯 Current Frame Points P2 */}
-            <div className="text-left pr-1 sm:pr-2 shrink-0">
-              <div className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-amber-400 font-mono tracking-tighter leading-none select-none drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">
+            <div className="text-left pr-1 sm:pr-2 shrink-0 relative z-10">
+              <div className={`text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-mono tracking-tighter leading-none select-none transition-all ${
+                currentPlayerIndex === 1
+                  ? 'text-amber-300 drop-shadow-[0_0_25px_rgba(251,191,36,0.95)] scale-105'
+                  : 'text-slate-500'
+              }`}>
                 {players[1].currentFramePoints}
               </div>
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-2 overflow-hidden text-right flex-row-reverse">
+            <div className="flex items-center gap-1 sm:gap-2 overflow-hidden text-right flex-row-reverse relative z-10">
               <div className="relative shrink-0">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-amber-950 border border-amber-500/50 flex items-center justify-center text-amber-400 font-extrabold text-[10px] sm:text-xs">
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-[10px] sm:text-xs transition-all ${
+                  currentPlayerIndex === 1
+                    ? 'bg-amber-500 text-slate-950 shadow-[0_0_12px_rgba(251,191,36,0.9)] ring-2 ring-white'
+                    : 'bg-slate-800 text-slate-400 border border-slate-700'
+                }`}>
                   P2
                 </div>
                 {currentPlayerIndex === 1 && (
-                  <span className="absolute -top-0.5 -left-0.5 w-2.5 h-2.5 bg-emerald-400 border border-slate-950 rounded-full animate-ping" />
+                  <span className="absolute -top-1 -left-1 w-3 h-3 bg-emerald-400 border-2 border-slate-950 rounded-full animate-ping" />
                 )}
               </div>
 
               <div className="flex-1 min-w-0">
+                {/* 🎯 ป้ายบอกสถานะแทงอยู่ */}
+                {currentPlayerIndex === 1 && (
+                  <div className="inline-flex items-center gap-1 text-[8px] font-black text-amber-300 bg-amber-950/90 px-1.5 py-0.2 rounded border border-amber-500/60 shadow mb-0.5 tracking-wider justify-end">
+                    <span>🎯 กำลังแทง</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  </div>
+                )}
+
                 {isEditingP2 ? (
                   <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                     <input
@@ -214,7 +270,9 @@ export function ScoreboardHeader({
                     >
                       <Edit3 className="w-2.5 h-2.5" />
                     </button>
-                    <span className="font-bold text-slate-100 text-xs sm:text-sm truncate">
+                    <span className={`font-black text-xs sm:text-base truncate ${
+                      currentPlayerIndex === 1 ? 'text-white drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' : 'text-slate-400'
+                    }`}>
                       {getDisplayName(players[1].name)}
                     </span>
                   </div>
