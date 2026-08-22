@@ -83,10 +83,10 @@ export default function App() {
   const isDesktop = device.type === 'Desktop';
 
   return (
-    <div className={`w-screen bg-slate-950 text-slate-100 flex flex-col overflow-x-hidden selection:bg-emerald-500 selection:text-white transition-all ${
+    <div className={`w-full min-h-[100dvh] min-h-screen bg-slate-950 text-slate-100 flex flex-col overflow-x-hidden selection:bg-emerald-500 selection:text-white transition-all pb-6 ${
       isFullscreen 
         ? 'fixed inset-0 z-[9999] h-[100dvh] w-vw overflow-y-auto p-[2px] sm:p-1 bg-slate-950' 
-        : 'h-[100dvh] overflow-x-hidden'
+        : ''
     }`}>
       
       {/* ป็อปอัปแจ้งเตือนให้หมุนมือถือเป็นแนวขวางอัตโนมัติ (Portrait Rotation Overlay) */}
@@ -209,7 +209,7 @@ export default function App() {
         isDesktop ? 'max-w-none px-4 py-2' : 'max-w-7xl'
       }`}>
         {activeTab === 'REFEREE' ? (
-          <div className="h-full flex flex-col justify-between space-y-1 md:space-y-2">
+          <div className="min-h-0 flex flex-col justify-between space-y-1 md:space-y-2">
             
             {/* 🔴🟡🟢 2. Middle Row: Referee Deck & Log Split */}
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-1 sm:gap-2 min-h-0">

@@ -54,7 +54,7 @@ export function ScoreboardHeader({
     <header className="bg-slate-900/95 border-b border-slate-800 backdrop-blur-md sticky top-0 z-30 shadow-2xl">
       <div className="max-w-7xl mx-auto px-1 sm:px-3 py-0.5">
         
-        {/* Flexbox Scoreboard Deck - ขยายขนาดตัวเลขคะแนนให้ใหญ่ยักษ์อลังการมากยิ่งขึ้น text-7xl */}
+        {/* Flexbox Scoreboard Deck - ปรับขนาดฟอนต์ให้พอดีกับหน้าจอมือถือ Samsung และสมาร์ตโฟนทุกรุ่น */}
         <div className="flex items-center justify-between gap-1 sm:gap-2 bg-slate-950 rounded-xl border border-slate-800 p-1 sm:p-2 shadow-2xl">
           
           {/* Player 1 Card (Cyan Palette) - กดแล้วสลับฝั่งเหมือนปุ่มเปลี่ยนฝั่ง */}
@@ -112,20 +112,20 @@ export function ScoreboardHeader({
               </div>
             </div>
 
-            {/* 🎯 Current Frame Points P1 (ขยายขนาดตัวเลขให้ใหญ่ยักษ์จัมโบ้เด่นชัดมากที่สุด text-7xl) */}
+            {/* 🎯 Current Frame Points P1 (ปรับขนาดฟอนต์ให้สมดุล คมชัด ไม่ดันเลย์เอาต์บน Samsung) */}
             <div className="text-right pl-1 sm:pl-2 shrink-0">
-              <div className="text-7xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-sky-400 font-mono tracking-tighter leading-none select-none drop-shadow-[0_0_30px_rgba(56,189,248,0.85)]">
+              <div className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-sky-400 font-mono tracking-tighter leading-none select-none drop-shadow-[0_0_20px_rgba(56,189,248,0.8)]">
                 {players[0].currentFramePoints}
               </div>
             </div>
           </div>
 
           {/* Center Match Frame Score + 🎱 6-Red Snooker Remaining Points (นับลูกแดง 6 เม็ด + แต้มขาด) */}
-          <div className="shrink-0 flex flex-col items-center justify-center text-center px-1">
+          <div className="shrink-0 flex flex-col items-center justify-center text-center px-0.5 sm:px-1">
             <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-0.2">
               FRAMES
             </div>
-            <div className="flex items-center justify-center gap-1 text-2xl sm:text-4xl md:text-5xl font-black text-amber-300 font-mono bg-slate-900 px-2 py-0.5 rounded-lg border border-amber-500/40 shadow-inner">
+            <div className="flex items-center justify-center gap-1 text-xl sm:text-3xl md:text-5xl font-black text-amber-300 font-mono bg-slate-900 px-1.5 sm:px-2 py-0.5 rounded-lg border border-amber-500/40 shadow-inner">
               <span>{players[0].frameScore}</span>
               <span className="text-slate-600 font-light">-</span>
               <span>{players[1].frameScore}</span>
@@ -133,17 +133,17 @@ export function ScoreboardHeader({
             
             {/* 🎱 สรุปลูกแดง 6 เม็ด + แต้มคงเหลือบนโต๊ะ (Points Remaining) */}
             <div className="mt-0.5 flex flex-col items-center gap-0.5">
-              <div className="text-[9px] sm:text-[10px] font-bold font-mono text-emerald-300 bg-emerald-950/90 px-1.5 py-0.2 rounded border border-emerald-700/80 shadow flex items-center gap-1">
-                <span>บนโต๊ะ: <strong className="text-amber-300 font-black">{pointsRemaining}</strong> แต้ม</span>
-                <span className="text-slate-400 text-[8.5px] border-l border-emerald-800 pl-1">
-                  🔴 <strong className="text-red-400 font-bold">{pottedRedsCount}</strong>/6 เม็ด
+              <div className="text-[8.5px] sm:text-[10px] font-bold font-mono text-emerald-300 bg-emerald-950/90 px-1 py-0.2 rounded border border-emerald-700/80 shadow flex items-center gap-0.5">
+                <span>บนโต๊ะ:<strong className="text-amber-300 font-black ml-0.5">{pointsRemaining}</strong></span>
+                <span className="text-slate-400 text-[8px] border-l border-emerald-800 pl-0.5">
+                  🔴<strong className="text-red-400 font-bold">{pottedRedsCount}</strong>/6
                 </span>
               </div>
 
               {/* ⚠️ แบรนด์แจ้งเตือนแต้มขาด / ต้องการกี่สนุ๊ก */}
               {isPointsDeficit ? (
-                <div className="text-[8.5px] sm:text-[9.5px] font-black text-red-300 bg-red-950/95 border-2 border-red-600 px-1.5 py-0.3 rounded-md animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]">
-                  🚨 แต้มขาดแล้ว! (นำ {scoreDiff} แต้ม / ต้องการ {snookersRequired} สนุ๊ก)
+                <div className="text-[8px] sm:text-[9px] font-black text-red-300 bg-red-950/95 border border-red-600 px-1 py-0.2 rounded animate-pulse shadow">
+                  🚨 แต้มขาด ({snookersRequired} สนุ๊ก)
                 </div>
               ) : (
                 currentPlayerIndex === 0 ? (
@@ -168,9 +168,9 @@ export function ScoreboardHeader({
                 : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 opacity-75'
             }`}
           >
-            {/* 🎯 Current Frame Points P2 (ขยายขนาดตัวเลขให้ใหญ่ยักษ์จัมโบ้เด่นชัดมากที่สุด text-7xl) */}
+            {/* 🎯 Current Frame Points P2 (ปรับขนาดฟอนต์ให้สมดุล คมชัด ไม่ดันเลย์เอาต์บน Samsung) */}
             <div className="text-left pr-1 sm:pr-2 shrink-0">
-              <div className="text-7xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-amber-400 font-mono tracking-tighter leading-none select-none drop-shadow-[0_0_30px_rgba(251,191,36,0.85)]">
+              <div className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-amber-400 font-mono tracking-tighter leading-none select-none drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">
                 {players[1].currentFramePoints}
               </div>
             </div>
