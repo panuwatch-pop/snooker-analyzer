@@ -150,8 +150,14 @@ export function useSnookerMatch() {
     if (ballNum === 1 && remainingReds > 0) {
       setRemainingReds((r) => Math.max(0, r - 1));
     } else if (remainingReds === 0 && ballNum >= 2 && ballNum <= 7) {
-      // อยู่ในเฟสเก็บสี (Colors Phase)
-      setColorsPhasePotted((prev) => [...prev, ballNum]);
+      // ตรวจสอบว่าเป็นลูกสีหลังแดงลูกสุดท้ายหรือไม่
+      const lastBallInBreak = breakHistory[breakHistory.length - 1];
+      const isColorForLastRed = lastBallInBreak && lastBallInBreak.points === 1;
+
+      if (!isColorForLastRed) {
+        // อยู่ในเฟสเก็บสีอย่างเป็นทางการ (Colors Clearance Phase) หักแต้มลูกสีที่ตบหมดไป
+        setColorsPhasePotted((prev) => [...prev, ballNum]);
+      }
     }
 
     setPlayers((prev) => {
@@ -407,13 +413,9 @@ export function useSnookerMatch() {
     // แต่ละชุดลูกแดง + ดำ (1+7 = 8 แต้ม) + ลูกสีทั้งหมดตอนเก็บสี (27 แต้ม)
     pointsRemaining = (remainingReds * 8) + 27;
   } else {
-    // เฟสเก็บสี: 27 ลบด้วยคะแนนลูกสีที่ตบหมดไปแล้ว
-    const allColors = [2, 3, 4, 5, 6, 7];
-    const remainingColors = allColors.filter((pts) => {
-      const countPotted = colorsPhasePotted.filter((p) => p === pts).length;
-      return countPotted < 1;
-    });
-    pointsRemaining = remainingColors.reduce((a, b) => a + b, 0);
+    // เฟสเก็บสี: 27 แต้มพื้นฐาน หักด้วยคะแนนลูกสีที่ตบลงในเฟส clearance
+    const totalClearancePotted = colorsPhasePotted.reduce((sum, pts) => sum + pts, 0);
+    pointsRemaining = Math.max(0, 27 - totalClearancePotted);
   }
 
   // คำนวณส่วนต่างคะแนนและสถิติต้นแต้มขาด / ต้องการสนุ๊ก

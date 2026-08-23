@@ -57,7 +57,7 @@ export function ScoreboardHeader({
     <header className="bg-slate-900/95 border-b border-slate-800 backdrop-blur-md sticky top-0 z-30 shadow-2xl">
       <div className="max-w-7xl mx-auto px-1 sm:px-3 py-0.5">
         
-        {/* Flexbox Scoreboard Deck - ไฮไลต์การ์ดผู้เล่นแทงอยู่ด้วยกรอบสว่างวาบและลายพื้นหลังสะท้อนแสง */}
+        {/* Flexbox Scoreboard Deck - ปรับสีตัวเลขผู้เล่นที่ไม่ใช่ตาแทงให้ชัดแจ๋ว และเพิ่มขนาดตัวหนังสือแต้มบนโต๊ะกับฝั่งผู้เล่นแทง */}
         <div className="flex items-center justify-between gap-1 sm:gap-2 bg-slate-950 rounded-xl border border-slate-800 p-1 sm:p-2 shadow-2xl">
           
           {/* Player 1 Card (Cyan Palette) - กดแล้วสลับฝั่งเหมือนปุ่มเปลี่ยนฝั่ง */}
@@ -66,7 +66,7 @@ export function ScoreboardHeader({
             className={`relative flex-1 flex items-center justify-between p-1.5 sm:p-3 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden ${
               currentPlayerIndex === 0 
                 ? 'bg-gradient-to-r from-sky-950/90 via-slate-900 to-sky-950/90 border-2 border-sky-400 ring-4 ring-sky-500/40 shadow-[0_0_30px_rgba(56,189,248,0.5)] scale-[1.02] z-10' 
-                : 'bg-slate-950/40 border-slate-900 opacity-40 hover:opacity-75 grayscale-[30%]'
+                : 'bg-slate-950/80 border-slate-800/80 hover:border-slate-700 shadow-md'
             }`}
           >
             {/* ลายพื้นหลัง Mesh Pattern เฉพาะตอนกำลังแทง (Active Player 1 Texture) */}
@@ -85,7 +85,7 @@ export function ScoreboardHeader({
                 <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-[10px] sm:text-xs transition-all ${
                   currentPlayerIndex === 0
                     ? 'bg-sky-500 text-slate-950 shadow-[0_0_12px_rgba(56,189,248,0.9)] ring-2 ring-white'
-                    : 'bg-slate-800 text-slate-400 border border-slate-700'
+                    : 'bg-slate-800 text-sky-400 border border-slate-700 font-bold'
                 }`}>
                   P1
                 </div>
@@ -120,7 +120,7 @@ export function ScoreboardHeader({
                 ) : (
                   <div className="flex items-center gap-0.5">
                     <span className={`font-black text-xs sm:text-base truncate ${
-                      currentPlayerIndex === 0 ? 'text-white drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]' : 'text-slate-400'
+                      currentPlayerIndex === 0 ? 'text-white drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]' : 'text-slate-200'
                     }`}>
                       {getDisplayName(players[0].name)}
                     </span>
@@ -140,12 +140,12 @@ export function ScoreboardHeader({
               </div>
             </div>
 
-            {/* 🎯 Current Frame Points P1 */}
+            {/* 🎯 Current Frame Points P1 (ปรับสีตัวเลขตอนไม่ได้แทงให้สว่าง คมชัด ไม่จืดมืด) */}
             <div className="text-right pl-1 sm:pl-2 shrink-0 relative z-10">
               <div className={`text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-mono tracking-tighter leading-none select-none transition-all ${
                 currentPlayerIndex === 0
                   ? 'text-sky-300 drop-shadow-[0_0_25px_rgba(56,189,248,0.95)] scale-105'
-                  : 'text-slate-500'
+                  : 'text-sky-400/80 drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]'
               }`}>
                 {players[0].currentFramePoints}
               </div>
@@ -166,27 +166,27 @@ export function ScoreboardHeader({
               <span>{players[1].frameScore}</span>
             </div>
             
-            {/* 🎱 สรุปลูกแดง + แต้มคงเหลือบนโต๊ะ (Points Remaining) */}
+            {/* 🎱 สรุปลูกแดง + แต้มคงเหลือบนโต๊ะ (ขยายตัวหนังสือให้ใหญ่ขึ้นพอดีกรอบเดิม) */}
             <div className="mt-0.5 flex flex-col items-center gap-0.5">
-              <div className="text-[8.5px] sm:text-[10px] font-bold font-mono text-emerald-300 bg-emerald-950/90 px-1 py-0.2 rounded border border-emerald-700/80 shadow flex items-center gap-0.5">
-                <span>บนโต๊ะ:<strong className="text-amber-300 font-black ml-0.5">{pointsRemaining}</strong></span>
-                <span className="text-slate-400 text-[8px] border-l border-emerald-800 pl-0.5">
-                  🔴<strong className="text-red-400 font-bold">{pottedRedsCount}</strong>/{maxReds}
+              <div className="text-xs sm:text-sm font-black font-mono text-emerald-300 bg-emerald-950/95 px-2 py-0.5 rounded-lg border border-emerald-600 shadow-md flex items-center justify-center gap-1">
+                <span>บนโต๊ะ:<strong className="text-amber-300 font-black text-sm sm:text-base ml-1">{pointsRemaining}</strong> แต้ม</span>
+                <span className="text-slate-400 text-[10px] sm:text-xs font-bold border-l border-emerald-800 pl-1">
+                  🔴<strong className="text-red-400 font-black">{pottedRedsCount}</strong>/{maxReds}
                 </span>
               </div>
 
-              {/* ⚠️ แบรนด์แจ้งเตือนแต้มขาด / ต้องการกี่สนุ๊ก */}
+              {/* ⚠️ ปรับตัวหนังสือแสดงฝั่งผู้เล่นแทงใต้แต้มบนโต๊ะให้ใหญ่ขึ้น เด่นชัด */}
               {isPointsDeficit ? (
-                <div className="text-[8px] sm:text-[9px] font-black text-red-300 bg-red-950/95 border border-red-600 px-1 py-0.2 rounded animate-pulse shadow">
+                <div className="text-xs sm:text-sm font-black text-red-300 bg-red-950/95 border border-red-600 px-2 py-0.5 rounded-md animate-pulse shadow">
                   🚨 แต้มขาด ({snookersRequired} สนุ๊ก)
                 </div>
               ) : (
                 currentPlayerIndex === 0 ? (
-                  <div className="text-[8px] font-bold text-sky-300 bg-sky-950 px-1 rounded border border-sky-800 animate-pulse">
+                  <div className="text-xs sm:text-sm font-black text-sky-300 bg-sky-950 px-2 py-0.5 rounded-md border border-sky-500 shadow-[0_0_10px_rgba(56,189,248,0.4)] animate-pulse">
                     ◀ P1 แทง
                   </div>
                 ) : (
-                  <div className="text-[8px] font-bold text-amber-300 bg-amber-950 px-1 rounded border border-amber-800 animate-pulse">
+                  <div className="text-xs sm:text-sm font-black text-amber-300 bg-amber-950 px-2 py-0.5 rounded-md border border-amber-500 shadow-[0_0_10px_rgba(251,191,36,0.4)] animate-pulse">
                     P2 แทง ▶
                   </div>
                 )
@@ -200,7 +200,7 @@ export function ScoreboardHeader({
             className={`relative flex-1 flex items-center justify-between p-1.5 sm:p-3 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden ${
               currentPlayerIndex === 1 
                 ? 'bg-gradient-to-r from-amber-950/90 via-slate-900 to-amber-950/90 border-2 border-amber-400 ring-4 ring-amber-500/40 shadow-[0_0_30px_rgba(251,191,36,0.5)] scale-[1.02] z-10' 
-                : 'bg-slate-950/40 border-slate-900 opacity-40 hover:opacity-75 grayscale-[30%]'
+                : 'bg-slate-950/80 border-slate-800/80 hover:border-slate-700 shadow-md'
             }`}
           >
             {/* ลายพื้นหลัง Mesh Pattern เฉพาะตอนกำลังแทง (Active Player 2 Texture) */}
@@ -214,12 +214,12 @@ export function ScoreboardHeader({
               />
             )}
 
-            {/* 🎯 Current Frame Points P2 */}
+            {/* 🎯 Current Frame Points P2 (ปรับสีตัวเลขตอนไม่ได้แทงให้สว่าง คมชัด ไม่จืดมืด) */}
             <div className="text-left pr-1 sm:pr-2 shrink-0 relative z-10">
               <div className={`text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-mono tracking-tighter leading-none select-none transition-all ${
                 currentPlayerIndex === 1
                   ? 'text-amber-300 drop-shadow-[0_0_25px_rgba(251,191,36,0.95)] scale-105'
-                  : 'text-slate-500'
+                  : 'text-amber-400/80 drop-shadow-[0_0_10px_rgba(251,191,36,0.3)]'
               }`}>
                 {players[1].currentFramePoints}
               </div>
@@ -230,7 +230,7 @@ export function ScoreboardHeader({
                 <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-[10px] sm:text-xs transition-all ${
                   currentPlayerIndex === 1
                     ? 'bg-amber-500 text-slate-950 shadow-[0_0_12px_rgba(251,191,36,0.9)] ring-2 ring-white'
-                    : 'bg-slate-800 text-slate-400 border border-slate-700'
+                    : 'bg-slate-800 text-amber-400 border border-slate-700 font-bold'
                 }`}>
                   P2
                 </div>
@@ -271,7 +271,7 @@ export function ScoreboardHeader({
                       <Edit3 className="w-2.5 h-2.5" />
                     </button>
                     <span className={`font-black text-xs sm:text-base truncate ${
-                      currentPlayerIndex === 1 ? 'text-white drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' : 'text-slate-400'
+                      currentPlayerIndex === 1 ? 'text-white drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' : 'text-slate-200'
                     }`}>
                       {getDisplayName(players[1].name)}
                     </span>
