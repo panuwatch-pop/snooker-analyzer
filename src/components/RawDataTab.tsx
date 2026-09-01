@@ -16,10 +16,13 @@ export const RawDataTab: React.FC<RawDataTabProps> = ({ currentMatch, currentFra
   const shots = activeFrame.shots || [];
   const visits = activeFrame.visits || [];
 
-  const filteredShots = shots.filter(s => {
-    if (playerFilter === 'all') return true;
-    return s.playerIndex === playerFilter;
-  });
+  const filteredShots = shots
+    .filter(s => {
+      if (playerFilter === 'all') return true;
+      return s.playerIndex === playerFilter;
+    })
+    .slice()
+    .reverse(); // Latest shot on top, first shot on bottom
 
   const getActionBadge = (action: string, ball?: string, points?: number, concededOpportunity?: boolean) => {
     switch (action) {
