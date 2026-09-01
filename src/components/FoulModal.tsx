@@ -28,30 +28,86 @@ export const FoulModal: React.FC<FoulModalProps> = ({
     onClose();
   };
 
-  // Keyboard listener inside Modal for 1-9, Enter, and Escape
+  // Keyboard listener inside Modal for 1-9 (Numpad, Digit, Thai keyboard), Enter, and Escape
   useEffect(() => {
     if (!isOpen) return;
 
     const handleModalKeyDown = (e: KeyboardEvent) => {
       const key = e.key;
+      const code = e.code;
 
-      // Direct instant foul keys: 4, 5, 6, 7 (and 1, 2, 3, 8, 9)
-      if (['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(key)) {
+      // 4 points (Brown / Default)
+      if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ภ') {
         e.preventDefault();
         e.stopPropagation();
-        const pts = parseInt(key, 10);
-        handleConfirmWithPoints(pts);
+        handleConfirmWithPoints(4);
+        return;
+      }
+      // 5 points (Blue)
+      if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleConfirmWithPoints(5);
+        return;
+      }
+      // 6 points (Pink)
+      if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ุ') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleConfirmWithPoints(6);
+        return;
+      }
+      // 7 points (Black)
+      if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'ึ') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleConfirmWithPoints(7);
+        return;
+      }
+      // 1 point
+      if (key === '1' || code === 'Digit1' || code === 'Numpad1' || key === 'ๅ') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleConfirmWithPoints(1);
+        return;
+      }
+      // 2 points
+      if (key === '2' || code === 'Digit2' || code === 'Numpad2' || key === '/') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleConfirmWithPoints(2);
+        return;
+      }
+      // 3 points
+      if (key === '3' || code === 'Digit3' || code === 'Numpad3' || key === '-') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleConfirmWithPoints(3);
+        return;
+      }
+      // 8 points
+      if (key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ค') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleConfirmWithPoints(8);
+        return;
+      }
+      // 9 points
+      if (key === '9' || code === 'Digit9' || code === 'Numpad9' || key === 'ต') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleConfirmWithPoints(9);
         return;
       }
 
-      if (key === 'Enter') {
+      if (key === 'Enter' || code === 'Enter' || code === 'NumpadEnter') {
         e.preventDefault();
         e.stopPropagation();
         handleConfirmWithPoints(4);
         return;
       }
 
-      if (key === 'Escape') {
+      if (key === 'Escape' || code === 'Escape') {
         e.preventDefault();
         e.stopPropagation();
         onClose();

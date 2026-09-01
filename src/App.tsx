@@ -482,19 +482,21 @@ export function App() {
       }
 
       const key = e.key;
-      if (key === '1') handlePotBall('red');
-      else if (key === '2') handlePotBall('yellow');
-      else if (key === '3') handlePotBall('green');
-      else if (key === '4') handlePotBall('brown');
-      else if (key === '5') handlePotBall('blue');
-      else if (key === '6') handlePotBall('pink');
-      else if (key === '7') handlePotBall('black');
-      else if (key === '+' || key === 'f' || key === 'F') setIsFoulModalOpen(true);
-      else if (key === '.' || key === ' ' || key === 'Delete') handleEndTurn('miss');
-      else if (key === 's' || key === 'S') handleEndTurn('safety');
-      else if (key === '*' || (e.ctrlKey && key.toLowerCase() === 'z')) handleUndo();
-      else if (key === 'l' || key === 'L') setIsScreenLocked(prev => !prev);
-      else if (key === 'e' || key === 'E') setIsFrameEndModalOpen(true);
+      const code = e.code;
+
+      if (key === '1' || code === 'Digit1' || code === 'Numpad1' || key === 'ๅ') handlePotBall('red');
+      else if (key === '2' || code === 'Digit2' || code === 'Numpad2' || key === '/') handlePotBall('yellow');
+      else if (key === '3' || code === 'Digit3' || code === 'Numpad3' || key === '-') handlePotBall('green');
+      else if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ภ') handlePotBall('brown');
+      else if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') handlePotBall('blue');
+      else if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ุ') handlePotBall('pink');
+      else if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'ึ') handlePotBall('black');
+      else if (key === '+' || code === 'NumpadAdd' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') setIsFoulModalOpen(true);
+      else if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === ' ' || code === 'Space' || key === 'Delete' || key === 'ใ') handleEndTurn('miss');
+      else if (key === 's' || key === 'S' || code === 'KeyS' || key === 'ห') handleEndTurn('safety');
+      else if (key === '*' || code === 'NumpadMultiply' || (e.ctrlKey && (key.toLowerCase() === 'z' || code === 'KeyZ'))) handleUndo();
+      else if (key === 'l' || key === 'L' || code === 'KeyL' || key === 'ส') setIsScreenLocked(prev => !prev);
+      else if (key === 'e' || key === 'E' || code === 'KeyE' || key === 'ำ') setIsFrameEndModalOpen(true);
     };
 
     window.addEventListener('keydown', handleKeyDown);
