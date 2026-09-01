@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { AlertTriangle, X, ShieldAlert } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { AlertTriangle, X, CheckCircle, ShieldAlert, Delete } from 'lucide-react';
 
 interface FoulModalProps {
   isOpen: boolean;
@@ -16,10 +16,30 @@ export const FoulModal: React.FC<FoulModalProps> = ({
   currentStrikerName,
   opponentName,
 }) => {
+  const [pointsInput, setPointsInput] = useState<string>('4');
   const [isFreeBall, setIsFreeBall] = useState<boolean>(false);
   const [switchStriker, setSwitchStriker] = useState<boolean>(true);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleConfirmWithPoints = (pts: number) => {
+  // Auto focus input when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setPointsInput('4');
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          inputRef.current.select();
+        }
+      }, 60);
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const currentPoints = parseInt(pointsInput, 10) || 0;
+
+  const handleConfirm = () => {
+    const pts = Math.max(1, parseInt(pointsInput, 10) || 4);
     onSubmitFoul(pts, {
       isFreeBall,
       switchStriker,
@@ -28,123 +48,64 @@ export const FoulModal: React.FC<FoulModalProps> = ({
     onClose();
   };
 
-  // Keyboard listener inside Modal for 1-9 (Numpad, Digit, Thai keyboard), Enter, and Escape
-  useEffect(() => {
-    if (!isOpen) return;
+  const handleKeypadPress = (val: string) => {
+    if (val === 'C') {
+      setPointsInput('');
+    } else if (val === 'DEL') {
+      setPointsInput(prev => prev.slice(0, -1));
+    } else {
+      setPointsInput(prev => {
+        if (prev === '0' || prev === '4') return val;
+        return prev + val;
+      });
+    }
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
 
-    const handleModalKeyDown = (e: KeyboardEvent) => {
-      const key = e.key;
-      const code = e.code;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/[^0-9]/g, '');
+    setPointsInput(val);
+  };
 
-      // 4 points (Brown / Default)
-      if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ภ') {
-        e.preventDefault();
-        e.stopPropagation();
-        handleConfirmWithPoints(4);
-        return;
-      }
-      // 5 points (Blue)
-      if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') {
-        e.preventDefault();
-        e.stopPropagation();
-        handleConfirmWithPoints(5);
-        return;
-      }
-      // 6 points (Pink)
-      if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ุ') {
-        e.preventDefault();
-        e.stopPropagation();
-        handleConfirmWithPoints(6);
-        return;
-      }
-      // 7 points (Black)
-      if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'ึ') {
-        e.preventDefault();
-        e.stopPropagation();
-        handleConfirmWithPoints(7);
-        return;
-      }
-      // 1 point
-      if (key === '1' || code === 'Digit1' || code === 'Numpad1' || key === 'ๅ') {
-        e.preventDefault();
-        e.stopPropagation();
-        handleConfirmWithPoints(1);
-        return;
-      }
-      // 2 points
-      if (key === '2' || code === 'Digit2' || code === 'Numpad2' || key === '/') {
-        e.preventDefault();
-        e.stopPropagation();
-        handleConfirmWithPoints(2);
-        return;
-      }
-      // 3 points
-      if (key === '3' || code === 'Digit3' || code === 'Numpad3' || key === '-') {
-        e.preventDefault();
-        e.stopPropagation();
-        handleConfirmWithPoints(3);
-        return;
-      }
-      // 8 points
-      if (key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ค') {
-        e.preventDefault();
-        e.stopPropagation();
-        handleConfirmWithPoints(8);
-        return;
-      }
-      // 9 points
-      if (key === '9' || code === 'Digit9' || code === 'Numpad9' || key === 'ต') {
-        e.preventDefault();
-        e.stopPropagation();
-        handleConfirmWithPoints(9);
-        return;
-      }
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleConfirm();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      onClose();
+    }
+  };
 
-      if (key === 'Enter' || code === 'Enter' || code === 'NumpadEnter') {
-        e.preventDefault();
-        e.stopPropagation();
-        handleConfirmWithPoints(4);
-        return;
-      }
-
-      if (key === 'Escape' || code === 'Escape') {
-        e.preventDefault();
-        e.stopPropagation();
-        onClose();
-        return;
-      }
-    };
-
-    window.addEventListener('keydown', handleModalKeyDown, { capture: true });
-    return () => window.removeEventListener('keydown', handleModalKeyDown, { capture: true });
-  }, [isOpen, isFreeBall, switchStriker, onSubmitFoul, onClose]);
-
-  if (!isOpen) return null;
-
-  const foulOptions = [
-    { pts: 4, label: '4 แต้ม', desc: 'ขาว/แดง/เหลือง/เขียว/น้ำตาล', key: '4' },
-    { pts: 5, label: '5 แต้ม', desc: 'ลูกน้ำเงิน (Blue)', key: '5' },
-    { pts: 6, label: '6 แต้ม', desc: 'ลูกชมพู (Pink)', key: '6' },
-    { pts: 7, label: '7 แต้ม', desc: 'ลูกดำ (Black)', key: '7' },
+  const quickPresets = [
+    { pts: 4, label: '4 แต้ม (ทั่วไป/แดง/ขาว)' },
+    { pts: 5, label: '5 แต้ม (น้ำเงิน)' },
+    { pts: 6, label: '6 แต้ม (ชมพู)' },
+    { pts: 7, label: '7 แต้ม (ดำ)' },
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div className="flex items-center space-x-2.5 text-rose-400">
-            <AlertTriangle className="w-6 h-6" />
-            <h3 className="text-lg font-black text-white">บันทึกแต้มฟาวล์ (Foul Penalty)</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-slate-900 border border-slate-700/90 rounded-2xl max-w-md w-full p-4 sm:p-6 shadow-2xl space-y-3.5">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <div className="flex items-center space-x-2 text-rose-400">
+            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6" />
+            <h3 className="text-base sm:text-lg font-black text-white">บันทึกแต้มฟาวล์ (Foul Penalty)</h3>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="bg-slate-950/80 border border-slate-800 p-3 rounded-xl text-xs sm:text-sm text-slate-300 flex items-center justify-between">
+        {/* Players Context */}
+        <div className="bg-slate-950/80 border border-slate-800 px-3 py-2 rounded-xl text-xs text-slate-300 flex items-center justify-between">
           <div>
             ผู้ทำฟาวล์: <strong className="text-rose-400 font-bold">{currentStrikerName}</strong>
           </div>
@@ -153,83 +114,121 @@ export const FoulModal: React.FC<FoulModalProps> = ({
           </div>
         </div>
 
-        {/* Big Touch Buttons: One-tap direct submit */}
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-            แตะเลือกคะแนนฟาวล์ (กดเลข 4-7 บนคีย์บอร์ดได้ทันที)
+        {/* Big Number Input Box */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-300 flex justify-between items-center">
+            <span>ระบุจำนวนแต้มฟาวล์:</span>
+            <span className="text-[11px] text-amber-400 font-mono">ให้แต้มคู่แข่ง: +{currentPoints || 0} แต้ม</span>
           </label>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            {foulOptions.map((opt) => (
+          <div className="relative">
+            <input
+              ref={inputRef}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={pointsInput}
+              onChange={handleInputChange}
+              onKeyDown={handleInputKeyDown}
+              placeholder="ใส่ตัวเลขแต้มฟาวล์..."
+              className="w-full bg-slate-950 border-2 border-rose-500/80 focus:border-rose-400 focus:ring-4 focus:ring-rose-500/20 text-white font-mono font-black text-3xl sm:text-4xl text-center py-2.5 px-4 rounded-xl outline-none shadow-inner tracking-wider"
+            />
+            {pointsInput && (
               <button
-                key={opt.pts}
                 type="button"
-                onClick={() => handleConfirmWithPoints(opt.pts)}
-                className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl border bg-gradient-to-b from-rose-700 to-red-800 hover:from-rose-600 hover:to-red-700 border-rose-500 text-white shadow-lg shadow-rose-950/50 transition-all cursor-pointer relative active:scale-95 hover:scale-105"
+                onClick={() => setPointsInput('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 rounded cursor-pointer"
               >
-                <span className="text-3xl sm:text-4xl font-black font-mono leading-none drop-shadow">+{opt.pts}</span>
-                <span className="text-[11px] mt-1 font-bold opacity-95">{opt.label}</span>
-                <span className="text-[9px] text-rose-200 opacity-80 truncate max-w-full">{opt.desc}</span>
-                <span className="absolute top-1.5 right-1.5 text-[9px] bg-slate-950/90 text-amber-300 px-1 rounded font-mono font-bold border border-slate-700">
-                  [{opt.key}]
-                </span>
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Presets (4, 5, 6, 7) */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {quickPresets.map((preset) => (
+            <button
+              key={preset.pts}
+              type="button"
+              onClick={() => setPointsInput(preset.pts.toString())}
+              className={`py-2 px-1 rounded-xl font-bold text-xs flex flex-col items-center justify-center border transition-all cursor-pointer ${
+                pointsInput === preset.pts.toString()
+                  ? 'bg-rose-600 border-rose-400 text-white shadow-md ring-2 ring-rose-400/50'
+                  : 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
+              }`}
+            >
+              <span className="font-mono font-black text-base leading-tight">+{preset.pts}</span>
+              <span className="text-[9px] opacity-80 truncate">{preset.pts === 4 ? 'ทั่วไป' : preset.pts === 5 ? 'น้ำเงิน' : preset.pts === 6 ? 'ชมพู' : 'ดำ'}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* On-screen Numeric Keypad (for Touch Screen & Mouse) */}
+        <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 space-y-1.5">
+          <div className="text-[11px] font-bold text-slate-400 text-center">แป้นตัวเลข (แตะเพื่อพิมพ์แต้ม):</div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', 'DEL'].map((btn) => (
+              <button
+                key={btn}
+                type="button"
+                onClick={() => handleKeypadPress(btn)}
+                className={`py-2 rounded-lg font-mono font-bold text-base transition-all active:scale-95 cursor-pointer border ${
+                  btn === 'C'
+                    ? 'bg-amber-950/60 text-amber-300 border-amber-800 hover:bg-amber-900/80'
+                    : btn === 'DEL'
+                    ? 'bg-rose-950/60 text-rose-300 border-rose-800 hover:bg-rose-900/80 flex items-center justify-center'
+                    : 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700 shadow-sm'
+                }`}
+              >
+                {btn === 'DEL' ? <Delete className="w-4 h-4" /> : btn}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Custom Point Buttons (e.g. 1, 2, 3, 8, 9, 10) */}
-        <div className="space-y-1.5 pt-1">
-          <span className="text-xs text-slate-400 font-semibold block">แต้มฟาวล์อื่นๆ (แตะเพื่อส่งค่าทันที):</span>
-          <div className="flex items-center flex-wrap gap-2">
-            {[1, 2, 3, 8, 9, 10].map((num) => (
-              <button
-                key={num}
-                type="button"
-                onClick={() => handleConfirmWithPoints(num)}
-                className="px-3 py-1.5 rounded-lg border font-mono font-bold text-xs bg-slate-800 text-slate-200 border-slate-700 hover:bg-rose-700 hover:text-white hover:border-rose-500 cursor-pointer active:scale-95 transition-all"
-              >
-                +{num} แต้ม
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Options: Pass Turn & Free Ball */}
-        <div className="space-y-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-          <label className="flex items-center space-x-3 cursor-pointer select-none">
+        {/* Options */}
+        <div className="space-y-1.5 bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 text-xs">
+          <label className="flex items-center space-x-2.5 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={switchStriker}
               onChange={(e) => setSwitchStriker(e.target.checked)}
               className="w-4 h-4 rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 bg-slate-800 cursor-pointer"
             />
-            <span className="text-xs sm:text-sm font-semibold text-slate-200">
-              สลับให้อีกฝ่ายขึ้นมาแทง (Pass turn)
-            </span>
+            <span className="font-semibold text-slate-200">สลับให้อีกฝ่ายขึ้นมาแทง (Pass turn)</span>
           </label>
 
-          <label className="flex items-center space-x-3 cursor-pointer select-none">
+          <label className="flex items-center space-x-2.5 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={isFreeBall}
               onChange={(e) => setIsFreeBall(e.target.checked)}
               className="w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-amber-400 bg-slate-800 cursor-pointer"
             />
-            <span className="text-xs sm:text-sm font-semibold text-amber-300 flex items-center space-x-1.5">
-              <ShieldAlert className="w-4 h-4 text-amber-400" />
+            <span className="font-semibold text-amber-300 flex items-center space-x-1">
+              <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
               <span>สนุ๊กเกอร์ขัง / เกิดฟรีบอล (Award Free Ball)</span>
             </span>
           </label>
         </div>
 
-        <div className="flex items-center justify-end space-x-3 pt-2">
+        {/* Action Buttons */}
+        <div className="flex items-center justify-between space-x-2 pt-1">
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs sm:text-sm transition-colors cursor-pointer"
+            className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs sm:text-sm transition-colors cursor-pointer"
           >
             ยกเลิก [Esc]
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            className="flex-2 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-rose-600/30 flex items-center justify-center space-x-1.5 cursor-pointer transition-all active:scale-98"
+          >
+            <CheckCircle className="w-4 h-4 text-emerald-300" />
+            <span>ยืนยันเสียฟาวล์ (+{currentPoints || 4} แต้ม) [Enter]</span>
           </button>
         </div>
       </div>

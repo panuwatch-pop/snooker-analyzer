@@ -118,37 +118,16 @@ export const BallPots: React.FC<BallPotsProps> = ({
 
       {/* Action Controls: Foul, Miss, Safety, Undo, End Frame */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-        {/* Foul Button Card with Quick direct +4, +5, +6, +7 pills */}
-        <div className="flex flex-col bg-gradient-to-r from-rose-700 to-red-800 rounded-xl border border-rose-600 shadow-lg shadow-rose-950/50 p-2 space-y-1.5 justify-between">
-          <div
-            onClick={onOpenFoulModal}
-            className="flex items-center justify-between cursor-pointer active:scale-98 transition-transform"
-          >
-            <div className="flex items-center space-x-1.5">
-              <AlertTriangle className="w-4 h-4 text-amber-300 flex-shrink-0" />
-              <span className="text-xs sm:text-sm font-extrabold text-white leading-tight">เสียฟาวล์</span>
-            </div>
-            <span className="text-[10px] text-rose-200 font-mono font-bold bg-slate-950/60 px-1 rounded border border-rose-500/40">[+]</span>
+        <button
+          onClick={onOpenFoulModal}
+          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-rose-700 to-red-800 hover:from-rose-600 hover:to-red-700 text-white font-extrabold py-3 px-3 rounded-xl border border-rose-600 shadow-lg shadow-rose-950/50 cursor-pointer active:scale-98 transition-all"
+        >
+          <AlertTriangle className="w-5 h-5 text-amber-300 flex-shrink-0" />
+          <div className="text-left">
+            <div className="text-xs sm:text-sm leading-tight">เสียฟาวล์</div>
+            <div className="text-[10px] text-rose-200 font-normal">[+] / [F]</div>
           </div>
-
-          <div className="grid grid-cols-4 gap-1">
-            {[4, 5, 6, 7].map((pts) => (
-              <button
-                key={pts}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onDirectFoul) onDirectFoul(pts);
-                  else onOpenFoulModal();
-                }}
-                title={`บันทึกฟาวล์ ${pts} แต้มทันที`}
-                className="bg-slate-950/80 hover:bg-white text-rose-300 hover:text-slate-950 font-mono font-black text-xs py-1 rounded border border-rose-500/60 transition-colors active:scale-90 cursor-pointer shadow"
-              >
-                +{pts}
-              </button>
-            ))}
-          </div>
-        </div>
+        </button>
 
         <button
           onClick={() => onEndTurn('miss')}
