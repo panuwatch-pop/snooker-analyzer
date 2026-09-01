@@ -334,10 +334,28 @@ export function App() {
     }
   };
 
-  const handleSubmitFoul = (points: number, options: { isFreeBall: boolean; switchStriker: boolean; note?: string }) => {
+  const handleSubmitFoul = useCallback((points: number, options: { isFreeBall: boolean; switchStriker: boolean; note?: string }) => {
     soundManager.playFoulSound();
     const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
     const shotNumber = (currentFrame.shots?.length || 0) + 1;
+
+    let updatedShots = [...currentFrame.shots];
+    let updatedVisits = [...currentFrame.visits];
+
+    // If current striker committed foul without scoring, opponent's previous defense was good
+    if (ballsInCurrentVisit === 0 && updatedVisits.length > 0) {
+      const prevVisit = updatedVisits[updatedVisits.length - 1];
+      if (prevVisit.playerIndex !== activeStrikerIndex) {
+        prevVisit.endedWithOpportunityGiven = false;
+        for (let i = updatedShots.length - 1; i >= 0; i--) {
+          if (updatedShots[i].playerIndex !== activeStrikerIndex) {
+            updatedShots[i].concededOpportunity = false;
+            updatedShots[i].notes = 'ป้องกันดี (อีกฝ่ายทำแต้มไม่ได้)';
+            break;
+          }
+        }
+      }
+    }
 
     const foulShot: Shot = {
       id: 'shot-' + Date.now(),
@@ -376,8 +394,8 @@ export function App() {
     const newP2Score = activeStrikerIndex === 0 ? currentFrame.player2Score + points : currentFrame.player2Score;
     const nextStrikerIndex = (options.switchStriker ? (activeStrikerIndex === 0 ? 1 : 0) : activeStrikerIndex) as 0 | 1;
 
-    const updatedShots = [...currentFrame.shots, foulShot];
-    const updatedVisits = [...currentFrame.visits, visitRecord];
+    updatedShots.push(foulShot);
+    updatedVisits.push(visitRecord);
 
     const p1Stats = calculatePlayerStats(updatedShots, updatedVisits, 0, updatedShots.filter(s => s.playerIndex === 1));
     const p2Stats = calculatePlayerStats(updatedShots, updatedVisits, 1, updatedShots.filter(s => s.playerIndex === 0));
@@ -401,7 +419,20 @@ export function App() {
     setCurrentVisitNumber(prev => prev + 1);
     setCurrentVisitShots([]);
     setShotStartTime(Date.now());
-  };
+  }, [
+    activeStrikerIndex,
+    ballsInCurrentVisit,
+    currentBreak,
+    currentFrame,
+    currentVisitNumber,
+    currentVisitShots,
+    match,
+    shotStartTime,
+  ]);
+
+  const handleDirectFoul = useCallback((points: number) => {
+    handleSubmitFoul(points, { isFreeBall: false, switchStriker: true, note: `ฟาวล์ ${points} แต้ม` });
+  }, [handleSubmitFoul]);
 
   const handleUndo = useCallback(() => {
     if (!currentFrame.shots || currentFrame.shots.length === 0) return;
@@ -643,6 +674,7 @@ export function App() {
               onPotBall={handlePotBall}
               onAddCustomPoints={handleAddCustomPoints}
               onOpenFoulModal={() => setIsFoulModalOpen(true)}
+              onDirectFoul={handleDirectFoul}
               onEndTurn={handleEndTurn}
               onUndo={handleUndo}
               onEndFrame={() => setIsFrameEndModalOpen(true)}
