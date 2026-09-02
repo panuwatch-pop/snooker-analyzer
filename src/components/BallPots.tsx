@@ -44,14 +44,14 @@ export const BallPots: React.FC<BallPotsProps> = ({
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-3 relative">
-      {/* Potted Balls in Current Break */}
+      {/* Potted Balls in Current Break - Mini colored spheres with numbers only (No text) */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-lg flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center space-x-2 text-xs font-bold text-slate-300">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
           <span>ลูกที่ตบลงในเทิร์นนี้ ({pottedInVisit.length} ลูก):</span>
         </div>
 
-        <div className="flex items-center space-x-1.5 overflow-x-auto max-w-full py-1 px-1">
+        <div className="flex items-center space-x-2 overflow-x-auto max-w-full py-1 px-1">
           {pottedInVisit.length === 0 ? (
             <span className="text-xs text-slate-500 italic">ยังไม่มีลูกที่ตบลงในรอบนี้</span>
           ) : (
@@ -61,11 +61,10 @@ export const BallPots: React.FC<BallPotsProps> = ({
               return (
                 <div
                   key={s.id || idx}
-                  className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-950 border border-slate-700 shadow-sm text-xs font-bold"
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-mono font-black text-xs sm:text-sm text-white shadow-md border border-white/30 select-none ${b.cssClass}`}
+                  title={`ลูก${b.nameTh} (+${b.points})`}
                 >
-                  <span className={`w-3.5 h-3.5 rounded-full shadow-inner ${b.cssClass}`} />
-                  <span className="text-slate-200">{b.nameTh}</span>
-                  <span className="text-[10px] text-emerald-400 font-mono font-bold">+{b.points}</span>
+                  <span className="drop-shadow-sm">{b.points}</span>
                 </div>
               );
             })
@@ -73,14 +72,14 @@ export const BallPots: React.FC<BallPotsProps> = ({
         </div>
       </div>
 
-      {/* Ball Potting Buttons - Larger 3D Spheres with Point Numbers Only */}
+      {/* Ball Potting Buttons - Restored original compact button sizing */}
       <div className="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-xl space-y-2">
         <div className="flex items-center justify-between text-xs text-slate-400 font-bold px-1">
-          <span>แตะลูกที่ตบลง (แต้มบนลูก):</span>
+          <span>แตะลูกสนุ๊กเกอร์ที่ตบลง:</span>
           <span className="text-rose-400">แดงเหลือ: <strong className="text-white font-mono text-sm">{redsRemaining}</strong> ลูก</span>
         </div>
 
-        <div className="grid grid-cols-7 gap-2 sm:gap-3.5">
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
           {ballList.map((ballKey) => {
             const ball = BALL_MAP[ballKey];
             const isRed = ballKey === 'red';
@@ -91,20 +90,20 @@ export const BallPots: React.FC<BallPotsProps> = ({
                 key={ballKey}
                 onClick={() => onPotBall(ballKey)}
                 disabled={isDisabled}
-                className={`group relative aspect-square w-full rounded-2xl sm:rounded-3xl flex items-center justify-center transition-all duration-150 cursor-pointer border active:scale-90 ${ball.cssClass} ${
+                className={`group relative flex flex-col items-center justify-center py-3 sm:py-4 px-1 rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} ${
                   isDisabled
-                    ? 'opacity-25 cursor-not-allowed border-slate-800'
-                    : 'hover:brightness-115 hover:shadow-xl shadow-lg hover:-translate-y-1'
+                    ? 'opacity-30 cursor-not-allowed border-slate-800'
+                    : 'hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5'
                 }`}
                 title={`ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
               >
-                {/* 3D Ball point number centered inside the sphere */}
-                <span className="font-mono font-black text-2xl sm:text-3xl md:text-4xl leading-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] select-none">
+                {/* Clean Point number directly on the ball without name text */}
+                <span className="font-mono font-black text-2xl sm:text-3xl leading-none drop-shadow-md select-none">
                   {ball.points}
                 </span>
 
                 {/* Keyboard Shortcut Hint Badge */}
-                <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[8px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full border border-slate-700 shadow-sm">
+                <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[8px] sm:text-[9px] font-mono font-bold px-1 rounded-full border border-slate-700 shadow">
                   {ball.numpadKey}
                 </span>
               </button>
