@@ -490,7 +490,7 @@ export function App() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore global shortcuts when any modal is open or when typing in inputs
-      if (isFoulModalOpen || isNewMatchModalOpen || isFrameEndModalOpen || isKeypadGuideOpen) {
+      if (isNewMatchModalOpen || isFrameEndModalOpen || isKeypadGuideOpen) {
         return;
       }
 
@@ -509,7 +509,6 @@ export function App() {
       else if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') handlePotBall('blue');
       else if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ุ') handlePotBall('pink');
       else if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'ึ') handlePotBall('black');
-      else if (key === '+' || code === 'NumpadAdd' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') setIsFoulModalOpen(true);
       else if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === ' ' || code === 'Space' || key === 'Delete' || key === 'ใ') handleEndTurn('miss');
       else if (key === 's' || key === 'S' || code === 'KeyS' || key === 'ห') handleEndTurn('safety');
       else if (key === '*' || code === 'NumpadMultiply' || (e.ctrlKey && (key.toLowerCase() === 'z' || code === 'KeyZ'))) handleUndo();
@@ -519,7 +518,7 @@ export function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFoulModalOpen, isNewMatchModalOpen, isFrameEndModalOpen, isKeypadGuideOpen, handlePotBall, handleEndTurn, handleUndo]);
+  }, [isNewMatchModalOpen, isFrameEndModalOpen, isKeypadGuideOpen, handlePotBall, handleEndTurn, handleUndo]);
 
   const handleNextFrame = () => {
     const p1Won = currentFrame.player1Score > currentFrame.player2Score;
