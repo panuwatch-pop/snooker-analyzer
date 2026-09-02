@@ -709,6 +709,8 @@ export function App() {
         activeStrikerIndex={activeStrikerIndex}
         player1Name={match.player1Name}
         player2Name={match.player2Name}
+        player1Score={currentFrame.player1Score}
+        player2Score={currentFrame.player2Score}
       />
 
       <KeypadGuide
