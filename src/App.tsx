@@ -334,96 +334,108 @@ export function App() {
     }
   };
 
-  const handleSubmitFoul = useCallback((points: number, options: { isFreeBall: boolean; switchStriker: boolean; note?: string; recipientPlayerIndex?: 0 | 1 }) => {
-    soundManager.playFoulSound();
-    const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
-    const shotNumber = (currentFrame.shots?.length || 0) + 1;
+  const handleSubmitFoul = useCallback((points: number, options?: { isFreeBall?: boolean; switchStriker?: boolean; note?: string; recipientPlayerIndex?: 0 | 1 }) => {
+    try {
+      soundManager.playFoulSound();
+      const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
+      const shotNumber = (currentFrame?.shots?.length || 0) + 1;
 
-    let updatedShots = [...currentFrame.shots];
-    let updatedVisits = [...currentFrame.visits];
+      const recipientIndex = (options?.recipientPlayerIndex !== undefined)
+        ? options.recipientPlayerIndex
+        : (activeStrikerIndex === 0 ? 1 : 0);
+      const foulPlayerIndex = recipientIndex === 1 ? 0 : 1;
+      const shouldSwitch = options?.switchStriker !== false;
 
-    const recipientIndex = options.recipientPlayerIndex !== undefined
-      ? options.recipientPlayerIndex
-      : (activeStrikerIndex === 0 ? 1 : 0);
-    const foulPlayerIndex = recipientIndex === 1 ? 0 : 1;
+      let updatedShots = currentFrame?.shots ? [...currentFrame.shots] : [];
+      let updatedVisits = currentFrame?.visits ? [...currentFrame.visits] : [];
 
-    // If current striker committed foul without scoring, opponent's previous defense was good
-    if (ballsInCurrentVisit === 0 && updatedVisits.length > 0) {
-      const prevVisit = updatedVisits[updatedVisits.length - 1];
-      if (prevVisit.playerIndex !== foulPlayerIndex) {
-        prevVisit.endedWithOpportunityGiven = false;
-        for (let i = updatedShots.length - 1; i >= 0; i--) {
-          if (updatedShots[i].playerIndex !== foulPlayerIndex) {
-            updatedShots[i].concededOpportunity = false;
-            updatedShots[i].notes = 'ป้องกันดี (อีกฝ่ายทำแต้มไม่ได้)';
-            break;
+      // If current striker committed foul without scoring, opponent's previous defense was good
+      if (ballsInCurrentVisit === 0 && updatedVisits.length > 0) {
+        const prevVisit = updatedVisits[updatedVisits.length - 1];
+        if (prevVisit.playerIndex !== foulPlayerIndex) {
+          prevVisit.endedWithOpportunityGiven = false;
+          for (let i = updatedShots.length - 1; i >= 0; i--) {
+            if (updatedShots[i].playerIndex !== foulPlayerIndex) {
+              updatedShots[i].concededOpportunity = false;
+              updatedShots[i].notes = 'ป้องกันดี (อีกฝ่ายทำแต้มไม่ได้)';
+              break;
+            }
           }
         }
       }
+
+      const foulShot: Shot = {
+        id: 'shot-' + Date.now(),
+        shotNumber,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        shotTimeSec: duration,
+        playerIndex: foulPlayerIndex,
+        action: 'foul',
+        points,
+        redsRemainingBefore: currentFrame?.redsRemaining ?? 15,
+        redsRemainingAfter: currentFrame?.redsRemaining ?? 15,
+        legalTargetBefore: 'red',
+        legalTargetAfter: 'red',
+        visitNumber: currentVisitNumber,
+        ballsInVisit: ballsInCurrentVisit,
+        visitBreakPoints: currentBreak,
+        isBreakAttempt: true,
+        notes: options?.note || `ฟาวล์ ${points} แต้ม`,
+        concededOpportunity: true,
+      };
+
+      const allVisitShots = [...currentVisitShots, foulShot];
+      const visitRecord: Visit = {
+        visitNumber: currentVisitNumber,
+        playerIndex: foulPlayerIndex,
+        shots: allVisitShots,
+        pointsScored: currentBreak,
+        ballsPotted: ballsInCurrentVisit,
+        hadFoul: true,
+        foulPointsGiven: points,
+        totalTimeSec: allVisitShots.reduce((sum, s) => sum + (s.shotTimeSec || 0), 0),
+        endedWithOpportunityGiven: true,
+      };
+
+      updatedShots.push(foulShot);
+      updatedVisits.push(visitRecord);
+
+      const newP1Score = recipientIndex === 0 ? (currentFrame?.player1Score || 0) + points : (currentFrame?.player1Score || 0);
+      const newP2Score = recipientIndex === 1 ? (currentFrame?.player2Score || 0) + points : (currentFrame?.player2Score || 0);
+      const nextStrikerIndex = (shouldSwitch ? (recipientIndex === 0 ? 0 : 1) : activeStrikerIndex) as 0 | 1;
+
+      let p1Stats, p2Stats;
+      try {
+        p1Stats = calculatePlayerStats(updatedShots, updatedVisits, 0, updatedShots.filter(s => s.playerIndex === 1));
+        p2Stats = calculatePlayerStats(updatedShots, updatedVisits, 1, updatedShots.filter(s => s.playerIndex === 0));
+      } catch {
+        p1Stats = currentFrame?.stats?.[0];
+        p2Stats = currentFrame?.stats?.[1];
+      }
+
+      const updatedFrame: Frame = {
+        ...currentFrame,
+        player1Score: newP1Score,
+        player2Score: newP2Score,
+        shots: updatedShots,
+        visits: updatedVisits,
+        stats: p1Stats && p2Stats ? [p1Stats, p2Stats] : currentFrame?.stats,
+      };
+
+      const frameIdx = match.currentFrameIndex ?? 0;
+      const newFrames = [...match.frames];
+      newFrames[frameIdx] = updatedFrame;
+
+      setMatch({ ...match, frames: newFrames });
+      setActiveStrikerIndex(nextStrikerIndex);
+      setCurrentBreak(0);
+      setBallsInCurrentVisit(0);
+      setCurrentVisitNumber(prev => prev + 1);
+      setCurrentVisitShots([]);
+      setShotStartTime(Date.now());
+    } catch (err) {
+      console.error("Foul scoring error:", err);
     }
-
-    const foulShot: Shot = {
-      id: 'shot-' + Date.now(),
-      shotNumber,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      shotTimeSec: duration,
-      playerIndex: foulPlayerIndex,
-      action: 'foul',
-      points,
-      redsRemainingBefore: currentFrame.redsRemaining,
-      redsRemainingAfter: currentFrame.redsRemaining,
-      legalTargetBefore: 'red',
-      legalTargetAfter: 'red',
-      visitNumber: currentVisitNumber,
-      ballsInVisit: ballsInCurrentVisit,
-      visitBreakPoints: currentBreak,
-      isBreakAttempt: true,
-      notes: options.note || `ฟาวล์ ${points} แต้ม`,
-      concededOpportunity: true,
-    };
-
-    const allVisitShots = [...currentVisitShots, foulShot];
-    const visitRecord: Visit = {
-      visitNumber: currentVisitNumber,
-      playerIndex: foulPlayerIndex,
-      shots: allVisitShots,
-      pointsScored: currentBreak,
-      ballsPotted: ballsInCurrentVisit,
-      hadFoul: true,
-      foulPointsGiven: points,
-      totalTimeSec: allVisitShots.reduce((sum, s) => sum + s.shotTimeSec, 0),
-      endedWithOpportunityGiven: true,
-    };
-
-    const newP1Score = recipientIndex === 0 ? currentFrame.player1Score + points : currentFrame.player1Score;
-    const newP2Score = recipientIndex === 1 ? currentFrame.player2Score + points : currentFrame.player2Score;
-    const nextStrikerIndex = (options.switchStriker ? (recipientIndex === 0 ? 0 : 1) : activeStrikerIndex) as 0 | 1;
-
-    updatedShots.push(foulShot);
-    updatedVisits.push(visitRecord);
-
-    const p1Stats = calculatePlayerStats(updatedShots, updatedVisits, 0, updatedShots.filter(s => s.playerIndex === 1));
-    const p2Stats = calculatePlayerStats(updatedShots, updatedVisits, 1, updatedShots.filter(s => s.playerIndex === 0));
-
-    const updatedFrame: Frame = {
-      ...currentFrame,
-      player1Score: newP1Score,
-      player2Score: newP2Score,
-      shots: updatedShots,
-      visits: updatedVisits,
-      stats: [p1Stats, p2Stats],
-    };
-
-    const newFrames = [...match.frames];
-    newFrames[match.currentFrameIndex] = updatedFrame;
-
-    setMatch(prev => ({ ...prev, frames: newFrames }));
-    setActiveStrikerIndex(nextStrikerIndex);
-    setCurrentBreak(0);
-    setBallsInCurrentVisit(0);
-    setCurrentVisitNumber(prev => prev + 1);
-    setCurrentVisitShots([]);
-    setShotStartTime(Date.now());
   }, [
     activeStrikerIndex,
     ballsInCurrentVisit,
