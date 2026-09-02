@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlertTriangle, X, ShieldAlert } from 'lucide-react';
 
 interface FoulModalProps {
@@ -27,19 +27,28 @@ export const FoulModal: React.FC<FoulModalProps> = ({
   const [isFreeBall, setIsFreeBall] = useState<boolean>(false);
   const [switchStriker, setSwitchStriker] = useState<boolean>(true);
 
+  // Sync recipient when modal opens or striker changes
+  useEffect(() => {
+    if (isOpen) {
+      setRecipientIndex(activeStrikerIndex === 0 ? 1 : 0);
+    }
+  }, [isOpen, activeStrikerIndex]);
+
   if (!isOpen) return null;
 
   const recipientName = recipientIndex === 0 ? player1Name : player2Name;
   const foulPlayerName = recipientIndex === 1 ? player1Name : player2Name;
 
   const handleApplyFoul = (points: number) => {
+    // 1. Close modal immediately
+    onClose();
+    // 2. Submit foul score & update match
     onSubmitFoul(points, {
       isFreeBall,
       switchStriker,
       recipientPlayerIndex: recipientIndex,
       note: `ฟาวล์ ${points} แต้ม (ให้ ${recipientName})`,
     });
-    onClose();
   };
 
   const handleCustomSubmit = () => {
