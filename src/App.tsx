@@ -20,6 +20,7 @@ export function App() {
   const [isKeypadGuideOpen, setIsKeypadGuideOpen] = useState<boolean>(false);
   const [isNewMatchModalOpen, setIsNewMatchModalOpen] = useState<boolean>(false);
   const [isFrameEndModalOpen, setIsFrameEndModalOpen] = useState<boolean>(false);
+  const [isFoulMode, setIsFoulMode] = useState<boolean>(false);
 
   // Active match state
   const [match, setMatch] = useState<Match>(() => {
@@ -497,6 +498,32 @@ export function App() {
       const key = e.key;
       const code = e.code;
 
+      // Minus key or F toggles Foul Mode
+      if (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') {
+        e.preventDefault();
+        setIsFoulMode(prev => !prev);
+        return;
+      }
+
+      // When Foul Mode is active: 4, 5, 6, 7 submit foul points
+      if (isFoulMode) {
+        if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ภ') {
+          handleSubmitFoul(4, { switchStriker: true, note: 'ฟาวล์ +4 แต้ม' });
+          setIsFoulMode(false);
+        } else if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') {
+          handleSubmitFoul(5, { switchStriker: true, note: 'ฟาวล์ +5 แต้ม' });
+          setIsFoulMode(false);
+        } else if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ุ') {
+          handleSubmitFoul(6, { switchStriker: true, note: 'ฟาวล์ +6 แต้ม' });
+          setIsFoulMode(false);
+        } else if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'ึ') {
+          handleSubmitFoul(7, { switchStriker: true, note: 'ฟาวล์ +7 แต้ม' });
+          setIsFoulMode(false);
+        }
+        return;
+      }
+
+      // Normal Potting Mode
       if (key === '1' || code === 'Digit1' || code === 'Numpad1' || key === 'ๅ') handlePotBall('red');
       else if (key === '2' || code === 'Digit2' || code === 'Numpad2' || key === '/') handlePotBall('yellow');
       else if (key === '3' || code === 'Digit3' || code === 'Numpad3' || key === '-') handlePotBall('green');
@@ -512,7 +539,7 @@ export function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isNewMatchModalOpen, isFrameEndModalOpen, isKeypadGuideOpen, handlePotBall, handleEndTurn, handleUndo]);
+  }, [isNewMatchModalOpen, isFrameEndModalOpen, isKeypadGuideOpen, isFoulMode, handlePotBall, handleSubmitFoul, handleEndTurn, handleUndo]);
 
   const handleNextFrame = () => {
     const p1Won = currentFrame.player1Score > currentFrame.player2Score;
@@ -648,8 +675,13 @@ export function App() {
             <BallPots
               redsRemaining={currentFrame.redsRemaining}
               currentVisitShots={currentVisitShots}
+              isFoulMode={isFoulMode}
+              onToggleFoulMode={() => setIsFoulMode(prev => !prev)}
               onPotBall={handlePotBall}
-              onFoul={(pts) => handleSubmitFoul(pts, { isFreeBall: false, switchStriker: true, note: `ฟาวล์ +${pts} แต้ม` })}
+              onFoul={(pts) => {
+                handleSubmitFoul(pts, { isFreeBall: false, switchStriker: true, note: `ฟาวล์ +${pts} แต้ม` });
+                setIsFoulMode(false);
+              }}
               onAddCustomPoints={handleAddCustomPoints}
               onEndTurn={handleEndTurn}
               onUndo={handleUndo}

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { AlertTriangle, RotateCcw, Shield, Undo2, Flag, Layers, Edit3, X } from 'lucide-react';
+import { AlertTriangle, RotateCcw, Shield, Undo2, Flag, Layers, Edit3 } from 'lucide-react';
 import { BallColor } from '../types/snooker';
 import { BALL_MAP } from '../utils/snookerRules';
 
 interface BallPotsProps {
   redsRemaining: number;
   currentVisitShots: any[];
+  isFoulMode: boolean;
+  onToggleFoulMode: () => void;
   onPotBall: (ball: BallColor) => void;
   onFoul: (points: number) => void;
   onAddCustomPoints: (points: number, label: string) => void;
@@ -19,6 +21,8 @@ interface BallPotsProps {
 export const BallPots: React.FC<BallPotsProps> = ({
   redsRemaining,
   currentVisitShots,
+  isFoulMode,
+  onToggleFoulMode,
   onPotBall,
   onFoul,
   onAddCustomPoints,
@@ -28,7 +32,6 @@ export const BallPots: React.FC<BallPotsProps> = ({
   onMultiRedPot,
   canUndo,
 }) => {
-  const [isFoulMode, setIsFoulMode] = useState<boolean>(false);
   const [showMultiRedModal, setShowMultiRedModal] = useState<boolean>(false);
   const [customPointsInput, setCustomPointsInput] = useState<string>('');
   const [showCustomPointsModal, setShowCustomPointsModal] = useState<boolean>(false);
@@ -43,11 +46,6 @@ export const BallPots: React.FC<BallPotsProps> = ({
       setCustomPointsInput('');
       setShowCustomPointsModal(false);
     }
-  };
-
-  const handleFoulBallSelect = (pts: number) => {
-    onFoul(pts);
-    setIsFoulMode(false);
   };
 
   return (
@@ -110,7 +108,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
                 key={ballKey}
                 onClick={() => {
                   if (isFoulMode) {
-                    handleFoulBallSelect(ball.points);
+                    onFoul(ball.points);
                   } else {
                     onPotBall(ballKey);
                   }
@@ -141,7 +139,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
       {/* Main Action Controls: Foul, Miss, Safety, Undo, End Frame */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
         <button
-          onClick={() => setIsFoulMode(prev => !prev)}
+          onClick={onToggleFoulMode}
           className={`flex items-center justify-center space-x-2 font-extrabold py-3 px-3 rounded-xl border transition-all cursor-pointer active:scale-98 shadow-md ${
             isFoulMode
               ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 ring-2 ring-rose-400 shadow-rose-950/60 animate-pulse'
@@ -151,15 +149,12 @@ export const BallPots: React.FC<BallPotsProps> = ({
           <AlertTriangle className="w-5 h-5 text-amber-300 flex-shrink-0" />
           <div className="text-left">
             <div className="text-xs sm:text-sm leading-tight">{isFoulMode ? 'ยกเลิกฟาวล์' : 'เสียฟาวล์'}</div>
-            <div className="text-[10px] text-rose-200 font-normal">{isFoulMode ? '[แตะเพื่อปิด]' : '[+] / [F]'}</div>
+            <div className="text-[10px] text-rose-200 font-normal">{isFoulMode ? '[แตะเพื่อปิด]' : '[-] / [F]'}</div>
           </div>
         </button>
 
         <button
-          onClick={() => {
-            setIsFoulMode(false);
-            onEndTurn('miss');
-          }}
+          onClick={() => onEndTurn('miss')}
           className="flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold py-3 px-3 rounded-xl border border-slate-700 shadow-md cursor-pointer active:scale-98 transition-all"
         >
           <RotateCcw className="w-5 h-5 text-amber-400 flex-shrink-0" />
@@ -170,10 +165,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
         </button>
 
         <button
-          onClick={() => {
-            setIsFoulMode(false);
-            onEndTurn('safety');
-          }}
+          onClick={() => onEndTurn('safety')}
           className="flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold py-3 px-3 rounded-xl border border-slate-700 shadow-md cursor-pointer active:scale-98 transition-all"
         >
           <Shield className="w-5 h-5 text-sky-400 flex-shrink-0" />
@@ -184,10 +176,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
         </button>
 
         <button
-          onClick={() => {
-            setIsFoulMode(false);
-            onUndo();
-          }}
+          onClick={onUndo}
           disabled={!canUndo}
           className={`flex items-center justify-center space-x-2 font-extrabold py-3 px-3 rounded-xl border transition-all cursor-pointer ${
             canUndo
@@ -203,10 +192,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
         </button>
 
         <button
-          onClick={() => {
-            setIsFoulMode(false);
-            onEndFrame();
-          }}
+          onClick={onEndFrame}
           className="col-span-2 sm:col-span-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-extrabold py-3 px-3 rounded-xl border border-amber-400 shadow-lg shadow-amber-950/50 cursor-pointer active:scale-98 transition-all"
         >
           <Flag className="w-5 h-5 text-slate-950 flex-shrink-0" />
