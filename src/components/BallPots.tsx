@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { AlertTriangle, RotateCcw, Shield, Undo2, Lock, Unlock, Flag, Layers, Edit3 } from 'lucide-react';
-import { BallType, BALLS, SHOT_TIMES } from '../types/snooker';
+import { BallColor } from '../types/snooker';
+import { BALLS, BALL_MAP } from '../utils/snookerRules';
 
 interface BallPotsProps {
   redsRemaining: number;
   currentVisitShots: any[];
   isScreenLocked: boolean;
   onToggleScreenLock: () => void;
-  onPotBall: (ball: BallType) => void;
+  onPotBall: (ball: BallColor) => void;
   onAddCustomPoints: (points: number, label: string) => void;
   onOpenFoulModal: () => void;
   onDirectFoul: (points: number) => void;
@@ -39,7 +40,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
 
   const pottedInVisit = currentVisitShots.filter(s => s.action === 'pot' && s.ballPotted);
 
-  const ballList: BallType[] = ['red', 'yellow', 'green', 'brown', 'blue', 'pink', 'black'];
+  const ballList: BallColor[] = ['red', 'yellow', 'green', 'brown', 'blue', 'pink', 'black'];
 
   const handleCustomPointsSubmit = () => {
     const pts = parseInt(customPointsInput, 10);
@@ -84,16 +85,14 @@ export const BallPots: React.FC<BallPotsProps> = ({
             <span className="text-xs text-slate-500 italic">ยังไม่มีลูกที่ตบลงในรอบนี้</span>
           ) : (
             pottedInVisit.map((s, idx) => {
-              const b = BALLS[s.ballPotted as BallType];
+              const b = BALL_MAP[s.ballPotted as BallColor];
+              if (!b) return null;
               return (
                 <div
                   key={s.id || idx}
-                  className="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-slate-950 border border-slate-700 shadow-sm text-xs font-bold"
+                  className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-slate-950 border border-slate-700 shadow-sm text-xs font-bold"
                 >
-                  <span
-                    className="w-3 h-3 rounded-full border border-white/30 flex-shrink-0"
-                    style={{ backgroundColor: b.colorHex }}
-                  />
+                  <span className={`w-3.5 h-3.5 rounded-full shadow-inner ${b.cssClass}`} />
                   <span className="text-slate-200">{b.nameTh}</span>
                   <span className="text-[10px] text-emerald-400 font-mono font-bold">+{b.points}</span>
                 </div>
@@ -121,7 +120,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
 
         <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
           {ballList.map((ballKey) => {
-            const ball = BALLS[ballKey];
+            const ball = BALL_MAP[ballKey];
             const isRed = ballKey === 'red';
             const isDisabled = isRed && redsRemaining === 0;
 
@@ -130,16 +129,11 @@ export const BallPots: React.FC<BallPotsProps> = ({
                 key={ballKey}
                 onClick={() => onPotBall(ballKey)}
                 disabled={isDisabled}
-                className={`group relative flex flex-col items-center justify-center py-2 sm:py-3 px-1 rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${
+                className={`group relative flex flex-col items-center justify-center py-2 sm:py-3 px-1 rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} ${
                   isDisabled
-                    ? 'opacity-30 cursor-not-allowed bg-slate-950 border-slate-800'
+                    ? 'opacity-30 cursor-not-allowed border-slate-800'
                     : 'hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5'
                 }`}
-                style={{
-                  backgroundColor: ball.colorHex,
-                  borderColor: isRed ? '#ef4444' : ballKey === 'black' ? '#475569' : ball.colorHex,
-                  color: ball.textColorHex,
-                }}
               >
                 <span className="font-mono font-black text-xl sm:text-2xl leading-none drop-shadow-md">
                   {ball.points}
