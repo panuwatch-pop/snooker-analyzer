@@ -73,12 +73,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
       </div>
 
       {/* Ball Potting Buttons - Restored original compact button sizing */}
-      <div className="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-xl space-y-2">
-        <div className="flex items-center justify-between text-xs text-slate-400 font-bold px-1">
-          <span>แตะลูกสนุ๊กเกอร์ที่ตบลง:</span>
-          <span className="text-rose-400">แดงเหลือ: <strong className="text-white font-mono text-sm">{redsRemaining}</strong> ลูก</span>
-        </div>
-
+      <div className="bg-slate-900/95 border border-slate-800 rounded-2xl p-2.5 sm:p-3.5 shadow-xl">
         <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
           {ballList.map((ballKey) => {
             const ball = BALL_MAP[ballKey];
