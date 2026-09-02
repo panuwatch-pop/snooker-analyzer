@@ -626,7 +626,6 @@ export function App() {
         currentFrameNumber={match.currentFrameIndex + 1}
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
-        onOpenKeypadGuide={() => setIsKeypadGuideOpen(true)}
         onNewMatch={() => setIsNewMatchModalOpen(true)}
       />
 

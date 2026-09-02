@@ -3,7 +3,6 @@ import {
   Trophy, 
   Volume2, 
   VolumeX, 
-  Keyboard, 
   PlusCircle, 
   BarChart3, 
   TableProperties, 
@@ -21,7 +20,6 @@ interface NavbarProps {
   currentFrameNumber: number;
   isMuted: boolean;
   onToggleMute: () => void;
-  onOpenKeypadGuide: () => void;
   onNewMatch: () => void;
 }
 
@@ -34,7 +32,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentFrameNumber,
   isMuted,
   onToggleMute,
-  onOpenKeypadGuide,
   onNewMatch,
 }) => {
   const isUnlimited = matchLengthType === 'unlimited' || bestOfFrames === 0;
@@ -110,23 +107,21 @@ export const Navbar: React.FC<NavbarProps> = ({
         </nav>
 
         <div className="flex items-center space-x-2">
+          {/* Mute / Unmute Button on Top */}
           <button
             onClick={onToggleMute}
-            title={isMuted ? 'เปิดเสียง' : 'ปิดเสียง'}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700 cursor-pointer"
+            title={isMuted ? 'เปิดเสียง (Sound Unmuted)' : 'ปิดเสียง (Sound Muted)'}
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition-all border font-semibold text-xs cursor-pointer shadow-sm ${
+              isMuted
+                ? 'bg-rose-950/80 text-rose-300 border-rose-700/80 hover:bg-rose-900'
+                : 'bg-emerald-950/80 text-emerald-300 border-emerald-700/80 hover:bg-emerald-900'
+            }`}
           >
             {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+            <span>{isMuted ? 'เปิดเสียง' : 'ปิดเสียง'}</span>
           </button>
 
-          <button
-            onClick={onOpenKeypadGuide}
-            title="คู่มือปุ่มคีย์บอร์ดไร้สาย / Numpad"
-            className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors border border-slate-700 text-xs font-semibold cursor-pointer"
-          >
-            <Keyboard className="w-4 h-4 text-amber-400" />
-            <span className="hidden sm:inline">คีย์บอร์ด</span>
-          </button>
-
+          {/* New Match Button */}
           <button
             onClick={onNewMatch}
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white transition-all text-xs md:text-sm font-bold shadow-md shadow-amber-600/20 cursor-pointer"
