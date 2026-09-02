@@ -34,9 +34,74 @@ export const FoulModal: React.FC<FoulModalProps> = ({
     }
   }, [isOpen]);
 
+  // Global window keydown listener inside modal so all keys (numpad/digit/enter/esc) work without requiring input focus
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleWindowKeyDown = (e: KeyboardEvent) => {
+      const key = e.key;
+      const code = e.code;
+
+      if (e.key === 'Escape' || code === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Enter' || code === 'Enter' || code === 'NumpadEnter') {
+        e.preventDefault();
+        const pts = Math.max(1, parseInt(pointsInput, 10) || 4);
+        onSubmitFoul(pts, {
+          isFreeBall,
+          switchStriker,
+          note: `ฟาวล์ ${pts} แต้ม`,
+        });
+        onClose();
+        return;
+      }
+
+      // If user presses digit keys (0-9, Numpad, or Thai digits)
+      const digitMap: Record<string, string> = {
+        '0': '0', '1': '1', '2': '2', '3': '3', '4': '4',
+        '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
+        'Digit0': '0', 'Digit1': '1', 'Digit2': '2', 'Digit3': '3', 'Digit4': '4',
+        'Digit5': '5', 'Digit6': '6', 'Digit7': '7', 'Digit8': '8', 'Digit9': '9',
+        'Numpad0': '0', 'Numpad1': '1', 'Numpad2': '2', 'Numpad3': '3', 'Numpad4': '4',
+        'Numpad5': '5', 'Numpad6': '6', 'Numpad7': '7', 'Numpad8': '8', 'Numpad9': '9',
+        'จ': '0', 'ๅ': '1', '/': '2', '-': '3', 'ภ': '4',
+        'ถ': '5', 'ุ': '6', 'ึ': '7', 'ค': '8', 'ต': '9',
+      };
+
+      const digit = digitMap[code] || digitMap[key];
+      if (digit !== undefined) {
+        // If target is not the input itself, append/replace
+        const target = e.target as HTMLElement;
+        if (target !== inputRef.current) {
+          e.preventDefault();
+          setPointsInput(prev => {
+            if (prev === '0' || prev === '4') return digit;
+            return prev + digit;
+          });
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleWindowKeyDown);
+    return () => window.removeEventListener('keydown', handleWindowKeyDown);
+  }, [isOpen, pointsInput, isFreeBall, switchStriker, onSubmitFoul, onClose]);
+
   if (!isOpen) return null;
 
   const currentPoints = parseInt(pointsInput, 10) || 0;
+
+  const handleConfirmWithPoints = (pts: number) => {
+    onSubmitFoul(pts, {
+      isFreeBall,
+      switchStriker,
+      note: `ฟาวล์ ${pts} แต้ม`,
+    });
+    onClose();
+  };
 
   const handleConfirm = () => {
     const pts = Math.max(1, parseInt(pointsInput, 10) || 4);
@@ -67,16 +132,6 @@ export const FoulModal: React.FC<FoulModalProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/[^0-9]/g, '');
     setPointsInput(val);
-  };
-
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleConfirm();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      onClose();
-    }
   };
 
   const quickPresets = [
@@ -129,7 +184,15 @@ export const FoulModal: React.FC<FoulModalProps> = ({
               pattern="[0-9]*"
               value={pointsInput}
               onChange={handleInputChange}
-              onKeyDown={handleInputKeyDown}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleConfirm();
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  onClose();
+                }
+              }}
               placeholder="ใส่ตัวเลขแต้มฟาวล์..."
               className="w-full bg-slate-950 border-2 border-rose-500/80 focus:border-rose-400 focus:ring-4 focus:ring-rose-500/20 text-white font-mono font-black text-3xl sm:text-4xl text-center py-2.5 px-4 rounded-xl outline-none shadow-inner tracking-wider"
             />
