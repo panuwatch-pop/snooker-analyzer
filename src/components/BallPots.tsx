@@ -150,66 +150,19 @@ export const BallPots: React.FC<BallPotsProps> = ({
         </div>
       </div>
 
-      {/* Direct Foul Quick Action Bar (1-Click Instant Foul) */}
-      <div className="bg-gradient-to-r from-rose-950/90 via-red-950/80 to-slate-900 border-2 border-rose-600/80 rounded-2xl p-2.5 sm:p-3 shadow-xl shadow-rose-950/40 space-y-2">
-        <div className="flex items-center justify-between text-xs font-extrabold text-white px-1">
-          <div className="flex items-center space-x-1.5 text-rose-300">
-            <AlertTriangle className="w-4 h-4 text-amber-300 flex-shrink-0 animate-pulse" />
-            <span>เสียฟาวล์ (แตะแต้มเพื่อให้คู่แข่งทันที 1 คลิก):</span>
+      {/* Main Action Controls: Foul, Miss, Safety, Undo, End Frame */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+        <button
+          onClick={onOpenFoulModal}
+          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-rose-700 to-red-800 hover:from-rose-600 hover:to-red-700 text-white font-extrabold py-3 px-3 rounded-xl border border-rose-600 shadow-lg shadow-rose-950/50 cursor-pointer active:scale-98 transition-all"
+        >
+          <AlertTriangle className="w-5 h-5 text-amber-300 flex-shrink-0" />
+          <div className="text-left">
+            <div className="text-xs sm:text-sm leading-tight">เสียฟาวล์</div>
+            <div className="text-[10px] text-rose-200 font-normal">[+] / [F]</div>
           </div>
-          <span className="text-[10px] text-amber-400 font-mono font-normal">[ปุ่มลัด: กด + หรือ F]</span>
-        </div>
+        </button>
 
-        <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-          <button
-            type="button"
-            onClick={() => onDirectFoul(4)}
-            className="py-2.5 sm:py-3 px-1.5 rounded-xl bg-gradient-to-b from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-black border border-rose-400 shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center"
-          >
-            <span className="font-mono text-xl sm:text-2xl leading-none">+4</span>
-            <span className="text-[9px] sm:text-[10px] text-rose-100 font-bold mt-0.5">ทั่วไป/แดง</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onDirectFoul(5)}
-            className="py-2.5 sm:py-3 px-1.5 rounded-xl bg-gradient-to-b from-blue-700 to-blue-800 hover:from-blue-600 hover:to-blue-700 text-white font-black border border-blue-400 shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center"
-          >
-            <span className="font-mono text-xl sm:text-2xl leading-none">+5</span>
-            <span className="text-[9px] sm:text-[10px] text-blue-100 font-bold mt-0.5">น้ำเงิน</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onDirectFoul(6)}
-            className="py-2.5 sm:py-3 px-1.5 rounded-xl bg-gradient-to-b from-pink-700 to-pink-800 hover:from-pink-600 hover:to-pink-700 text-white font-black border border-pink-400 shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center"
-          >
-            <span className="font-mono text-xl sm:text-2xl leading-none">+6</span>
-            <span className="text-[9px] sm:text-[10px] text-pink-100 font-bold mt-0.5">ชมพู</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onDirectFoul(7)}
-            className="py-2.5 sm:py-3 px-1.5 rounded-xl bg-gradient-to-b from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white font-black border border-slate-500 shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center"
-          >
-            <span className="font-mono text-xl sm:text-2xl leading-none">+7</span>
-            <span className="text-[9px] sm:text-[10px] text-slate-200 font-bold mt-0.5">ดำ</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onOpenFoulModal}
-            className="py-2.5 sm:py-3 px-1 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 font-bold border border-slate-700 shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center"
-          >
-            <Edit3 className="w-4 h-4 text-amber-400" />
-            <span className="text-[10px] text-slate-300 font-bold mt-0.5">ระบุแต้ม...</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Main Action Controls: Miss, Safety, Undo, End Frame */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <button
           onClick={() => onEndTurn('miss')}
           className="flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold py-3 px-3 rounded-xl border border-slate-700 shadow-md cursor-pointer active:scale-98 transition-all"
@@ -250,7 +203,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
 
         <button
           onClick={onEndFrame}
-          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-extrabold py-3 px-3 rounded-xl border border-amber-400 shadow-lg shadow-amber-950/50 cursor-pointer active:scale-98 transition-all"
+          className="col-span-2 sm:col-span-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-extrabold py-3 px-3 rounded-xl border border-amber-400 shadow-lg shadow-amber-950/50 cursor-pointer active:scale-98 transition-all"
         >
           <Flag className="w-5 h-5 text-slate-950 flex-shrink-0" />
           <div className="text-left text-slate-950">
