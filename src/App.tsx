@@ -334,7 +334,7 @@ export function App() {
     }
   };
 
-  const handleSubmitFoul = useCallback((points: number, options: { isFreeBall: boolean; switchStriker: boolean; note?: string }) => {
+  const handleSubmitFoul = useCallback((points: number, options: { isFreeBall: boolean; switchStriker: boolean; note?: string; recipientPlayerIndex?: 0 | 1 }) => {
     soundManager.playFoulSound();
     const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
     const shotNumber = (currentFrame.shots?.length || 0) + 1;
@@ -342,13 +342,18 @@ export function App() {
     let updatedShots = [...currentFrame.shots];
     let updatedVisits = [...currentFrame.visits];
 
+    const recipientIndex = options.recipientPlayerIndex !== undefined
+      ? options.recipientPlayerIndex
+      : (activeStrikerIndex === 0 ? 1 : 0);
+    const foulPlayerIndex = recipientIndex === 1 ? 0 : 1;
+
     // If current striker committed foul without scoring, opponent's previous defense was good
     if (ballsInCurrentVisit === 0 && updatedVisits.length > 0) {
       const prevVisit = updatedVisits[updatedVisits.length - 1];
-      if (prevVisit.playerIndex !== activeStrikerIndex) {
+      if (prevVisit.playerIndex !== foulPlayerIndex) {
         prevVisit.endedWithOpportunityGiven = false;
         for (let i = updatedShots.length - 1; i >= 0; i--) {
-          if (updatedShots[i].playerIndex !== activeStrikerIndex) {
+          if (updatedShots[i].playerIndex !== foulPlayerIndex) {
             updatedShots[i].concededOpportunity = false;
             updatedShots[i].notes = 'ป้องกันดี (อีกฝ่ายทำแต้มไม่ได้)';
             break;
@@ -362,7 +367,7 @@ export function App() {
       shotNumber,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
       shotTimeSec: duration,
-      playerIndex: activeStrikerIndex,
+      playerIndex: foulPlayerIndex,
       action: 'foul',
       points,
       redsRemainingBefore: currentFrame.redsRemaining,
@@ -380,7 +385,7 @@ export function App() {
     const allVisitShots = [...currentVisitShots, foulShot];
     const visitRecord: Visit = {
       visitNumber: currentVisitNumber,
-      playerIndex: activeStrikerIndex,
+      playerIndex: foulPlayerIndex,
       shots: allVisitShots,
       pointsScored: currentBreak,
       ballsPotted: ballsInCurrentVisit,
@@ -390,9 +395,9 @@ export function App() {
       endedWithOpportunityGiven: true,
     };
 
-    const newP1Score = activeStrikerIndex === 1 ? currentFrame.player1Score + points : currentFrame.player1Score;
-    const newP2Score = activeStrikerIndex === 0 ? currentFrame.player2Score + points : currentFrame.player2Score;
-    const nextStrikerIndex = (options.switchStriker ? (activeStrikerIndex === 0 ? 1 : 0) : activeStrikerIndex) as 0 | 1;
+    const newP1Score = recipientIndex === 0 ? currentFrame.player1Score + points : currentFrame.player1Score;
+    const newP2Score = recipientIndex === 1 ? currentFrame.player2Score + points : currentFrame.player2Score;
+    const nextStrikerIndex = (options.switchStriker ? (recipientIndex === 0 ? 0 : 1) : activeStrikerIndex) as 0 | 1;
 
     updatedShots.push(foulShot);
     updatedVisits.push(visitRecord);
@@ -412,7 +417,7 @@ export function App() {
     const newFrames = [...match.frames];
     newFrames[match.currentFrameIndex] = updatedFrame;
 
-    setMatch({ ...match, frames: newFrames });
+    setMatch(prev => ({ ...prev, frames: newFrames }));
     setActiveStrikerIndex(nextStrikerIndex);
     setCurrentBreak(0);
     setBallsInCurrentVisit(0);
@@ -701,8 +706,9 @@ export function App() {
         isOpen={isFoulModalOpen}
         onClose={() => setIsFoulModalOpen(false)}
         onSubmitFoul={handleSubmitFoul}
-        currentStrikerName={activeStrikerIndex === 0 ? match.player1Name : match.player2Name}
-        opponentName={activeStrikerIndex === 0 ? match.player2Name : match.player1Name}
+        activeStrikerIndex={activeStrikerIndex}
+        player1Name={match.player1Name}
+        player2Name={match.player2Name}
       />
 
       <KeypadGuide
