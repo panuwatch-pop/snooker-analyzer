@@ -172,8 +172,6 @@ export function App() {
 
   // Unconstrained Ball Potting
   const handlePotBall = useCallback((ball: BallColor) => {
-    if (isScreenLocked) return;
-
     const ballInfo = BALL_MAP[ball];
     const points = ballInfo.points;
     soundManager.playPotSound(points);
@@ -263,14 +261,12 @@ export function App() {
     currentBreak,
     currentFrame,
     currentVisitNumber,
-    isScreenLocked,
     match,
     shotStartTime,
   ]);
 
   // Add Direct Custom Points
   const handleAddCustomPoints = (points: number, label: string) => {
-    if (isScreenLocked) return;
     soundManager.playPotSound(points);
 
     const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
