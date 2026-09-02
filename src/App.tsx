@@ -20,7 +20,6 @@ export function App() {
   const [isKeypadGuideOpen, setIsKeypadGuideOpen] = useState<boolean>(false);
   const [isNewMatchModalOpen, setIsNewMatchModalOpen] = useState<boolean>(false);
   const [isFrameEndModalOpen, setIsFrameEndModalOpen] = useState<boolean>(false);
-  const [isScreenLocked, setIsScreenLocked] = useState<boolean>(false);
 
   // Active match state
   const [match, setMatch] = useState<Match>(() => {
@@ -512,7 +511,6 @@ export function App() {
       else if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === ' ' || code === 'Space' || key === 'Delete' || key === 'ใ') handleEndTurn('miss');
       else if (key === 's' || key === 'S' || code === 'KeyS' || key === 'ห') handleEndTurn('safety');
       else if (key === '*' || code === 'NumpadMultiply' || (e.ctrlKey && (key.toLowerCase() === 'z' || code === 'KeyZ'))) handleUndo();
-      else if (key === 'l' || key === 'L' || code === 'KeyL' || key === 'ส') setIsScreenLocked(prev => !prev);
       else if (key === 'e' || key === 'E' || code === 'KeyE' || key === 'ำ') setIsFrameEndModalOpen(true);
     };
 
@@ -655,8 +653,6 @@ export function App() {
             <BallPots
               redsRemaining={currentFrame.redsRemaining}
               currentVisitShots={currentVisitShots}
-              isScreenLocked={isScreenLocked}
-              onToggleScreenLock={() => setIsScreenLocked(prev => !prev)}
               onPotBall={handlePotBall}
               onAddCustomPoints={handleAddCustomPoints}
               onEndTurn={handleEndTurn}

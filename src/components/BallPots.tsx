@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { RotateCcw, Shield, Undo2, Lock, Unlock, Flag, Layers, Edit3 } from 'lucide-react';
+import { RotateCcw, Shield, Undo2, Flag, Layers, Edit3 } from 'lucide-react';
 import { BallColor } from '../types/snooker';
-import { BALLS, BALL_MAP } from '../utils/snookerRules';
+import { BALL_MAP } from '../utils/snookerRules';
 
 interface BallPotsProps {
   redsRemaining: number;
   currentVisitShots: any[];
-  isScreenLocked: boolean;
-  onToggleScreenLock: () => void;
   onPotBall: (ball: BallColor) => void;
   onAddCustomPoints: (points: number, label: string) => void;
   onEndTurn: (reason: 'miss' | 'safety') => void;
@@ -20,8 +18,6 @@ interface BallPotsProps {
 export const BallPots: React.FC<BallPotsProps> = ({
   redsRemaining,
   currentVisitShots,
-  isScreenLocked,
-  onToggleScreenLock,
   onPotBall,
   onAddCustomPoints,
   onEndTurn,
@@ -48,26 +44,6 @@ export const BallPots: React.FC<BallPotsProps> = ({
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-3 relative">
-      {/* Screen Lock Overlay */}
-      {isScreenLocked && (
-        <div className="absolute inset-0 z-30 bg-slate-950/90 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center space-y-3 p-6 border-2 border-amber-500/50 shadow-2xl">
-          <div className="w-16 h-16 rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-amber-400 animate-pulse">
-            <Lock className="w-8 h-8" />
-          </div>
-          <div className="text-center space-y-1">
-            <h3 className="text-xl font-black text-white">หน้าจอถูกล็อคอยู่ (Screen Locked)</h3>
-            <p className="text-xs text-slate-400">ป้องกันการเผลอกดโดนปุ่มคะแนนขณะถือหรือวางเครื่อง</p>
-          </div>
-          <button
-            onClick={onToggleScreenLock}
-            className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/30 flex items-center space-x-2 cursor-pointer transition-all active:scale-95"
-          >
-            <Unlock className="w-4 h-4" />
-            <span>แตะที่นี่เพื่อปลดล็อค (Unlock)</span>
-          </button>
-        </div>
-      )}
-
       {/* Potted Balls in Current Break */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-lg flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center space-x-2 text-xs font-bold text-slate-300">
@@ -95,25 +71,16 @@ export const BallPots: React.FC<BallPotsProps> = ({
             })
           )}
         </div>
-
-        <button
-          onClick={onToggleScreenLock}
-          className="text-xs text-slate-400 hover:text-white flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 cursor-pointer transition-colors"
-          title="ล็อคหน้าจอเพื่อป้องกันการเผลอกด"
-        >
-          <Lock className="w-3.5 h-3.5 text-amber-400" />
-          <span>ล็อคจอ</span>
-        </button>
       </div>
 
-      {/* Ball Potting Buttons */}
+      {/* Ball Potting Buttons - Larger 3D Spheres with Point Numbers Only */}
       <div className="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-xl space-y-2">
         <div className="flex items-center justify-between text-xs text-slate-400 font-bold px-1">
-          <span>แตะลูกสนุ๊กเกอร์ที่ตบลง:</span>
+          <span>แตะลูกที่ตบลง (แต้มบนลูก):</span>
           <span className="text-rose-400">แดงเหลือ: <strong className="text-white font-mono text-sm">{redsRemaining}</strong> ลูก</span>
         </div>
 
-        <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
+        <div className="grid grid-cols-7 gap-2 sm:gap-3.5">
           {ballList.map((ballKey) => {
             const ball = BALL_MAP[ballKey];
             const isRed = ballKey === 'red';
@@ -124,19 +91,20 @@ export const BallPots: React.FC<BallPotsProps> = ({
                 key={ballKey}
                 onClick={() => onPotBall(ballKey)}
                 disabled={isDisabled}
-                className={`group relative flex flex-col items-center justify-center py-2 sm:py-3 px-1 rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} ${
+                className={`group relative aspect-square w-full rounded-2xl sm:rounded-3xl flex items-center justify-center transition-all duration-150 cursor-pointer border active:scale-90 ${ball.cssClass} ${
                   isDisabled
-                    ? 'opacity-30 cursor-not-allowed border-slate-800'
-                    : 'hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5'
+                    ? 'opacity-25 cursor-not-allowed border-slate-800'
+                    : 'hover:brightness-115 hover:shadow-xl shadow-lg hover:-translate-y-1'
                 }`}
+                title={`ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
               >
-                <span className="font-mono font-black text-xl sm:text-2xl leading-none drop-shadow-md">
+                {/* 3D Ball point number centered inside the sphere */}
+                <span className="font-mono font-black text-2xl sm:text-3xl md:text-4xl leading-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] select-none">
                   {ball.points}
                 </span>
-                <span className="text-[10px] sm:text-xs font-bold leading-tight mt-0.5 opacity-90 truncate max-w-full">
-                  {ball.nameTh}
-                </span>
-                <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[8px] sm:text-[9px] font-mono font-bold px-1 rounded-full border border-slate-700 shadow">
+
+                {/* Keyboard Shortcut Hint Badge */}
+                <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[8px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full border border-slate-700 shadow-sm">
                   {ball.numpadKey}
                 </span>
               </button>
@@ -145,7 +113,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
         </div>
       </div>
 
-      {/* Main Action Controls: Miss, Safety, Undo, End Frame (No Foul Button) */}
+      {/* Main Action Controls: Miss, Safety, Undo, End Frame */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <button
           onClick={() => onEndTurn('miss')}
