@@ -9,7 +9,7 @@ interface ScoreboardProps {
   activeStrikerIndex: 0 | 1;
   currentBreak: number;
   ballsInCurrentVisit: number;
-  frame: Frame;
+  frame?: Frame;
   frameDurationFormatted: string;
   shotDurationSec: number;
   onSwitchStriker: () => void;
@@ -17,21 +17,27 @@ interface ScoreboardProps {
 }
 
 export const Scoreboard: React.FC<ScoreboardProps> = ({
-  player1Name,
-  player2Name,
-  activeStrikerIndex,
-  currentBreak,
-  ballsInCurrentVisit,
+  player1Name = 'ผู้เล่น 1',
+  player2Name = 'ผู้เล่น 2',
+  activeStrikerIndex = 0,
+  currentBreak = 0,
+  ballsInCurrentVisit = 0,
   frame,
-  frameDurationFormatted,
-  shotDurationSec,
+  frameDurationFormatted = '00:00',
+  shotDurationSec = 0,
   onSwitchStriker,
   onEndFrame,
 }) => {
-  const p1Score = frame.player1Score;
-  const p2Score = frame.player2Score;
+  const p1Score = frame?.player1Score ?? 0;
+  const p2Score = frame?.player2Score ?? 0;
+  const p1Frames = frame?.player1FramesWon ?? 0;
+  const p2Frames = frame?.player2FramesWon ?? 0;
+  const redsRemaining = frame?.redsRemaining ?? 15;
+  const p1HighBreak = frame?.stats?.[0]?.highestBreak ?? 0;
+  const p2HighBreak = frame?.stats?.[1]?.highestBreak ?? 0;
+
   const diff = Math.abs(p1Score - p2Score);
-  const remaining = calculateRemainingPoints(frame.redsRemaining, frame.shots);
+  const remaining = calculateRemainingPoints(redsRemaining, frame?.shots || []);
   const isSafeLead = diff > remaining;
   const snookersNeeded = calculateSnookersRequired(diff, remaining);
   const leaderName = p1Score >= p2Score ? player1Name : player2Name;
@@ -71,7 +77,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
                 </span>
               )}
               <div className="text-xs text-slate-400 font-semibold">
-                เบรกสูงสุด: <strong className="text-emerald-400 font-bold">{frame.stats[0]?.highestBreak || 0}</strong>
+                เบรกสูงสุด: <strong className="text-emerald-400 font-bold">{p1HighBreak}</strong>
               </div>
             </div>
           </div>
@@ -85,13 +91,13 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
                 <span>เฟรม</span>
               </div>
               <span className="text-3xl sm:text-4xl md:text-5xl font-black font-mono text-amber-300 leading-none mt-1">
-                {frame.player1FramesWon}
+                {p1Frames}
               </span>
             </div>
 
             {/* Giant Score on the RIGHT (Facing Player 2) */}
             <div className="flex-1 text-right">
-              <span className="text-8xl sm:text-9xl md:text-[9.5rem] font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] leading-none select-none inline-block">
+              <span className="text-7xl sm:text-8xl md:text-9xl font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] leading-none select-none inline-block">
                 {p1Score}
               </span>
             </div>
@@ -135,7 +141,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
                 </span>
               )}
               <div className="text-xs text-slate-400 font-semibold">
-                เบรกสูงสุด: <strong className="text-emerald-400 font-bold">{frame.stats[1]?.highestBreak || 0}</strong>
+                เบรกสูงสุด: <strong className="text-emerald-400 font-bold">{p2HighBreak}</strong>
               </div>
             </div>
 
@@ -153,7 +159,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
           <div className="my-2 py-1 flex items-center justify-between gap-3 sm:gap-5">
             {/* Giant Score on the LEFT (Facing Player 1) */}
             <div className="flex-1 text-left">
-              <span className="text-8xl sm:text-9xl md:text-[9.5rem] font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] leading-none select-none inline-block">
+              <span className="text-7xl sm:text-8xl md:text-9xl font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] leading-none select-none inline-block">
                 {p2Score}
               </span>
             </div>
@@ -165,7 +171,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
                 <span>เฟรม</span>
               </div>
               <span className="text-3xl sm:text-4xl md:text-5xl font-black font-mono text-amber-300 leading-none mt-1">
-                {frame.player2FramesWon}
+                {p2Frames}
               </span>
             </div>
           </div>
@@ -192,7 +198,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
         <div className="flex items-center space-x-2">
           <span className="text-slate-400">แดงบนโต๊ะ:</span>
           <span className="font-bold font-mono text-red-400 bg-red-950/80 border border-red-800 px-2.5 py-0.5 rounded-lg">
-            {frame.redsRemaining} ลูก
+            {redsRemaining} ลูก
           </span>
         </div>
 
