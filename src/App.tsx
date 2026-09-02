@@ -649,6 +649,7 @@ export function App() {
               redsRemaining={currentFrame.redsRemaining}
               currentVisitShots={currentVisitShots}
               onPotBall={handlePotBall}
+              onFoul={(pts) => handleSubmitFoul(pts, { isFreeBall: false, switchStriker: true, note: `ฟาวล์ +${pts} แต้ม` })}
               onAddCustomPoints={handleAddCustomPoints}
               onEndTurn={handleEndTurn}
               onUndo={handleUndo}
