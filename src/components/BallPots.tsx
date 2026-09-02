@@ -49,17 +49,17 @@ export const BallPots: React.FC<BallPotsProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-3 relative">
-      {/* Potted Balls in Current Break - Mini colored spheres with numbers only (No text) */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-lg flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center space-x-2 text-xs font-bold text-slate-300">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+    <div className="w-full max-w-7xl mx-auto space-y-2 sm:space-y-3 relative">
+      {/* Potted Balls in Current Break - Mini colored spheres with numbers only */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center space-x-1.5 text-[11px] sm:text-xs font-bold text-slate-300">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>ลูกที่ตบลงในเทิร์นนี้ ({pottedInVisit.length} ลูก):</span>
         </div>
 
-        <div className="flex items-center space-x-2 overflow-x-auto max-w-full py-1 px-1">
+        <div className="flex items-center space-x-1.5 overflow-x-auto max-w-full py-0.5 px-0.5">
           {pottedInVisit.length === 0 ? (
-            <span className="text-xs text-slate-500 italic">ยังไม่มีลูกที่ตบลงในรอบนี้</span>
+            <span className="text-[11px] sm:text-xs text-slate-500 italic">ยังไม่มีลูกที่ตบลงในรอบนี้</span>
           ) : (
             pottedInVisit.map((s, idx) => {
               const b = BALL_MAP[s.ballPotted as BallColor];
@@ -67,7 +67,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
               return (
                 <div
                   key={s.id || idx}
-                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-mono font-black text-xs sm:text-sm text-white shadow-md border border-white/30 select-none ${b.cssClass}`}
+                  className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-mono font-black text-[11px] sm:text-xs md:text-sm text-white shadow-md border border-white/30 select-none ${b.cssClass}`}
                   title={`ลูก${b.nameTh} (+${b.points})`}
                 >
                   <span className="drop-shadow-sm">{b.points}</span>
@@ -79,13 +79,13 @@ export const BallPots: React.FC<BallPotsProps> = ({
       </div>
 
       {/* Ball Potting / Foul Mode Panel */}
-      <div className={`rounded-2xl p-2.5 sm:p-3.5 shadow-xl transition-all border ${
+      <div className={`rounded-2xl p-2 sm:p-3 md:p-3.5 shadow-xl transition-all border ${
         isFoulMode
           ? 'bg-gradient-to-b from-rose-950/80 via-slate-900 to-slate-900 border-rose-500/80 ring-2 ring-rose-500/40'
           : 'bg-slate-900/95 border-slate-800'
       }`}>
-        {/* 7-Column Ball Grid (Same size in both normal and foul modes) */}
-        <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
+        {/* 7-Column Ball Grid (Responsive for all screen sizes) */}
+        <div className="grid grid-cols-7 gap-1 sm:gap-2 md:gap-2.5">
           {ballList.map((ballKey) => {
             const ball = BALL_MAP[ballKey];
             const isRed = ballKey === 'red';
@@ -96,7 +96,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
               return (
                 <div
                   key={ballKey}
-                  className="invisible pointer-events-none py-3 sm:py-4 px-1"
+                  className="invisible pointer-events-none py-2.5 sm:py-3.5 md:py-4 px-0.5"
                 />
               );
             }
@@ -114,7 +114,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
                   }
                 }}
                 disabled={isDisabled}
-                className={`group relative flex flex-col items-center justify-center py-3 sm:py-4 px-1 rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} ${
+                className={`group relative flex flex-col items-center justify-center py-2.5 sm:py-3.5 md:py-4 px-0.5 sm:px-1 rounded-xl sm:rounded-2xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} ${
                   isDisabled
                     ? 'opacity-30 cursor-not-allowed border-slate-800'
                     : 'hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5'
@@ -122,12 +122,12 @@ export const BallPots: React.FC<BallPotsProps> = ({
                 title={isFoulMode ? `เสียฟาวล์ ${ball.points} แต้ม` : `ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
               >
                 {/* Display -4, -5, -6, -7 in foul mode, or 1-7 in normal mode */}
-                <span className="font-mono font-black text-2xl sm:text-3xl leading-none drop-shadow-md select-none">
+                <span className="font-mono font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-none drop-shadow-md select-none">
                   {isFoulMode ? `-${ball.points}` : ball.points}
                 </span>
 
                 {/* Keyboard Shortcut Hint Badge */}
-                <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[8px] sm:text-[9px] font-mono font-bold px-1 rounded-full border border-slate-700 shadow">
+                <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[8px] sm:text-[9px] md:text-[10px] font-mono font-bold px-1 rounded-full border border-slate-700 shadow">
                   {ball.numpadKey}
                 </span>
               </button>
@@ -136,69 +136,69 @@ export const BallPots: React.FC<BallPotsProps> = ({
         </div>
       </div>
 
-      {/* Main Action Controls: Foul, Miss, Safety, Undo, End Frame */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+      {/* Main Action Controls: 5 Buttons in 1 Row (Responsive & Mobile-Ready) */}
+      <div className="grid grid-cols-5 gap-1 sm:gap-2 md:gap-2.5">
         <button
           onClick={onToggleFoulMode}
-          className={`flex items-center justify-center space-x-2 font-extrabold py-3 px-3 rounded-xl border transition-all cursor-pointer active:scale-98 shadow-md ${
+          className={`flex items-center justify-center space-x-1 sm:space-x-1.5 font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border transition-all cursor-pointer active:scale-98 shadow-md ${
             isFoulMode
               ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 ring-2 ring-rose-400 shadow-rose-950/60 animate-pulse'
               : 'bg-gradient-to-r from-rose-800 to-red-900 hover:from-rose-700 hover:to-red-800 text-white border-rose-700 shadow-rose-950/50'
           }`}
         >
-          <AlertTriangle className="w-5 h-5 text-amber-300 flex-shrink-0" />
-          <div className="text-left">
-            <div className="text-xs sm:text-sm leading-tight">{isFoulMode ? 'ยกเลิกฟาวล์' : 'เสียฟาวล์'}</div>
-            <div className="text-[10px] text-rose-200 font-normal">{isFoulMode ? '[แตะเพื่อปิด]' : '[-] / [F]'}</div>
+          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 flex-shrink-0" />
+          <div className="text-left min-w-0">
+            <div className="text-[11px] sm:text-xs md:text-sm leading-tight font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
+            <div className="text-[8px] sm:text-[9px] text-rose-200 font-normal hidden sm:block">[-] / [F]</div>
           </div>
         </button>
 
         <button
           onClick={() => onEndTurn('miss')}
-          className="flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold py-3 px-3 rounded-xl border border-slate-700 shadow-md cursor-pointer active:scale-98 transition-all"
+          className="flex items-center justify-center space-x-1 sm:space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border border-slate-700 shadow-md cursor-pointer active:scale-98 transition-all"
         >
-          <RotateCcw className="w-5 h-5 text-amber-400 flex-shrink-0" />
-          <div className="text-left">
-            <div className="text-xs sm:text-sm leading-tight">แทงพลาด</div>
-            <div className="text-[10px] text-slate-400 font-normal">[.] / [Space]</div>
+          <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 flex-shrink-0" />
+          <div className="text-left min-w-0">
+            <div className="text-[11px] sm:text-xs md:text-sm leading-tight font-black truncate">พลาด</div>
+            <div className="text-[8px] sm:text-[9px] text-slate-400 font-normal hidden sm:block">[.] / [Space]</div>
           </div>
         </button>
 
         <button
           onClick={() => onEndTurn('safety')}
-          className="flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold py-3 px-3 rounded-xl border border-slate-700 shadow-md cursor-pointer active:scale-98 transition-all"
+          className="flex items-center justify-center space-x-1 sm:space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border border-slate-700 shadow-md cursor-pointer active:scale-98 transition-all"
         >
-          <Shield className="w-5 h-5 text-sky-400 flex-shrink-0" />
-          <div className="text-left">
-            <div className="text-xs sm:text-sm leading-tight">กัน / เซฟตี้</div>
-            <div className="text-[10px] text-slate-400 font-normal">[S]</div>
+          <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-sky-400 flex-shrink-0" />
+          <div className="text-left min-w-0">
+            <div className="text-[11px] sm:text-xs md:text-sm leading-tight font-black truncate">กัน/เซฟ</div>
+            <div className="text-[8px] sm:text-[9px] text-slate-400 font-normal hidden sm:block">[S]</div>
           </div>
         </button>
 
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className={`flex items-center justify-center space-x-2 font-extrabold py-3 px-3 rounded-xl border transition-all cursor-pointer ${
+          className={`flex items-center justify-center space-x-1 sm:space-x-1.5 font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border transition-all cursor-pointer ${
             canUndo
               ? 'bg-amber-600 hover:bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-950/40 active:scale-98'
               : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed'
           }`}
         >
-          <Undo2 className="w-5 h-5 flex-shrink-0" />
-          <div className="text-left">
-            <div className="text-xs sm:text-sm leading-tight">ย้อนกลับ</div>
-            <div className="text-[10px] opacity-80 font-normal">[*] / [Ctrl+Z]</div>
+          <Undo2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+          <div className="text-left min-w-0">
+            <div className="text-[11px] sm:text-xs md:text-sm leading-tight font-black truncate">ย้อนกลับ</div>
+            <div className="text-[8px] sm:text-[9px] opacity-80 font-normal hidden sm:block">[*]</div>
           </div>
         </button>
 
         <button
           onClick={onEndFrame}
-          className="col-span-2 sm:col-span-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-extrabold py-3 px-3 rounded-xl border border-amber-400 shadow-lg shadow-amber-950/50 cursor-pointer active:scale-98 transition-all"
+          className="flex items-center justify-center space-x-1 sm:space-x-1.5 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border border-amber-400 shadow-lg shadow-amber-950/50 cursor-pointer active:scale-98 transition-all"
         >
-          <Flag className="w-5 h-5 text-slate-950 flex-shrink-0" />
-          <div className="text-left text-slate-950">
-            <div className="text-xs sm:text-sm font-black leading-tight">จบเฟรมนี้ 🏁</div>
-            <div className="text-[10px] font-bold opacity-90">ดูผู้ชนะ / ถัดไป</div>
+          <Flag className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950 flex-shrink-0" />
+          <div className="text-left text-slate-950 min-w-0">
+            <div className="text-[11px] sm:text-xs md:text-sm font-black leading-tight truncate">จบเฟรม</div>
+            <div className="text-[8px] sm:text-[9px] font-bold opacity-90 hidden sm:block">[E]</div>
           </div>
         </button>
       </div>
