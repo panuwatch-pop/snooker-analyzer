@@ -38,7 +38,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-3">
-      {/* Main Scoreboard Cards with Giant Scores & Adjacent Frame Box */}
+      {/* Main Scoreboard Cards with Centered Scores on Both Sides */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Player 1 Card */}
         <div
@@ -76,22 +76,22 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             </div>
           </div>
 
-          {/* Giant Score & Big Frame Box Side-by-Side */}
-          <div className="my-2 py-1 flex items-center justify-between gap-2 sm:gap-4">
-            {/* Giant Score filling the space */}
-            <div className="flex-1 text-left">
-              <span className="text-7xl sm:text-8xl md:text-9xl font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] leading-none select-none">
+          {/* Centered Giant Score & Positioned Frame Box */}
+          <div className="my-3 flex items-center justify-center relative w-full">
+            {/* Centered Giant Score */}
+            <div className="text-center w-full">
+              <span className="text-8xl sm:text-9xl md:text-[9.5rem] font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] leading-none select-none inline-block">
                 {p1Score}
               </span>
             </div>
 
-            {/* Big Frame Counter Box next to score */}
-            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/40 border-2 border-amber-400/80 rounded-2xl px-3 sm:px-5 py-2.5 sm:py-3 shadow-lg flex-shrink-0">
+            {/* Frame Counter Box on the right */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/50 border-2 border-amber-400/80 rounded-2xl px-2.5 sm:px-4 py-2 sm:py-3 shadow-lg flex-shrink-0">
               <div className="text-[10px] sm:text-xs text-amber-300 font-extrabold uppercase tracking-wider flex items-center space-x-1">
                 <Trophy className="w-3.5 h-3.5 text-amber-400" />
                 <span>เฟรม</span>
               </div>
-              <span className="text-3xl sm:text-4xl md:text-5xl font-black font-mono text-amber-300 leading-none mt-1">
+              <span className="text-2xl sm:text-3xl md:text-4xl font-black font-mono text-amber-300 leading-none mt-1">
                 {frame.player1FramesWon}
               </span>
             </div>
@@ -149,22 +149,22 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             </div>
           </div>
 
-          {/* Giant Score & Big Frame Box Side-by-Side */}
-          <div className="my-2 py-1 flex items-center justify-between gap-2 sm:gap-4">
-            {/* Giant Score filling the space */}
-            <div className="flex-1 text-left">
-              <span className="text-7xl sm:text-8xl md:text-9xl font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] leading-none select-none">
+          {/* Centered Giant Score & Positioned Frame Box */}
+          <div className="my-3 flex items-center justify-center relative w-full">
+            {/* Centered Giant Score */}
+            <div className="text-center w-full">
+              <span className="text-8xl sm:text-9xl md:text-[9.5rem] font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] leading-none select-none inline-block">
                 {p2Score}
               </span>
             </div>
 
-            {/* Big Frame Counter Box next to score */}
-            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/40 border-2 border-amber-400/80 rounded-2xl px-3 sm:px-5 py-2.5 sm:py-3 shadow-lg flex-shrink-0">
+            {/* Frame Counter Box on the right */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/50 border-2 border-amber-400/80 rounded-2xl px-2.5 sm:px-4 py-2 sm:py-3 shadow-lg flex-shrink-0">
               <div className="text-[10px] sm:text-xs text-amber-300 font-extrabold uppercase tracking-wider flex items-center space-x-1">
                 <Trophy className="w-3.5 h-3.5 text-amber-400" />
                 <span>เฟรม</span>
               </div>
-              <span className="text-3xl sm:text-4xl md:text-5xl font-black font-mono text-amber-300 leading-none mt-1">
+              <span className="text-2xl sm:text-3xl md:text-4xl font-black font-mono text-amber-300 leading-none mt-1">
                 {frame.player2FramesWon}
               </span>
             </div>
