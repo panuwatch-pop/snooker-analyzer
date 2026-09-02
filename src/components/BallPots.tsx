@@ -86,23 +86,6 @@ export const BallPots: React.FC<BallPotsProps> = ({
           ? 'bg-gradient-to-b from-rose-950/80 via-slate-900 to-slate-900 border-rose-500/80 ring-2 ring-rose-500/40'
           : 'bg-slate-900/95 border-slate-800'
       }`}>
-        {/* Foul Mode Header Bar */}
-        {isFoulMode && (
-          <div className="mb-2 px-2 py-1 rounded-xl bg-rose-950/90 border border-rose-600/80 flex items-center justify-between text-xs sm:text-sm font-black text-rose-200 animate-pulse">
-            <div className="flex items-center space-x-2">
-              <AlertTriangle className="w-4 h-4 text-amber-300 flex-shrink-0" />
-              <span>แตะลูกสีเพื่อเสียฟาวล์ (-4 ถึง -7 แต้มให้ฝ่ายตรงข้าม):</span>
-            </div>
-            <button
-              onClick={() => setIsFoulMode(false)}
-              className="flex items-center space-x-1 px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-              <span>ยกเลิก</span>
-            </button>
-          </div>
-        )}
-
         {/* 7-Column Ball Grid (Same size in both normal and foul modes) */}
         <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
           {ballList.map((ballKey) => {
