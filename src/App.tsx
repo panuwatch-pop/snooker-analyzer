@@ -3,7 +3,6 @@ import confetti from 'canvas-confetti';
 import { Navbar } from './components/Navbar';
 import { Scoreboard } from './components/Scoreboard';
 import { BallPots } from './components/BallPots';
-import { FoulModal } from './components/FoulModal';
 import { KeypadGuide } from './components/KeypadGuide';
 import { RawDataTab } from './components/RawDataTab';
 import { AnalyticsTab } from './components/AnalyticsTab';
@@ -19,7 +18,6 @@ export function App() {
   const [activeTab, setActiveTab] = useState<'scoreboard' | 'raw-data' | 'analytics' | 'history'>('scoreboard');
   const [isMuted, setIsMuted] = useState<boolean>(soundManager.isMuted());
   const [isKeypadGuideOpen, setIsKeypadGuideOpen] = useState<boolean>(false);
-  const [isFoulModalOpen, setIsFoulModalOpen] = useState<boolean>(false);
   const [isNewMatchModalOpen, setIsNewMatchModalOpen] = useState<boolean>(false);
   const [isFrameEndModalOpen, setIsFrameEndModalOpen] = useState<boolean>(false);
   const [isScreenLocked, setIsScreenLocked] = useState<boolean>(false);
@@ -662,8 +660,6 @@ export function App() {
               onToggleScreenLock={() => setIsScreenLocked(prev => !prev)}
               onPotBall={handlePotBall}
               onAddCustomPoints={handleAddCustomPoints}
-              onOpenFoulModal={() => setIsFoulModalOpen(true)}
-              onDirectFoul={handleDirectFoul}
               onEndTurn={handleEndTurn}
               onUndo={handleUndo}
               onEndFrame={() => setIsFrameEndModalOpen(true)}
@@ -685,17 +681,6 @@ export function App() {
           <HistoryTab onLoadMatch={(m) => setMatch(m)} />
         )}
       </main>
-
-      <FoulModal
-        isOpen={isFoulModalOpen}
-        onClose={() => setIsFoulModalOpen(false)}
-        onSubmitFoul={handleSubmitFoul}
-        activeStrikerIndex={activeStrikerIndex}
-        player1Name={match.player1Name}
-        player2Name={match.player2Name}
-        player1Score={currentFrame.player1Score}
-        player2Score={currentFrame.player2Score}
-      />
 
       <KeypadGuide
         isOpen={isKeypadGuideOpen}

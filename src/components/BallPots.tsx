@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, RotateCcw, Shield, Undo2, Lock, Unlock, Flag, Layers, Edit3 } from 'lucide-react';
+import { RotateCcw, Shield, Undo2, Lock, Unlock, Flag, Layers, Edit3 } from 'lucide-react';
 import { BallColor } from '../types/snooker';
 import { BALLS, BALL_MAP } from '../utils/snookerRules';
 
@@ -10,8 +10,6 @@ interface BallPotsProps {
   onToggleScreenLock: () => void;
   onPotBall: (ball: BallColor) => void;
   onAddCustomPoints: (points: number, label: string) => void;
-  onOpenFoulModal: () => void;
-  onDirectFoul: (points: number) => void;
   onEndTurn: (reason: 'miss' | 'safety') => void;
   onUndo: () => void;
   onEndFrame: () => void;
@@ -26,8 +24,6 @@ export const BallPots: React.FC<BallPotsProps> = ({
   onToggleScreenLock,
   onPotBall,
   onAddCustomPoints,
-  onOpenFoulModal,
-  onDirectFoul,
   onEndTurn,
   onUndo,
   onEndFrame,
@@ -39,7 +35,6 @@ export const BallPots: React.FC<BallPotsProps> = ({
   const [showCustomPointsModal, setShowCustomPointsModal] = useState<boolean>(false);
 
   const pottedInVisit = currentVisitShots.filter(s => s.action === 'pot' && s.ballPotted);
-
   const ballList: BallColor[] = ['red', 'yellow', 'green', 'brown', 'blue', 'pink', 'black'];
 
   const handleCustomPointsSubmit = () => {
@@ -150,19 +145,8 @@ export const BallPots: React.FC<BallPotsProps> = ({
         </div>
       </div>
 
-      {/* Main Action Controls: Foul, Miss, Safety, Undo, End Frame */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-        <button
-          onClick={onOpenFoulModal}
-          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-rose-700 to-red-800 hover:from-rose-600 hover:to-red-700 text-white font-extrabold py-3 px-3 rounded-xl border border-rose-600 shadow-lg shadow-rose-950/50 cursor-pointer active:scale-98 transition-all"
-        >
-          <AlertTriangle className="w-5 h-5 text-amber-300 flex-shrink-0" />
-          <div className="text-left">
-            <div className="text-xs sm:text-sm leading-tight">เสียฟาวล์</div>
-            <div className="text-[10px] text-rose-200 font-normal">[+] / [F]</div>
-          </div>
-        </button>
-
+      {/* Main Action Controls: Miss, Safety, Undo, End Frame (No Foul Button) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <button
           onClick={() => onEndTurn('miss')}
           className="flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold py-3 px-3 rounded-xl border border-slate-700 shadow-md cursor-pointer active:scale-98 transition-all"
@@ -203,7 +187,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
 
         <button
           onClick={onEndFrame}
-          className="col-span-2 sm:col-span-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-extrabold py-3 px-3 rounded-xl border border-amber-400 shadow-lg shadow-amber-950/50 cursor-pointer active:scale-98 transition-all"
+          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-extrabold py-3 px-3 rounded-xl border border-amber-400 shadow-lg shadow-amber-950/50 cursor-pointer active:scale-98 transition-all"
         >
           <Flag className="w-5 h-5 text-slate-950 flex-shrink-0" />
           <div className="text-left text-slate-950">
