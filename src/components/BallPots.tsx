@@ -34,8 +34,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
   const [showCustomPointsModal, setShowCustomPointsModal] = useState<boolean>(false);
 
   const pottedInVisit = currentVisitShots.filter(s => s.action === 'pot' && s.ballPotted);
-  const normalBallList: BallColor[] = ['red', 'yellow', 'green', 'brown', 'blue', 'pink', 'black'];
-  const foulBallList: BallColor[] = ['brown', 'blue', 'pink', 'black'];
+  const ballList: BallColor[] = ['red', 'yellow', 'green', 'brown', 'blue', 'pink', 'black'];
 
   const handleCustomPointsSubmit = () => {
     const pts = parseInt(customPointsInput, 10);
@@ -89,10 +88,10 @@ export const BallPots: React.FC<BallPotsProps> = ({
       }`}>
         {/* Foul Mode Header Bar */}
         {isFoulMode && (
-          <div className="mb-2.5 px-2 py-1.5 rounded-xl bg-rose-950/90 border border-rose-600/80 flex items-center justify-between text-xs sm:text-sm font-black text-rose-200 animate-pulse">
+          <div className="mb-2 px-2 py-1 rounded-xl bg-rose-950/90 border border-rose-600/80 flex items-center justify-between text-xs sm:text-sm font-black text-rose-200 animate-pulse">
             <div className="flex items-center space-x-2">
               <AlertTriangle className="w-4 h-4 text-amber-300 flex-shrink-0" />
-              <span>แตะลูกสีเพื่อเสียฟาวล์ (4 - 7 แต้มให้ฝ่ายตรงข้าม):</span>
+              <span>แตะลูกสีเพื่อเสียฟาวล์ (-4 ถึง -7 แต้มให้ฝ่ายตรงข้าม):</span>
             </div>
             <button
               onClick={() => setIsFoulMode(false)}
@@ -104,62 +103,56 @@ export const BallPots: React.FC<BallPotsProps> = ({
           </div>
         )}
 
-        {/* Balls Grid */}
-        {isFoulMode ? (
-          /* Foul Mode: Only Balls 4, 5, 6, 7 */
-          <div className="grid grid-cols-4 gap-2 sm:gap-3">
-            {foulBallList.map((ballKey) => {
-              const ball = BALL_MAP[ballKey];
-              return (
-                <button
-                  key={ballKey}
-                  onClick={() => handleFoulBallSelect(ball.points)}
-                  className={`group relative flex flex-col items-center justify-center py-3.5 sm:py-5 px-2 rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 hover:shadow-xl shadow-lg hover:-translate-y-0.5`}
-                >
-                  <span className="font-mono font-black text-3xl sm:text-4xl leading-none drop-shadow-md select-none">
-                    +{ball.points}
-                  </span>
-                  <span className="text-[10px] sm:text-xs font-bold text-white/90 mt-1">
-                    ฟาวล์ {ball.points} แต้ม
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          /* Normal Potting Mode: Balls 1 - 7 */
-          <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
-            {normalBallList.map((ballKey) => {
-              const ball = BALL_MAP[ballKey];
-              const isRed = ballKey === 'red';
-              const isDisabled = isRed && redsRemaining === 0;
+        {/* 7-Column Ball Grid (Same size in both normal and foul modes) */}
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
+          {ballList.map((ballKey) => {
+            const ball = BALL_MAP[ballKey];
+            const isRed = ballKey === 'red';
+            const isFoulTarget = ball.points >= 4;
 
+            // In Foul mode: hide balls 1, 2, 3 (Red, Yellow, Green)
+            if (isFoulMode && !isFoulTarget) {
               return (
-                <button
+                <div
                   key={ballKey}
-                  onClick={() => onPotBall(ballKey)}
-                  disabled={isDisabled}
-                  className={`group relative flex flex-col items-center justify-center py-3 sm:py-4 px-1 rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} ${
-                    isDisabled
-                      ? 'opacity-30 cursor-not-allowed border-slate-800'
-                      : 'hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5'
-                  }`}
-                  title={`ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
-                >
-                  {/* Clean Point number directly on the ball without name text */}
-                  <span className="font-mono font-black text-2xl sm:text-3xl leading-none drop-shadow-md select-none">
-                    {ball.points}
-                  </span>
-
-                  {/* Keyboard Shortcut Hint Badge */}
-                  <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[8px] sm:text-[9px] font-mono font-bold px-1 rounded-full border border-slate-700 shadow">
-                    {ball.numpadKey}
-                  </span>
-                </button>
+                  className="invisible pointer-events-none py-3 sm:py-4 px-1"
+                />
               );
-            })}
-          </div>
-        )}
+            }
+
+            const isDisabled = !isFoulMode && isRed && redsRemaining === 0;
+
+            return (
+              <button
+                key={ballKey}
+                onClick={() => {
+                  if (isFoulMode) {
+                    handleFoulBallSelect(ball.points);
+                  } else {
+                    onPotBall(ballKey);
+                  }
+                }}
+                disabled={isDisabled}
+                className={`group relative flex flex-col items-center justify-center py-3 sm:py-4 px-1 rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} ${
+                  isDisabled
+                    ? 'opacity-30 cursor-not-allowed border-slate-800'
+                    : 'hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5'
+                }`}
+                title={isFoulMode ? `เสียฟาวล์ ${ball.points} แต้ม` : `ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
+              >
+                {/* Display -4, -5, -6, -7 in foul mode, or 1-7 in normal mode */}
+                <span className="font-mono font-black text-2xl sm:text-3xl leading-none drop-shadow-md select-none">
+                  {isFoulMode ? `-${ball.points}` : ball.points}
+                </span>
+
+                {/* Keyboard Shortcut Hint Badge */}
+                <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[8px] sm:text-[9px] font-mono font-bold px-1 rounded-full border border-slate-700 shadow">
+                  {ball.numpadKey}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Main Action Controls: Foul, Miss, Safety, Undo, End Frame */}
