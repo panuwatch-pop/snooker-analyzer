@@ -38,14 +38,14 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-3">
-      {/* Main Scoreboard Cards with Adjacent Giant Points & Frames Underneath */}
+      {/* Main Scoreboard Cards with Giant Scores & Adjacent Frame Box */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {/* Player 1 Card (Score on Right) */}
+        {/* Player 1 Card */}
         <div
           onClick={onSwitchStriker}
-          className={`relative overflow-hidden rounded-2xl p-4 sm:p-5 transition-all duration-300 cursor-pointer border active:scale-[0.99] ${
+          className={`relative overflow-hidden rounded-2xl p-4 sm:p-5 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
             activeStrikerIndex === 0
-              ? 'bg-gradient-to-br from-slate-900 via-emerald-950/50 to-slate-900 border-emerald-500 ring-2 ring-emerald-500/50 shadow-2xl shadow-emerald-950/70'
+              ? 'bg-gradient-to-br from-slate-900 via-emerald-950/60 to-slate-900 border-emerald-500 ring-2 ring-emerald-500/50 shadow-2xl shadow-emerald-950/70'
               : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-90'
           }`}
         >
@@ -53,45 +53,53 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 animate-pulse" />
           )}
 
+          {/* Player Header */}
           <div className="flex items-center justify-between">
-            {/* Player Info (Left) */}
-            <div className="space-y-2 flex-1 min-w-0 pr-2">
-              <div className="flex items-center space-x-2">
-                <div className={`p-1.5 rounded-lg ${activeStrikerIndex === 0 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400'}`}>
-                  <User className="w-4 h-4" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight truncate">
-                  {player1Name}
-                </h3>
+            <div className="flex items-center space-x-2 min-w-0">
+              <div className={`p-1.5 rounded-lg ${activeStrikerIndex === 0 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400'}`}>
+                <User className="w-4 h-4" />
               </div>
-
-              <div className="flex items-center space-x-2">
-                {activeStrikerIndex === 0 && (
-                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-extrabold uppercase bg-emerald-500 text-slate-950 rounded-full animate-pulse">
-                    กำลังแทง
-                  </span>
-                )}
-                <div className="text-xs text-slate-400 font-semibold">
-                  เบรกสูงสุด: <strong className="text-emerald-400 font-bold">{frame.stats[0]?.highestBreak || 0}</strong>
-                </div>
-              </div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight truncate">
+                {player1Name}
+              </h3>
             </div>
 
-            {/* Giant Score & Frame Count Underneath (Right) */}
-            <div className="flex flex-col items-end flex-shrink-0 pl-2">
-              <div className="text-6xl sm:text-7xl md:text-8xl font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] leading-none">
-                {p1Score}
-              </div>
-              <div className="mt-1 bg-amber-500/20 border border-amber-400/60 px-2.5 py-0.5 rounded-lg flex items-center space-x-1 shadow-sm">
-                <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-[11px] text-amber-200 font-bold">เฟรม:</span>
-                <span className="text-sm sm:text-base font-black font-mono text-amber-300">{frame.player1FramesWon}</span>
+            <div className="flex items-center space-x-2">
+              {activeStrikerIndex === 0 && (
+                <span className="inline-flex items-center px-2.5 py-0.5 text-[11px] font-extrabold uppercase bg-emerald-500 text-slate-950 rounded-full animate-pulse shadow">
+                  กำลังแทง
+                </span>
+              )}
+              <div className="text-xs text-slate-400 font-semibold">
+                เบรกสูงสุด: <strong className="text-emerald-400 font-bold">{frame.stats[0]?.highestBreak || 0}</strong>
               </div>
             </div>
           </div>
 
+          {/* Giant Score & Big Frame Box Side-by-Side */}
+          <div className="my-2 py-1 flex items-center justify-between gap-2 sm:gap-4">
+            {/* Giant Score filling the space */}
+            <div className="flex-1 text-left">
+              <span className="text-7xl sm:text-8xl md:text-9xl font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] leading-none select-none">
+                {p1Score}
+              </span>
+            </div>
+
+            {/* Big Frame Counter Box next to score */}
+            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/40 border-2 border-amber-400/80 rounded-2xl px-3 sm:px-5 py-2.5 sm:py-3 shadow-lg flex-shrink-0">
+              <div className="text-[10px] sm:text-xs text-amber-300 font-extrabold uppercase tracking-wider flex items-center space-x-1">
+                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                <span>เฟรม</span>
+              </div>
+              <span className="text-3xl sm:text-4xl md:text-5xl font-black font-mono text-amber-300 leading-none mt-1">
+                {frame.player1FramesWon}
+              </span>
+            </div>
+          </div>
+
+          {/* Break & AST footer for active striker */}
           {activeStrikerIndex === 0 && (
-            <div className="mt-3 pt-2.5 border-t border-emerald-800/40 flex items-center justify-between text-xs font-bold">
+            <div className="pt-2.5 border-t border-emerald-800/40 flex items-center justify-between text-xs font-bold">
               <div className="flex items-center space-x-2 text-amber-400 bg-amber-950/50 border border-amber-700/50 px-2.5 py-1 rounded-lg">
                 <Flame className="w-4 h-4 text-amber-400 animate-bounce" />
                 <span>เบรกปัจจุบัน: <strong className="text-sm text-amber-300 font-mono">{currentBreak}</strong> แต้ม</span>
@@ -105,12 +113,12 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
           )}
         </div>
 
-        {/* Player 2 Card (Score on Left, Info on Right) */}
+        {/* Player 2 Card */}
         <div
           onClick={onSwitchStriker}
-          className={`relative overflow-hidden rounded-2xl p-4 sm:p-5 transition-all duration-300 cursor-pointer border active:scale-[0.99] ${
+          className={`relative overflow-hidden rounded-2xl p-4 sm:p-5 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
             activeStrikerIndex === 1
-              ? 'bg-gradient-to-br from-slate-900 via-emerald-950/50 to-slate-900 border-emerald-500 ring-2 ring-emerald-500/50 shadow-2xl shadow-emerald-950/70'
+              ? 'bg-gradient-to-br from-slate-900 via-emerald-950/60 to-slate-900 border-emerald-500 ring-2 ring-emerald-500/50 shadow-2xl shadow-emerald-950/70'
               : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-90'
           }`}
         >
@@ -118,45 +126,53 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 animate-pulse" />
           )}
 
+          {/* Player Header */}
           <div className="flex items-center justify-between">
-            {/* Giant Score & Frame Count Underneath (Left) */}
-            <div className="flex flex-col items-start flex-shrink-0 pr-2">
-              <div className="text-6xl sm:text-7xl md:text-8xl font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] leading-none">
-                {p2Score}
+            <div className="flex items-center space-x-2 min-w-0">
+              <div className={`p-1.5 rounded-lg ${activeStrikerIndex === 1 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400'}`}>
+                <User className="w-4 h-4" />
               </div>
-              <div className="mt-1 bg-amber-500/20 border border-amber-400/60 px-2.5 py-0.5 rounded-lg flex items-center space-x-1 shadow-sm">
-                <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-[11px] text-amber-200 font-bold">เฟรม:</span>
-                <span className="text-sm sm:text-base font-black font-mono text-amber-300">{frame.player2FramesWon}</span>
-              </div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight truncate">
+                {player2Name}
+              </h3>
             </div>
 
-            {/* Player Info (Right) */}
-            <div className="space-y-2 flex-1 min-w-0 pl-2 text-right">
-              <div className="flex items-center justify-end space-x-2">
-                <h3 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight truncate">
-                  {player2Name}
-                </h3>
-                <div className={`p-1.5 rounded-lg ${activeStrikerIndex === 1 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400'}`}>
-                  <User className="w-4 h-4" />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end space-x-2">
-                <div className="text-xs text-slate-400 font-semibold">
-                  เบรกสูงสุด: <strong className="text-emerald-400 font-bold">{frame.stats[1]?.highestBreak || 0}</strong>
-                </div>
-                {activeStrikerIndex === 1 && (
-                  <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-extrabold uppercase bg-emerald-500 text-slate-950 rounded-full animate-pulse">
-                    กำลังแทง
-                  </span>
-                )}
+            <div className="flex items-center space-x-2">
+              {activeStrikerIndex === 1 && (
+                <span className="inline-flex items-center px-2.5 py-0.5 text-[11px] font-extrabold uppercase bg-emerald-500 text-slate-950 rounded-full animate-pulse shadow">
+                  กำลังแทง
+                </span>
+              )}
+              <div className="text-xs text-slate-400 font-semibold">
+                เบรกสูงสุด: <strong className="text-emerald-400 font-bold">{frame.stats[1]?.highestBreak || 0}</strong>
               </div>
             </div>
           </div>
 
+          {/* Giant Score & Big Frame Box Side-by-Side */}
+          <div className="my-2 py-1 flex items-center justify-between gap-2 sm:gap-4">
+            {/* Giant Score filling the space */}
+            <div className="flex-1 text-left">
+              <span className="text-7xl sm:text-8xl md:text-9xl font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] leading-none select-none">
+                {p2Score}
+              </span>
+            </div>
+
+            {/* Big Frame Counter Box next to score */}
+            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/40 border-2 border-amber-400/80 rounded-2xl px-3 sm:px-5 py-2.5 sm:py-3 shadow-lg flex-shrink-0">
+              <div className="text-[10px] sm:text-xs text-amber-300 font-extrabold uppercase tracking-wider flex items-center space-x-1">
+                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                <span>เฟรม</span>
+              </div>
+              <span className="text-3xl sm:text-4xl md:text-5xl font-black font-mono text-amber-300 leading-none mt-1">
+                {frame.player2FramesWon}
+              </span>
+            </div>
+          </div>
+
+          {/* Break & AST footer for active striker */}
           {activeStrikerIndex === 1 && (
-            <div className="mt-3 pt-2.5 border-t border-emerald-800/40 flex items-center justify-between text-xs font-bold">
+            <div className="pt-2.5 border-t border-emerald-800/40 flex items-center justify-between text-xs font-bold">
               <div className="flex items-center space-x-1 text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-lg">
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
                 <span>ช็อตนี้: <strong className="text-amber-300 font-mono">{shotDurationSec}s</strong></span>
