@@ -71,6 +71,7 @@ export const FoulModal: React.FC<FoulModalProps> = ({
           <div className="flex items-center space-x-2 text-rose-400 font-black text-lg">
             <AlertTriangle className="w-6 h-6" />
             <span>เสียฟาวล์ (Foul Penalty)</span>
+            <span className="bg-amber-400 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full shadow">v2.5.0 LIVE</span>
           </div>
           <button
             type="button"
