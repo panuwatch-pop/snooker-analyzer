@@ -115,15 +115,18 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
               </div>
             )}
 
-            {/* Current Break in the MIDDLE (No word "เบรก", flame icon + bold number) */}
-            <div className={`flex flex-col items-center justify-center rounded-lg sm:rounded-2xl px-1.5 sm:px-3 py-1 sm:py-2.5 border transition-all flex-shrink-0 ${
+            {/* Current Break in the MIDDLE (Vibrant Neon Glow & High Contrast) */}
+            <div className={`flex flex-col items-center justify-center rounded-lg sm:rounded-2xl px-2 sm:px-3.5 py-1 sm:py-2.5 border-2 transition-all duration-200 flex-shrink-0 ${
               activeStrikerIndex === 0 && p1Break > 0
-                ? 'bg-gradient-to-b from-orange-500/30 to-amber-950/60 border-orange-400/80 shadow-md shadow-orange-950/50 scale-105'
-                : 'bg-slate-950/50 border-slate-800/80 opacity-60'
+                ? 'bg-gradient-to-b from-amber-500 via-orange-600 to-amber-700 text-white border-yellow-300 ring-2 ring-yellow-400/80 shadow-lg shadow-orange-500/60 scale-105 animate-pulse'
+                : 'bg-slate-950/70 border-slate-700/60 opacity-60'
             }`}>
-              <Flame className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${activeStrikerIndex === 0 && p1Break > 0 ? 'text-orange-400 animate-bounce' : 'text-slate-500'}`} />
-              <span className={`text-lg sm:text-3xl md:text-4xl lg:text-5xl font-black font-mono leading-none mt-0.5 ${
-                activeStrikerIndex === 0 && p1Break > 0 ? 'text-orange-300' : 'text-slate-500'
+              <div className="flex items-center space-x-0.5">
+                <Flame className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 ${activeStrikerIndex === 0 && p1Break > 0 ? 'text-yellow-200 fill-yellow-300 animate-bounce' : 'text-slate-500'}`} />
+                <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-wider ${activeStrikerIndex === 0 && p1Break > 0 ? 'text-yellow-100 drop-shadow' : 'text-slate-500'}`}>เบรก</span>
+              </div>
+              <span className={`text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black font-mono leading-none mt-0.5 ${
+                activeStrikerIndex === 0 && p1Break > 0 ? 'text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]' : 'text-slate-500'
               }`}>
                 {p1Break}
               </span>
@@ -196,15 +199,18 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
               </span>
             </div>
 
-            {/* Current Break in the MIDDLE (No word "เบรก", flame icon + bold number) */}
-            <div className={`flex flex-col items-center justify-center rounded-lg sm:rounded-2xl px-1.5 sm:px-3 py-1 sm:py-2.5 border transition-all flex-shrink-0 ${
+            {/* Current Break in the MIDDLE (Vibrant Neon Glow & High Contrast) */}
+            <div className={`flex flex-col items-center justify-center rounded-lg sm:rounded-2xl px-2 sm:px-3.5 py-1 sm:py-2.5 border-2 transition-all duration-200 flex-shrink-0 ${
               activeStrikerIndex === 1 && p2Break > 0
-                ? 'bg-gradient-to-b from-orange-500/30 to-amber-950/60 border-orange-400/80 shadow-md shadow-orange-950/50 scale-105'
-                : 'bg-slate-950/50 border-slate-800/80 opacity-60'
+                ? 'bg-gradient-to-b from-amber-500 via-orange-600 to-amber-700 text-white border-yellow-300 ring-2 ring-yellow-400/80 shadow-lg shadow-orange-500/60 scale-105 animate-pulse'
+                : 'bg-slate-950/70 border-slate-700/60 opacity-60'
             }`}>
-              <Flame className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${activeStrikerIndex === 1 && p2Break > 0 ? 'text-orange-400 animate-bounce' : 'text-slate-500'}`} />
-              <span className={`text-lg sm:text-3xl md:text-4xl lg:text-5xl font-black font-mono leading-none mt-0.5 ${
-                activeStrikerIndex === 1 && p2Break > 0 ? 'text-orange-300' : 'text-slate-500'
+              <div className="flex items-center space-x-0.5">
+                <Flame className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 ${activeStrikerIndex === 1 && p2Break > 0 ? 'text-yellow-200 fill-yellow-300 animate-bounce' : 'text-slate-500'}`} />
+                <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-wider ${activeStrikerIndex === 1 && p2Break > 0 ? 'text-yellow-100 drop-shadow' : 'text-slate-500'}`}>เบรก</span>
+              </div>
+              <span className={`text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black font-mono leading-none mt-0.5 ${
+                activeStrikerIndex === 1 && p2Break > 0 ? 'text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]' : 'text-slate-500'
               }`}>
                 {p2Break}
               </span>
