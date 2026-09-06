@@ -220,11 +220,12 @@ export const BallPots: React.FC<BallPotsProps> = ({
         )}
       </div>
 
-      {/* Main Action Controls (Responsive & Mobile-Ready) */}
-      <div className={`grid ${isGaMode ? 'grid-cols-6' : 'grid-cols-5'} gap-1 sm:gap-2 md:gap-2.5`}>
+      {/* Main Action Controls (Responsive & Mobile-Ready: Large Foul Button, Compact Secondary Buttons) */}
+      <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
+        {/* Foul Button - Keeps Full/Dominant Size */}
         <button
           onClick={onToggleFoulMode}
-          className={`flex items-center justify-center space-x-1 sm:space-x-1.5 font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border transition-all cursor-pointer active:scale-98 shadow-md ${
+          className={`flex-1.5 sm:flex-1.5 flex items-center justify-center space-x-1 sm:space-x-1.5 font-extrabold py-2.5 sm:py-3 px-1.5 sm:px-2.5 rounded-xl border transition-all cursor-pointer active:scale-98 shadow-md ${
             isFoulMode
               ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 ring-2 ring-rose-400 shadow-rose-950/60 animate-pulse'
               : 'bg-gradient-to-r from-rose-800 to-red-900 hover:from-rose-700 hover:to-red-800 text-white border-rose-700 shadow-rose-950/50'
@@ -232,7 +233,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
         >
           <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 flex-shrink-0" />
           <div className="text-left min-w-0">
-            <div className="text-[11px] sm:text-xs md:text-sm leading-tight font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
+            <div className="text-xs sm:text-sm md:text-base leading-tight font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
             <div className="text-[8px] sm:text-[9px] text-rose-200 font-normal hidden sm:block">[-] / [F]</div>
           </div>
         </button>
@@ -241,63 +242,67 @@ export const BallPots: React.FC<BallPotsProps> = ({
         {isGaMode && (
           <button
             onClick={() => setShowManualGaModal(true)}
-            className="flex items-center justify-center space-x-1 sm:space-x-1.5 bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border border-purple-500 shadow-md shadow-purple-950/50 cursor-pointer active:scale-98 transition-all"
+            className="flex-1 flex items-center justify-center space-x-0.5 sm:space-x-1 bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white font-extrabold py-2 sm:py-2.5 px-1 rounded-xl border border-purple-500 shadow-md shadow-purple-950/50 cursor-pointer active:scale-98 transition-all"
             title="เพิ่ม/ปรับจำนวนกาโดยตรง"
           >
-            <Target className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 flex-shrink-0" />
+            <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 flex-shrink-0" />
             <div className="text-left min-w-0">
-              <div className="text-[11px] sm:text-xs md:text-sm leading-tight font-black truncate">เพิ่มกา</div>
-              <div className="text-[8px] sm:text-[9px] text-purple-200 font-normal hidden sm:block">[+กา]</div>
+              <div className="text-[10px] sm:text-xs leading-tight font-black truncate">เพิ่มกา</div>
+              <div className="text-[7px] sm:text-[8px] text-purple-200 font-normal hidden sm:block">[+กา]</div>
             </div>
           </button>
         )}
 
+        {/* Miss Button - Compact */}
         <button
           onClick={() => onEndTurn('miss')}
-          className="flex items-center justify-center space-x-1 sm:space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border border-slate-700 shadow-md cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex items-center justify-center space-x-0.5 sm:space-x-1 bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-2 sm:py-2.5 px-1 rounded-xl border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
         >
-          <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 flex-shrink-0" />
+          <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
           <div className="text-left min-w-0">
-            <div className="text-[11px] sm:text-xs md:text-sm leading-tight font-black truncate">พลาด</div>
-            <div className="text-[8px] sm:text-[9px] text-slate-400 font-normal hidden sm:block">[.] / [Space]</div>
+            <div className="text-[10px] sm:text-xs leading-tight font-bold truncate">พลาด</div>
+            <div className="text-[7px] sm:text-[8px] text-slate-400 font-normal hidden sm:block">[.]</div>
           </div>
         </button>
 
+        {/* Safety Button - Compact */}
         <button
           onClick={() => onEndTurn('safety')}
-          className="flex items-center justify-center space-x-1 sm:space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border border-slate-700 shadow-md cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex items-center justify-center space-x-0.5 sm:space-x-1 bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-2 sm:py-2.5 px-1 rounded-xl border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
         >
-          <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-sky-400 flex-shrink-0" />
+          <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400 flex-shrink-0" />
           <div className="text-left min-w-0">
-            <div className="text-[11px] sm:text-xs md:text-sm leading-tight font-black truncate">กัน/เซฟ</div>
-            <div className="text-[8px] sm:text-[9px] text-slate-400 font-normal hidden sm:block">[S]</div>
+            <div className="text-[10px] sm:text-xs leading-tight font-bold truncate">กัน/เซฟ</div>
+            <div className="text-[7px] sm:text-[8px] text-slate-400 font-normal hidden sm:block">[S]</div>
           </div>
         </button>
 
+        {/* Undo Button - Compact */}
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className={`flex items-center justify-center space-x-1 sm:space-x-1.5 font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border transition-all cursor-pointer ${
+          className={`flex-1 flex items-center justify-center space-x-0.5 sm:space-x-1 font-bold py-2 sm:py-2.5 px-1 rounded-xl border transition-all cursor-pointer ${
             canUndo
-              ? 'bg-amber-600 hover:bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-950/40 active:scale-98'
+              ? 'bg-amber-600/90 hover:bg-amber-500 text-white border-amber-500 shadow-sm active:scale-98'
               : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed'
           }`}
         >
-          <Undo2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+          <Undo2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
           <div className="text-left min-w-0">
-            <div className="text-[11px] sm:text-xs md:text-sm leading-tight font-black truncate">ย้อนกลับ</div>
-            <div className="text-[8px] sm:text-[9px] opacity-80 font-normal hidden sm:block">[*]</div>
+            <div className="text-[10px] sm:text-xs leading-tight font-bold truncate">ย้อนกลับ</div>
+            <div className="text-[7px] sm:text-[8px] opacity-80 font-normal hidden sm:block">[*]</div>
           </div>
         </button>
 
+        {/* End Frame Button - Compact */}
         <button
           onClick={onEndFrame}
-          className="flex items-center justify-center space-x-1 sm:space-x-1.5 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border border-amber-400 shadow-lg shadow-amber-950/50 cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex items-center justify-center space-x-0.5 sm:space-x-1 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black py-2 sm:py-2.5 px-1 rounded-xl border border-amber-400 shadow-md shadow-amber-950/40 cursor-pointer active:scale-98 transition-all"
         >
-          <Flag className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950 flex-shrink-0" />
+          <Flag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-950 flex-shrink-0" />
           <div className="text-left text-slate-950 min-w-0">
-            <div className="text-[11px] sm:text-xs md:text-sm font-black leading-tight truncate">จบเฟรม</div>
-            <div className="text-[8px] sm:text-[9px] font-bold opacity-90 hidden sm:block">[E]</div>
+            <div className="text-[10px] sm:text-xs font-black leading-tight truncate">จบเฟรม</div>
+            <div className="text-[7px] sm:text-[8px] font-bold opacity-80 hidden sm:block">[E]</div>
           </div>
         </button>
       </div>

@@ -112,27 +112,18 @@ export const Navbar: React.FC<NavbarProps> = ({
         </nav>
 
         <div className="flex items-center space-x-2">
-          {/* Mute / Unmute Button on Top */}
+          {/* Mute / Unmute Button on Top (Top-right positioned) */}
           <button
             onClick={onToggleMute}
             title={isMuted ? 'เปิดเสียง (Sound Unmuted)' : 'ปิดเสียง (Sound Muted)'}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition-all border font-semibold text-xs cursor-pointer shadow-sm ${
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition-all border font-bold text-xs cursor-pointer shadow-sm ${
               isMuted
-                ? 'bg-rose-950/80 text-rose-300 border-rose-700/80 hover:bg-rose-900'
-                : 'bg-emerald-950/80 text-emerald-300 border-emerald-700/80 hover:bg-emerald-900'
+                ? 'bg-rose-950/90 text-rose-300 border-rose-700 hover:bg-rose-900 shadow-rose-950/40'
+                : 'bg-emerald-950/90 text-emerald-300 border-emerald-600 hover:bg-emerald-900 shadow-emerald-950/40'
             }`}
           >
-            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
-            <span>{isMuted ? 'เปิดเสียง' : 'ปิดเสียง'}</span>
-          </button>
-
-          {/* New Match Button */}
-          <button
-            onClick={onNewMatch}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white transition-all text-xs md:text-sm font-bold shadow-md shadow-amber-600/20 cursor-pointer"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>เริ่มแมตช์ใหม่</span>
+            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400 animate-pulse" />}
+            <span>{isMuted ? 'เปิดเสียง' : 'เสียงเปิดอยู่'}</span>
           </button>
         </div>
       </div>

@@ -780,6 +780,7 @@ export function App() {
               isGaMode={match.gameMode === 'snooker-ga'}
               onSwitchStriker={() => handleEndTurn('miss')}
               onEndFrame={() => setIsFrameEndModalOpen(true)}
+              onNewMatch={() => setIsNewMatchModalOpen(true)}
             />
 
             <BallPots
