@@ -765,9 +765,9 @@ export function App() {
         onNewMatch={() => setIsNewMatchModalOpen(true)}
       />
 
-      <main className="flex-1 p-1 sm:p-2 md:p-3 max-w-7xl w-full mx-auto flex flex-col space-y-1 sm:space-y-2 pb-3">
+      <main className="flex-1 p-1 xs:p-1.5 sm:p-2.5 md:p-4 max-w-7xl w-full mx-auto flex flex-col space-y-1 md:space-y-3 pb-2 md:pb-4">
         {activeTab === 'scoreboard' && (
-          <div className="flex-1 flex flex-col justify-between space-y-1 sm:space-y-1.5 animate-fadeIn">
+          <div className="flex-1 flex flex-col justify-between space-y-1 sm:space-y-1.5 md:space-y-3 animate-fadeIn">
             <Scoreboard
               player1Name={match.player1Name}
               player2Name={match.player2Name}
