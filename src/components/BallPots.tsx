@@ -101,8 +101,6 @@ export const BallPots: React.FC<BallPotsProps> = ({
               );
             }
 
-            const isDisabled = !isFoulMode && isRed && redsRemaining === 0;
-
             return (
               <button
                 key={ballKey}
@@ -113,12 +111,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
                     onPotBall(ballKey);
                   }
                 }}
-                disabled={isDisabled}
-                className={`group relative flex flex-col items-center justify-center py-2.5 sm:py-3.5 md:py-4 px-0.5 sm:px-1 rounded-xl sm:rounded-2xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} ${
-                  isDisabled
-                    ? 'opacity-30 cursor-not-allowed border-slate-800'
-                    : 'hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5'
-                }`}
+                className={`group relative flex flex-col items-center justify-center py-2.5 sm:py-3.5 md:py-4 px-0.5 sm:px-1 rounded-xl sm:rounded-2xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5`}
                 title={isFoulMode ? `เสียฟาวล์ ${ball.points} แต้ม` : `ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
               >
                 {/* Display -4, -5, -6, -7 in foul mode, or 1-7 in normal mode */}

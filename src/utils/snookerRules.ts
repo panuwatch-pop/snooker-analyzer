@@ -18,10 +18,13 @@ export const BALL_MAP: Record<BallColor, BallInfo> = BALLS.reduce((acc, b) => {
 export const FINAL_COLORS: BallColor[] = ['yellow', 'green', 'brown', 'blue', 'pink', 'black'];
 
 /**
- * Calculates remaining points on the table.
- * Standard Snooker table points calculation:
- * - If Reds remaining > 0: (Reds * 8) + 27 (+ 7 if currently on color after red)
- * - If 0 Reds remaining: Clears 6 colors in order (27 -> 25 -> 22 -> 18 -> 13 -> 7 -> 0)
+ * Calculates remaining points on the table accurately:
+ * - When Reds remaining > 0:
+ *   Table points = (Reds * 8) + 27.
+ *   If the VERY LAST shot was a pot of a red in the current ongoing visit (striker is currently on color), +7.
+ *   After any foul, miss, safety, or color pot, the table points is strictly (Reds * 8) + 27.
+ * - When 0 Reds remaining:
+ *   Clears 6 colors in order (Yellow 2 -> Green 3 -> Brown 4 -> Blue 5 -> Pink 6 -> Black 7 = 27 total).
  */
 export function calculateRemainingPoints(
   redsRemaining: number,
@@ -29,13 +32,21 @@ export function calculateRemainingPoints(
   _gameMode: GameMode = '15-reds'
 ): number {
   if (redsRemaining > 0) {
-    // Check if the last pot was a red (so striker is on color)
-    const lastPot = [...shots].reverse().find(s => s.action === 'pot');
-    const isCurrentlyOnColor = lastPot && lastPot.ballPotted === 'red';
+    const lastShot = shots.length > 0 ? shots[shots.length - 1] : null;
+    const isCurrentlyOnColor = lastShot?.action === 'pot' && lastShot?.ballPotted === 'red';
     return (redsRemaining * 8) + 27 + (isCurrentlyOnColor ? 7 : 0);
   }
 
-  // 0 reds remaining: Calculate remaining points based on which of the 6 colors are still on the table
+  // 0 reds remaining
+  const lastShot = shots.length > 0 ? shots[shots.length - 1] : null;
+  const isCurrentlyOnColorForLastRed = lastShot?.action === 'pot' && lastShot?.ballPotted === 'red';
+
+  if (isCurrentlyOnColorForLastRed) {
+    // Striker just potted the last red and is currently on the color (+7) + 27 final colors
+    return 34;
+  }
+
+  // Find index of the very last red pot
   let lastRedIndex = -1;
   for (let i = shots.length - 1; i >= 0; i--) {
     if (shots[i].action === 'pot' && shots[i].ballPotted === 'red') {
@@ -169,71 +180,59 @@ export function isBallLegal(ball: BallColor, legalTarget: LegalTarget, redsRemai
     return ball !== 'red';
   }
 
-  return ball === legalTarget;
+  if (legalTarget === 'yellow') return ball === 'yellow';
+  if (legalTarget === 'green') return ball === 'green';
+  if (legalTarget === 'brown') return ball === 'brown';
+  if (legalTarget === 'blue') return ball === 'blue';
+  if (legalTarget === 'pink') return ball === 'pink';
+  if (legalTarget === 'black') return ball === 'black';
+
+  return false;
 }
 
 /**
- * Calculate comprehensive player statistics for a player in a frame / match.
+ * Compute detailed analytics for a player from their shots and visits.
  */
 export function calculatePlayerStats(
-  shots: Shot[],
-  visits: Visit[],
+  allShots: Shot[],
+  allVisits: Visit[],
   playerIndex: 0 | 1,
   opponentShots: Shot[]
 ): PlayerStats {
-  const pShots = shots.filter(s => s.playerIndex === playerIndex);
-  const pVisits = visits.filter(v => v.playerIndex === playerIndex);
+  const playerShots = allShots.filter(s => s.playerIndex === playerIndex);
+  const playerVisits = allVisits.filter(v => v.playerIndex === playerIndex);
 
-  // 9.1 Total Points = Pots + Opponent fouls points conceded to this player
-  const potsPoints = pShots
-    .filter(s => s.action === 'pot')
-    .reduce((sum, s) => sum + s.points, 0);
-
-  const opponentFoulPoints = opponentShots
-    .filter(s => s.action === 'foul')
-    .reduce((sum, s) => sum + s.points, 0);
-
-  const totalPoints = potsPoints + opponentFoulPoints;
-
-  // 9.2 Potting Accuracy %
-  // Potted balls vs Total pot attempts
-  const potsPotted = pShots.filter(s => s.action === 'pot').length;
-  // Attempts = potted balls + misses/end-turns/fouls where player tried to pot
-  const nonPotAttempts = pShots.filter(s => s.action === 'miss' || s.action === 'foul' || s.action === 'end-turn').length;
-  const potsAttempted = potsPotted + (nonPotAttempts > 0 ? nonPotAttempts : (pVisits.length > 0 ? pVisits.length : 0));
+  const totalPoints = playerShots.reduce((sum, s) => sum + (s.action === 'pot' ? s.points : 0), 0);
+  const potsAttempted = playerShots.filter(s => s.action === 'pot' || s.action === 'miss' || s.isBreakAttempt).length;
+  const potsPotted = playerShots.filter(s => s.action === 'pot').length;
   const pottingAccuracy = potsAttempted > 0 ? (potsPotted / potsAttempted) * 100 : 0;
 
-  // 9.3 Break Rate % (Criteria: >= 2 balls potted in visit)
-  const totalVisits = pVisits.length;
-  const breakVisits = pVisits.filter(v => v.ballsPotted >= 2).length;
+  const totalVisits = playerVisits.length;
+  const breakVisits = playerVisits.filter(v => v.ballsPotted >= 2).length;
   const breakRate = totalVisits > 0 ? (breakVisits / totalVisits) * 100 : 0;
 
-  // Break Tiers Breakdown
   const breakTiers = {
-    twoToFourBalls: pVisits.filter(v => v.ballsPotted >= 2 && v.pointsScored < 20).length,
-    twentyPlus: pVisits.filter(v => v.pointsScored >= 20 && v.pointsScored < 50).length,
-    fiftyPlus: pVisits.filter(v => v.pointsScored >= 50 && v.pointsScored < 70).length,
-    seventyPlus: pVisits.filter(v => v.pointsScored >= 70 && v.pointsScored < 100).length,
-    centuryPlus: pVisits.filter(v => v.pointsScored >= 100).length,
+    twoToFourBalls: playerVisits.filter(v => v.ballsPotted >= 2 && v.ballsPotted <= 4 && v.pointsScored < 20).length,
+    twentyPlus: playerVisits.filter(v => v.pointsScored >= 20 && v.pointsScored < 50).length,
+    fiftyPlus: playerVisits.filter(v => v.pointsScored >= 50 && v.pointsScored < 70).length,
+    seventyPlus: playerVisits.filter(v => v.pointsScored >= 70 && v.pointsScored < 100).length,
+    centuryPlus: playerVisits.filter(v => v.pointsScored >= 100).length,
   };
 
-  // 9.8 Highest Break
-  const highestBreak = pVisits.reduce((max, v) => Math.max(max, v.pointsScored), 0);
+  const highestBreak = playerVisits.reduce((max, v) => Math.max(max, v.pointsScored), 0);
 
-  // 9.6 Fouls Count & Conceded Points
-  const fouls = pShots.filter(s => s.action === 'foul');
-  const foulsCount = fouls.length;
-  const foulPointsConceded = fouls.reduce((sum, s) => sum + s.points, 0);
+  const foulsCount = playerShots.filter(s => s.action === 'foul').length;
+  const foulPointsConceded = playerShots
+    .filter(s => s.action === 'foul')
+    .reduce((sum, s) => sum + s.points, 0);
   const foulRate = totalVisits > 0 ? (foulsCount / totalVisits) * 100 : 0;
 
-  // 9.7 Unforced Error / Opportunity Conceded %
-  // (Visits where player ended turn/missed/fouled and opponent scored on their next immediate shot)
-  const errorsConceded = pVisits.filter(v => v.endedWithOpportunityGiven).length;
+  // Errors conceded: visits that ended in a miss/foul and directly allowed opponent to pot
+  const errorsConceded = playerVisits.filter(v => v.endedWithOpportunityGiven).length;
   const errorRate = totalVisits > 0 ? (errorsConceded / totalVisits) * 100 : 0;
 
-  // 9.4 Average Shot Time (AST) in seconds
-  const totalShotTimeSec = pShots.reduce((sum, s) => sum + (s.shotTimeSec || 0), 0);
-  const averageShotTime = pShots.length > 0 ? totalShotTimeSec / pShots.length : 0;
+  const totalShotTimeSec = playerShots.reduce((sum, s) => sum + (s.shotTimeSec || 0), 0);
+  const averageShotTime = playerShots.length > 0 ? totalShotTimeSec / playerShots.length : 0;
 
   return {
     totalPoints,
@@ -298,7 +297,7 @@ export function createInitialFrame(
   };
 
   return {
-    id: 'frame-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    id: 'frame-' + Date.now(),
     frameNumber,
     startTime: Date.now(),
     durationSec: 0,
@@ -312,6 +311,6 @@ export function createInitialFrame(
     shots: [],
     visits: [],
     isCompleted: false,
-    stats: [ { ...emptyStats }, { ...emptyStats } ],
+    stats: [emptyStats, { ...emptyStats }],
   };
 }
