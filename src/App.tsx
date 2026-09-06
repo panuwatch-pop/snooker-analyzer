@@ -398,6 +398,22 @@ export function App() {
     const shouldSwitch = options?.switchStriker !== false;
     const gaPenalty = options?.gaPenalty || 0;
 
+    // Calculate Ga deduction and Ga given to opponent if not enough Ga to deduct
+    const currentFoulPlayerGa = foulPlayerIndex === 0 ? (currentFrame.player1Ga || 0) : (currentFrame.player2Ga || 0);
+    const gaDeducted = Math.min(currentFoulPlayerGa, gaPenalty);
+    const gaAwardedToOpponent = Math.max(0, gaPenalty - currentFoulPlayerGa);
+
+    let noteText = options?.note || `เสียฟาวล์ +${points} แต้ม`;
+    if (gaPenalty > 0) {
+      if (gaDeducted > 0 && gaAwardedToOpponent > 0) {
+        noteText += ` (หัก -${gaDeducted} กา, กาไม่พอให้คู่แข่ง +${gaAwardedToOpponent} กา)`;
+      } else if (gaAwardedToOpponent > 0) {
+        noteText += ` (ไม่มีกาให้หัก -> ให้คู่แข่ง +${gaAwardedToOpponent} กา)`;
+      } else {
+        noteText += ` (หัก -${gaDeducted} กา)`;
+      }
+    }
+
     const foulShot: Shot = {
       id: 'shot-' + Date.now(),
       shotNumber,
@@ -415,7 +431,9 @@ export function App() {
       visitBreakPoints: currentBreak,
       isBreakAttempt: true,
       gaPenalty: gaPenalty,
-      notes: options?.note || `เสียฟาวล์ +${points} แต้ม${gaPenalty > 0 ? ` (หัก -${gaPenalty} กา)` : ''}`,
+      gaDeducted: gaDeducted,
+      gaAwardedToOpponent: gaAwardedToOpponent,
+      notes: noteText,
       concededOpportunity: true,
     };
 
@@ -439,9 +457,15 @@ export function App() {
     const newP1Score = recipientIndex === 0 ? currentFrame.player1Score + points : currentFrame.player1Score;
     const newP2Score = recipientIndex === 1 ? currentFrame.player2Score + points : currentFrame.player2Score;
 
-    // Deduct Ga from the foul committing player (if gaPenalty > 0)
-    const newP1Ga = foulPlayerIndex === 0 ? Math.max(0, (currentFrame.player1Ga || 0) - gaPenalty) : (currentFrame.player1Ga || 0);
-    const newP2Ga = foulPlayerIndex === 1 ? Math.max(0, (currentFrame.player2Ga || 0) - gaPenalty) : (currentFrame.player2Ga || 0);
+    // Calculate new Ga for both players:
+    // Foul player loses gaDeducted, Recipient (opponent) gains gaAwardedToOpponent
+    const newP1Ga = foulPlayerIndex === 0
+      ? (currentFrame.player1Ga || 0) - gaDeducted
+      : (currentFrame.player1Ga || 0) + gaAwardedToOpponent;
+
+    const newP2Ga = foulPlayerIndex === 1
+      ? (currentFrame.player2Ga || 0) - gaDeducted
+      : (currentFrame.player2Ga || 0) + gaAwardedToOpponent;
 
     const nextStrikerIndex = (shouldSwitch ? (recipientIndex === 0 ? 0 : 1) : activeStrikerIndex) as 0 | 1;
 
@@ -452,8 +476,8 @@ export function App() {
       ...currentFrame,
       player1Score: newP1Score,
       player2Score: newP2Score,
-      player1Ga: newP1Ga,
-      player2Ga: newP2Ga,
+      player1Ga: Math.max(0, newP1Ga),
+      player2Ga: Math.max(0, newP2Ga),
       shots: updatedShots,
       visits: updatedVisits,
       stats: [p1Stats, p2Stats],
@@ -506,10 +530,14 @@ export function App() {
     } else if (lastShot.action === 'foul') {
       if (lastShot.playerIndex === 0) {
         newP2Score -= lastShot.points;
-        if (lastShot.gaPenalty) newP1Ga += lastShot.gaPenalty;
+        // P1 was foul committer: restore P1 deducted Ga, revert opponent P2 awarded Ga
+        if (lastShot.gaDeducted) newP1Ga += lastShot.gaDeducted;
+        if (lastShot.gaAwardedToOpponent) newP2Ga = Math.max(0, newP2Ga - lastShot.gaAwardedToOpponent);
       } else {
         newP1Score -= lastShot.points;
-        if (lastShot.gaPenalty) newP2Ga += lastShot.gaPenalty;
+        // P2 was foul committer: restore P2 deducted Ga, revert opponent P1 awarded Ga
+        if (lastShot.gaDeducted) newP2Ga += lastShot.gaDeducted;
+        if (lastShot.gaAwardedToOpponent) newP1Ga = Math.max(0, newP1Ga - lastShot.gaAwardedToOpponent);
       }
     }
 
@@ -549,9 +577,6 @@ export function App() {
       visits: newVisits,
       stats: [p1Stats, p2Stats],
     };
-
-    const newFrames = [...match.frames];
-    newFrames[match.currentFrameIndex] = updatedFrame;
 
     setMatch({ ...match, frames: newFrames });
     setActiveStrikerIndex(newStriker);

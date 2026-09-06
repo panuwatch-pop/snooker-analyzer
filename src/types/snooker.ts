@@ -53,6 +53,8 @@ export interface Shot {
   notes?: string;
   gaCount?: number;
   gaPenalty?: number;
+  gaDeducted?: number;
+  gaAwardedToOpponent?: number;
   pocket?: PocketLocation;
 }
 

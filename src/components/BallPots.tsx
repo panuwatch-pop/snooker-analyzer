@@ -127,30 +127,20 @@ export const BallPots: React.FC<BallPotsProps> = ({
       }`}>
         {/* If in Foul Mode & Ga Mode: Show Snooker Ga Dedicated Foul Selector */}
         {isFoulMode && isGaMode ? (
-          <div className="space-y-3 py-1 animate-fadeIn">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-rose-400">
-                <AlertTriangle className="w-5 h-5 text-rose-400 animate-pulse" />
-                <span className="text-sm sm:text-base font-black text-white">สนุ๊กกา: เสียฟาวล์ (-7 แต้ม)</span>
-              </div>
-              <span className="text-xs bg-rose-950 text-rose-300 px-2 py-0.5 rounded-full border border-rose-700 font-mono font-bold">
-                คู่แข่งได้ +7 แต้ม
-              </span>
-            </div>
-
-            {/* Ga deduction options */}
-            <div className="bg-slate-950/80 p-2.5 rounded-xl border border-rose-900/60 space-y-2">
+          <div className="space-y-2 py-0.5 animate-fadeIn">
+            {/* Compact Ga deduction options */}
+            <div className="bg-slate-950/80 p-2 sm:p-2.5 rounded-xl border border-rose-900/60 space-y-1.5">
               <div className="flex items-center justify-between text-xs text-slate-300 font-bold">
                 <span className="flex items-center space-x-1">
-                  <Target className="w-4 h-4 text-purple-400" />
-                  <span>หักกากับผู้เล่นที่ทำฟาวล์:</span>
+                  <Target className="w-3.5 h-3.5 text-purple-400" />
+                  <span>เลือกจำนวนกาที่เสีย:</span>
                 </span>
                 <span className="text-purple-300 font-mono font-black">
-                  {selectedGaPenalty > 0 ? `หัก -${selectedGaPenalty} กา` : 'ไม่เสียกา (0 กา)'}
+                  {selectedGaPenalty > 0 ? `-${selectedGaPenalty} กา (ไม่พอยกให้อีกฝ่าย)` : 'ไม่เสียกา (0 กา)'}
                 </span>
               </div>
 
-              <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-1 sm:gap-1.5">
                 {[0, 1, 2, 3, 4, 5, 6].map((ga) => (
                   <button
                     key={ga}
@@ -169,22 +159,24 @@ export const BallPots: React.FC<BallPotsProps> = ({
             </div>
 
             {/* Action Buttons for Submitting Ga Foul */}
-            <div className="flex space-x-2 pt-1">
+            <div className="flex space-x-2 pt-0.5">
               <button
+                type="button"
                 onClick={onToggleFoulMode}
-                className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs sm:text-sm border border-slate-700 cursor-pointer"
+                className="flex-1 py-2.5 sm:py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs sm:text-sm border border-slate-700 cursor-pointer"
               >
                 ยกเลิก
               </button>
               <button
+                type="button"
                 onClick={() => {
                   onFoul(7, selectedGaPenalty);
                   setSelectedGaPenalty(0);
                 }}
-                className="flex-2 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs sm:text-sm border border-rose-400 shadow-lg shadow-rose-950/60 cursor-pointer active:scale-98 flex items-center justify-center space-x-2"
+                className="flex-2 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs sm:text-sm border border-rose-400 shadow-lg shadow-rose-950/60 cursor-pointer active:scale-98 flex items-center justify-center space-x-1.5"
               >
-                <AlertTriangle className="w-4 h-4" />
-                <span>ยืนยันเสียฟาวล์ (-7 แต้ม {selectedGaPenalty > 0 ? `| -${selectedGaPenalty} กา` : ''})</span>
+                <AlertTriangle className="w-4 h-4 text-amber-300" />
+                <span>ยืนยันฟาวล์ {selectedGaPenalty > 0 ? `(-${selectedGaPenalty} กา)` : ''}</span>
               </button>
             </div>
           </div>
