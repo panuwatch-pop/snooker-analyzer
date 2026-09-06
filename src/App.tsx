@@ -752,7 +752,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
+    <div className="h-[100dvh] max-h-[100dvh] w-full bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white overflow-hidden">
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -765,9 +765,9 @@ export function App() {
         onNewMatch={() => setIsNewMatchModalOpen(true)}
       />
 
-      <main className="flex-1 p-1.5 sm:p-3 md:p-4 max-w-7xl w-full mx-auto space-y-2 sm:space-y-3">
+      <main className="flex-1 min-h-0 p-1 sm:p-2 md:p-3 max-w-7xl w-full mx-auto flex flex-col overflow-hidden">
         {activeTab === 'scoreboard' && (
-          <div className="space-y-2 sm:space-y-3 animate-fadeIn">
+          <div className="flex-1 min-h-0 flex flex-col justify-between space-y-1 sm:space-y-1.5 animate-fadeIn">
             <Scoreboard
               player1Name={match.player1Name}
               player2Name={match.player2Name}
@@ -805,15 +805,21 @@ export function App() {
         )}
 
         {activeTab === 'raw-data' && (
-          <RawDataTab currentMatch={match} currentFrame={currentFrame} />
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <RawDataTab currentMatch={match} currentFrame={currentFrame} />
+          </div>
         )}
 
         {activeTab === 'analytics' && (
-          <AnalyticsTab currentMatch={match} />
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <AnalyticsTab currentMatch={match} />
+          </div>
         )}
 
         {activeTab === 'history' && (
-          <HistoryTab onLoadMatch={(m) => setMatch(m)} />
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <HistoryTab onLoadMatch={(m) => setMatch(m)} />
+          </div>
         )}
       </main>
 
