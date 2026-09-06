@@ -578,6 +578,9 @@ export function App() {
       stats: [p1Stats, p2Stats],
     };
 
+    const newFrames = [...match.frames];
+    newFrames[match.currentFrameIndex] = updatedFrame;
+
     setMatch({ ...match, frames: newFrames });
     setActiveStrikerIndex(newStriker);
     setCurrentVisitShots(restoredVisitShots);
