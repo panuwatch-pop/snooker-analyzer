@@ -779,8 +779,6 @@ export function App() {
               shotDurationSec={shotDurationSec}
               isGaMode={match.gameMode === 'snooker-ga'}
               onSwitchStriker={() => handleEndTurn('miss')}
-              onEndFrame={() => setIsFrameEndModalOpen(true)}
-              onNewMatch={() => setIsNewMatchModalOpen(true)}
             />
 
             <BallPots
@@ -799,6 +797,7 @@ export function App() {
               onEndTurn={handleEndTurn}
               onUndo={handleUndo}
               onEndFrame={() => setIsFrameEndModalOpen(true)}
+              onNewMatch={() => setIsNewMatchModalOpen(true)}
               onMultiRedPot={handleMultiRedPot}
               canUndo={currentFrame.shots && currentFrame.shots.length > 0}
             />

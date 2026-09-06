@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, RotateCcw, Shield, Undo2, Flag, Layers, Edit3, Target, Plus, Minus } from 'lucide-react';
+import { AlertTriangle, RotateCcw, Shield, Undo2, Flag, Layers, Edit3, Target, Plus, Minus, Sparkles } from 'lucide-react';
 import { BallColor, PocketLocation } from '../types/snooker';
 import { BALL_MAP } from '../utils/snookerRules';
 import { SnookerTablePockets } from './SnookerTablePockets';
@@ -17,6 +17,7 @@ interface BallPotsProps {
   onEndTurn: (reason: 'miss' | 'safety') => void;
   onUndo: () => void;
   onEndFrame: () => void;
+  onNewMatch: () => void;
   onMultiRedPot: (count: number) => void;
   canUndo: boolean;
 }
@@ -34,6 +35,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
   onEndTurn,
   onUndo,
   onEndFrame,
+  onNewMatch,
   onMultiRedPot,
   canUndo,
 }) => {
@@ -289,6 +291,16 @@ export const BallPots: React.FC<BallPotsProps> = ({
         >
           <Flag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-950 flex-shrink-0" />
           <span className="text-[10px] sm:text-xs font-black leading-tight truncate mt-0.5">จบเฟรม</span>
+        </button>
+
+        {/* New Match Button Next to End Frame - Compact & Vibrant Neon */}
+        <button
+          onClick={onNewMatch}
+          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-black py-2 px-1 rounded-xl border-2 border-cyan-300 ring-2 ring-cyan-400/50 shadow-md shadow-cyan-950/50 cursor-pointer active:scale-98 transition-all"
+          title="เริ่มแมตช์ใหม่"
+        >
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-950 flex-shrink-0 animate-pulse" />
+          <span className="text-[10px] sm:text-xs font-black leading-tight truncate mt-0.5">เริ่มใหม่</span>
         </button>
       </div>
 

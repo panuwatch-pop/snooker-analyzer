@@ -14,8 +14,6 @@ interface ScoreboardProps {
   shotDurationSec: number;
   isGaMode?: boolean;
   onSwitchStriker: () => void;
-  onEndFrame: () => void;
-  onNewMatch: () => void;
 }
 
 export const Scoreboard: React.FC<ScoreboardProps> = ({
@@ -29,8 +27,6 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
   shotDurationSec = 0,
   isGaMode = false,
   onSwitchStriker,
-  onEndFrame,
-  onNewMatch,
 }) => {
   const p1Score = frame?.player1Score ?? 0;
   const p2Score = frame?.player2Score ?? 0;
@@ -296,28 +292,6 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400" />
             <span className="font-mono font-bold text-slate-200 text-xs sm:text-sm">{frameDurationFormatted}</span>
           </div>
-
-          {/* Direct End Frame Button */}
-          <button
-            type="button"
-            onClick={onEndFrame}
-            className="flex items-center space-x-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-extrabold text-[11px] sm:text-xs shadow-md shadow-amber-600/40 border border-amber-400/80 cursor-pointer active:scale-95 transition-all"
-            title="กดเพื่อจบเฟรมนี้และดูผลผู้ชนะ หรือเริ่มเฟรมถัดไป"
-          >
-            <Flag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-950" />
-            <span className="text-slate-950 font-black">จบเฟรม</span>
-          </button>
-
-          {/* New Match Button Next to End Frame (Prominent Neon Cyan/Teal Gradient) */}
-          <button
-            type="button"
-            onClick={onNewMatch}
-            className="flex items-center space-x-1 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-black text-[11px] sm:text-xs shadow-lg shadow-cyan-500/40 border-2 border-cyan-300 ring-2 ring-cyan-400/50 cursor-pointer active:scale-95 transition-all animate-pulse"
-            title="กดเพื่อเริ่มเซ็ตแมตช์ใหม่"
-          >
-            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-950" />
-            <span>เริ่มแมตช์ใหม่</span>
-          </button>
         </div>
       </div>
     </div>
