@@ -117,7 +117,7 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
                 }`}
               >
                 <span className="text-xs sm:text-sm font-black text-amber-200">🎯 สนุ๊กกา</span>
-                <span className="text-[10px] opacity-90 text-amber-300">นับแต้ม + สะสมกา</span>
+                <span className="text-[10px] opacity-90 text-amber-300">6 แดง + สะสมกา</span>
               </button>
             </div>
           </div>

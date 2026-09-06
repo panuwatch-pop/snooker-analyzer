@@ -319,7 +319,7 @@ export function createInitialFrame(
   isCompleted: boolean;
   stats: [PlayerStats, PlayerStats];
 } {
-  const redsRemaining = (gameMode === '15-reds' || gameMode === 'snooker-ga') ? 15 : 6;
+  const redsRemaining = gameMode === '15-reds' ? 15 : 6;
   const emptyStats: PlayerStats = {
     totalPoints: 0,
     potsAttempted: 0,
