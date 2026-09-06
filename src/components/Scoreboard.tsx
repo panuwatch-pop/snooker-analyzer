@@ -136,7 +136,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
             {/* Giant Score on the RIGHT (Facing Player 2) */}
             <div className="flex-1 text-right">
-              <span className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-white font-mono drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] leading-none select-none inline-block">
+              <span className="text-5xl sm:text-7xl md:text-9xl lg:text-[10rem] font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] leading-none select-none inline-block">
                 {p1Score}
               </span>
             </div>
@@ -196,7 +196,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
           <div className="my-1 sm:my-2 py-0.5 sm:py-1 flex items-center justify-between gap-1 sm:gap-2.5">
             {/* Giant Score on the LEFT (Facing Player 1) */}
             <div className="flex-1 text-left">
-              <span className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-white font-mono drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] leading-none select-none inline-block">
+              <span className="text-5xl sm:text-7xl md:text-9xl lg:text-[10rem] font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] leading-none select-none inline-block">
                 {p2Score}
               </span>
             </div>

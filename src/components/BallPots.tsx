@@ -220,21 +220,21 @@ export const BallPots: React.FC<BallPotsProps> = ({
         )}
       </div>
 
-      {/* Main Action Controls (Responsive & Mobile-Ready: Large Foul Button, Compact Secondary Buttons) */}
-      <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
-        {/* Foul Button - Keeps Full/Dominant Size */}
+      {/* Main Action Controls: Foul Button Large & Dominant, Other Buttons Compact */}
+      <div className="flex items-stretch gap-1 sm:gap-2">
+        {/* Foul Button - Large & Dominant (Original width & prominence) */}
         <button
           onClick={onToggleFoulMode}
-          className={`flex-1.5 sm:flex-1.5 flex items-center justify-center space-x-1 sm:space-x-1.5 font-extrabold py-2.5 sm:py-3 px-1.5 sm:px-2.5 rounded-xl border transition-all cursor-pointer active:scale-98 shadow-md ${
+          className={`w-28 sm:w-36 md:w-44 flex-shrink-0 flex items-center justify-center space-x-1.5 sm:space-x-2 font-extrabold py-3 sm:py-3.5 px-2 sm:px-3 rounded-xl sm:rounded-2xl border transition-all cursor-pointer active:scale-98 shadow-lg ${
             isFoulMode
-              ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 ring-2 ring-rose-400 shadow-rose-950/60 animate-pulse'
-              : 'bg-gradient-to-r from-rose-800 to-red-900 hover:from-rose-700 hover:to-red-800 text-white border-rose-700 shadow-rose-950/50'
+              ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 ring-4 ring-rose-500/50 shadow-rose-950/80 animate-pulse'
+              : 'bg-gradient-to-r from-rose-700 via-rose-800 to-red-900 hover:from-rose-600 hover:to-red-800 text-white border-rose-600 shadow-rose-950/60'
           }`}
         >
-          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 flex-shrink-0" />
+          <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-amber-300 flex-shrink-0 animate-bounce" />
           <div className="text-left min-w-0">
-            <div className="text-xs sm:text-sm md:text-base leading-tight font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
-            <div className="text-[8px] sm:text-[9px] text-rose-200 font-normal hidden sm:block">[-] / [F]</div>
+            <div className="text-sm sm:text-base md:text-lg leading-none font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
+            <div className="text-[9px] sm:text-[10px] text-rose-200 font-normal hidden xs:block mt-0.5">[-] / [F]</div>
           </div>
         </button>
 
@@ -242,68 +242,53 @@ export const BallPots: React.FC<BallPotsProps> = ({
         {isGaMode && (
           <button
             onClick={() => setShowManualGaModal(true)}
-            className="flex-1 flex items-center justify-center space-x-0.5 sm:space-x-1 bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white font-extrabold py-2 sm:py-2.5 px-1 rounded-xl border border-purple-500 shadow-md shadow-purple-950/50 cursor-pointer active:scale-98 transition-all"
+            className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white font-extrabold py-2 px-1 rounded-xl border border-purple-500 shadow-md shadow-purple-950/50 cursor-pointer active:scale-98 transition-all"
             title="เพิ่ม/ปรับจำนวนกาโดยตรง"
           >
             <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 flex-shrink-0" />
-            <div className="text-left min-w-0">
-              <div className="text-[10px] sm:text-xs leading-tight font-black truncate">เพิ่มกา</div>
-              <div className="text-[7px] sm:text-[8px] text-purple-200 font-normal hidden sm:block">[+กา]</div>
-            </div>
+            <span className="text-[10px] sm:text-xs leading-tight font-black truncate mt-0.5">เพิ่มกา</span>
           </button>
         )}
 
         {/* Miss Button - Compact */}
         <button
           onClick={() => onEndTurn('miss')}
-          className="flex-1 flex items-center justify-center space-x-0.5 sm:space-x-1 bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-2 sm:py-2.5 px-1 rounded-xl border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex flex-col items-center justify-center bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-2 px-1 rounded-xl border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
         >
           <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
-          <div className="text-left min-w-0">
-            <div className="text-[10px] sm:text-xs leading-tight font-bold truncate">พลาด</div>
-            <div className="text-[7px] sm:text-[8px] text-slate-400 font-normal hidden sm:block">[.]</div>
-          </div>
+          <span className="text-[10px] sm:text-xs leading-tight font-bold truncate mt-0.5">พลาด</span>
         </button>
 
         {/* Safety Button - Compact */}
         <button
           onClick={() => onEndTurn('safety')}
-          className="flex-1 flex items-center justify-center space-x-0.5 sm:space-x-1 bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-2 sm:py-2.5 px-1 rounded-xl border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex flex-col items-center justify-center bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-2 px-1 rounded-xl border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
         >
           <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400 flex-shrink-0" />
-          <div className="text-left min-w-0">
-            <div className="text-[10px] sm:text-xs leading-tight font-bold truncate">กัน/เซฟ</div>
-            <div className="text-[7px] sm:text-[8px] text-slate-400 font-normal hidden sm:block">[S]</div>
-          </div>
+          <span className="text-[10px] sm:text-xs leading-tight font-bold truncate mt-0.5">กัน/เซฟ</span>
         </button>
 
         {/* Undo Button - Compact */}
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className={`flex-1 flex items-center justify-center space-x-0.5 sm:space-x-1 font-bold py-2 sm:py-2.5 px-1 rounded-xl border transition-all cursor-pointer ${
+          className={`flex-1 flex flex-col items-center justify-center font-bold py-2 px-1 rounded-xl border transition-all cursor-pointer ${
             canUndo
               ? 'bg-amber-600/90 hover:bg-amber-500 text-white border-amber-500 shadow-sm active:scale-98'
               : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed'
           }`}
         >
           <Undo2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-          <div className="text-left min-w-0">
-            <div className="text-[10px] sm:text-xs leading-tight font-bold truncate">ย้อนกลับ</div>
-            <div className="text-[7px] sm:text-[8px] opacity-80 font-normal hidden sm:block">[*]</div>
-          </div>
+          <span className="text-[10px] sm:text-xs leading-tight font-bold truncate mt-0.5">ย้อนกลับ</span>
         </button>
 
         {/* End Frame Button - Compact */}
         <button
           onClick={onEndFrame}
-          className="flex-1 flex items-center justify-center space-x-0.5 sm:space-x-1 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black py-2 sm:py-2.5 px-1 rounded-xl border border-amber-400 shadow-md shadow-amber-950/40 cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black py-2 px-1 rounded-xl border border-amber-400 shadow-md shadow-amber-950/40 cursor-pointer active:scale-98 transition-all"
         >
           <Flag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-950 flex-shrink-0" />
-          <div className="text-left text-slate-950 min-w-0">
-            <div className="text-[10px] sm:text-xs font-black leading-tight truncate">จบเฟรม</div>
-            <div className="text-[7px] sm:text-[8px] font-bold opacity-80 hidden sm:block">[E]</div>
-          </div>
+          <span className="text-[10px] sm:text-xs font-black leading-tight truncate mt-0.5">จบเฟรม</span>
         </button>
       </div>
 
