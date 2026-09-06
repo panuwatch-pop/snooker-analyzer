@@ -1,4 +1,4 @@
-import { BallInfo, BallColor, LegalTarget, Shot, Visit, PlayerStats, GameMode } from '../types/snooker';
+import { BallInfo, BallColor, LegalTarget, Shot, Visit, PlayerStats, GameMode, PocketLocation } from '../types/snooker';
 
 export const BALLS: BallInfo[] = [
   { color: 'red', nameTh: 'ลูกแดง', nameEn: 'Red', points: 1, cssClass: 'ball-red', numpadKey: '1', regularKey: '1' },
@@ -16,6 +16,44 @@ export const BALL_MAP: Record<BallColor, BallInfo> = BALLS.reduce((acc, b) => {
 }, {} as Record<BallColor, BallInfo>);
 
 export const FINAL_COLORS: BallColor[] = ['yellow', 'green', 'brown', 'blue', 'pink', 'black'];
+
+/**
+ * Calculate "Ga" (กา) count according to Snooker Ga rules:
+ * - Yellow (เหลือง): Every pocket -> 2 Ga
+ * - Green (เขียว): Bottom pockets (หลุมล่าง) -> 1 Ga
+ * - Brown (น้ำตาล): Middle pockets (หลุมกลาง) -> 2 Ga
+ * - Blue (น้ำเงิน): Middle pockets (หลุมกลาง) -> 1 Ga
+ * - Pink (ชมพู): Top pockets (หลุมบน) -> 1 Ga
+ * - Black (ดำ): Every pocket -> 2 Ga
+ * - Red (แดง): 0 Ga
+ */
+export function calculateGaForPot(ball: BallColor, pocket?: PocketLocation): number {
+  if (ball === 'red') return 0;
+  if (ball === 'yellow') return 2;
+  if (ball === 'black') return 2;
+
+  if (!pocket || pocket === 'any') {
+    return 0;
+  }
+
+  if (ball === 'green') {
+    return (pocket === 'bottom-left' || pocket === 'bottom-right') ? 1 : 0;
+  }
+
+  if (ball === 'brown') {
+    return (pocket === 'middle-left' || pocket === 'middle-right') ? 2 : 0;
+  }
+
+  if (ball === 'blue') {
+    return (pocket === 'middle-left' || pocket === 'middle-right') ? 1 : 0;
+  }
+
+  if (ball === 'pink') {
+    return (pocket === 'top-left' || pocket === 'top-right') ? 1 : 0;
+  }
+
+  return 0;
+}
 
 /**
  * Calculates remaining points on the table accurately:
@@ -234,6 +272,8 @@ export function calculatePlayerStats(
   const totalShotTimeSec = playerShots.reduce((sum, s) => sum + (s.shotTimeSec || 0), 0);
   const averageShotTime = playerShots.length > 0 ? totalShotTimeSec / playerShots.length : 0;
 
+  const totalGa = playerShots.reduce((sum, s) => sum + (s.gaCount || 0), 0);
+
   return {
     totalPoints,
     potsAttempted,
@@ -251,6 +291,7 @@ export function calculatePlayerStats(
     errorRate: Math.round(errorRate * 10) / 10,
     totalShotTimeSec: Math.round(totalShotTimeSec),
     averageShotTime: Math.round(averageShotTime * 10) / 10,
+    totalGa,
   };
 }
 
@@ -268,6 +309,8 @@ export function createInitialFrame(
   player2Score: number;
   player1FramesWon: number;
   player2FramesWon: number;
+  player1Ga: number;
+  player2Ga: number;
   redsRemaining: number;
   legalTarget: LegalTarget;
   freeBallActive: boolean;
@@ -276,7 +319,7 @@ export function createInitialFrame(
   isCompleted: boolean;
   stats: [PlayerStats, PlayerStats];
 } {
-  const redsRemaining = gameMode === '15-reds' ? 15 : 6;
+  const redsRemaining = (gameMode === '15-reds' || gameMode === 'snooker-ga') ? 15 : 6;
   const emptyStats: PlayerStats = {
     totalPoints: 0,
     potsAttempted: 0,
@@ -294,6 +337,7 @@ export function createInitialFrame(
     errorRate: 0,
     totalShotTimeSec: 0,
     averageShotTime: 0,
+    totalGa: 0,
   };
 
   return {
@@ -305,6 +349,8 @@ export function createInitialFrame(
     player2Score: 0,
     player1FramesWon: p1FramesWon,
     player2FramesWon: p2FramesWon,
+    player1Ga: 0,
+    player2Ga: 0,
     redsRemaining,
     legalTarget: 'red',
     freeBallActive: false,

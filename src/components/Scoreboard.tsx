@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Flame, Clock, Sparkles, ShieldAlert, Flag, Trophy } from 'lucide-react';
+import { User, Flame, Clock, Sparkles, ShieldAlert, Flag, Trophy, Target } from 'lucide-react';
 import { Frame } from '../types/snooker';
 import { calculateRemainingPoints, calculateSnookersRequired } from '../utils/snookerRules';
 
@@ -12,6 +12,7 @@ interface ScoreboardProps {
   frame?: Frame;
   frameDurationFormatted: string;
   shotDurationSec: number;
+  isGaMode?: boolean;
   onSwitchStriker: () => void;
   onEndFrame: () => void;
 }
@@ -25,6 +26,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
   frame,
   frameDurationFormatted = '00:00',
   shotDurationSec = 0,
+  isGaMode = false,
   onSwitchStriker,
   onEndFrame,
 }) => {
@@ -32,6 +34,8 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
   const p2Score = frame?.player2Score ?? 0;
   const p1Frames = frame?.player1FramesWon ?? 0;
   const p2Frames = frame?.player2FramesWon ?? 0;
+  const p1Ga = frame?.player1Ga ?? 0;
+  const p2Ga = frame?.player2Ga ?? 0;
   const redsRemaining = frame?.redsRemaining ?? 15;
   const p1HighBreak = frame?.stats?.[0]?.highestBreak ?? 0;
   const p2HighBreak = frame?.stats?.[1]?.highestBreak ?? 0;
@@ -49,7 +53,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
     <div className="w-full max-w-7xl mx-auto space-y-1.5 sm:space-y-3">
       {/* Main Scoreboard: ALWAYS 2 COLUMNS (Left-Right Side by Side on Mobile and Desktop) */}
       <div className="grid grid-cols-2 gap-1.5 sm:gap-3">
-        {/* Player 1 Card (Left Card: Frame -> Break -> Score) */}
+        {/* Player 1 Card (Left Card: Frame -> [Ga] -> Break -> Score) */}
         <div
           onClick={onSwitchStriker}
           className={`relative overflow-hidden rounded-xl sm:rounded-2xl p-2 sm:p-4 md:p-5 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
@@ -85,10 +89,10 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             </div>
           </div>
 
-          {/* Player 1 Middle: Frame on Left -> Break in Middle -> Giant Score on Right (Facing P2) */}
-          <div className="my-1 sm:my-2 py-0.5 sm:py-1 flex items-center justify-between gap-1 sm:gap-3">
+          {/* Player 1 Middle: Frame on Left -> [Ga] -> Break in Middle -> Giant Score on Right (Facing P2) */}
+          <div className="my-1 sm:my-2 py-0.5 sm:py-1 flex items-center justify-between gap-1 sm:gap-2.5">
             {/* Frame Box on the LEFT */}
-            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/50 border border-amber-400/80 rounded-lg sm:rounded-2xl px-1.5 sm:px-3.5 py-1 sm:py-2.5 shadow-md flex-shrink-0">
+            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/50 border border-amber-400/80 rounded-lg sm:rounded-2xl px-1.5 sm:px-3 py-1 sm:py-2.5 shadow-md flex-shrink-0">
               <div className="text-[8px] sm:text-xs text-amber-300 font-extrabold uppercase tracking-wider flex items-center space-x-0.5">
                 <Trophy className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-amber-400" />
                 <span>เฟรม</span>
@@ -98,8 +102,21 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
               </span>
             </div>
 
+            {/* Ga Box (Shown in Snooker Ga mode) */}
+            {isGaMode && (
+              <div className="flex flex-col items-center justify-center bg-gradient-to-b from-purple-500/25 to-purple-950/50 border-2 border-purple-400/80 rounded-lg sm:rounded-2xl px-1.5 sm:px-3 py-1 sm:py-2.5 shadow-md flex-shrink-0 animate-pulse">
+                <div className="text-[8px] sm:text-xs text-purple-300 font-extrabold uppercase tracking-wider flex items-center space-x-0.5">
+                  <Target className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-purple-400" />
+                  <span>กา</span>
+                </div>
+                <span className="text-lg sm:text-3xl md:text-4xl lg:text-5xl font-black font-mono text-purple-300 leading-none mt-0.5">
+                  {p1Ga}
+                </span>
+              </div>
+            )}
+
             {/* Current Break in the MIDDLE (No word "เบรก", flame icon + bold number) */}
-            <div className={`flex flex-col items-center justify-center rounded-lg sm:rounded-2xl px-1.5 sm:px-3.5 py-1 sm:py-2.5 border transition-all flex-shrink-0 ${
+            <div className={`flex flex-col items-center justify-center rounded-lg sm:rounded-2xl px-1.5 sm:px-3 py-1 sm:py-2.5 border transition-all flex-shrink-0 ${
               activeStrikerIndex === 0 && p1Break > 0
                 ? 'bg-gradient-to-b from-orange-500/30 to-amber-950/60 border-orange-400/80 shadow-md shadow-orange-950/50 scale-105'
                 : 'bg-slate-950/50 border-slate-800/80 opacity-60'
@@ -134,7 +151,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
           )}
         </div>
 
-        {/* Player 2 Card (Right Card: Score -> Break -> Frame) */}
+        {/* Player 2 Card (Right Card: Score -> Break -> [Ga] -> Frame) */}
         <div
           onClick={onSwitchStriker}
           className={`relative overflow-hidden rounded-xl sm:rounded-2xl p-2 sm:p-4 md:p-5 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
@@ -170,8 +187,8 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             </div>
           </div>
 
-          {/* Player 2 Middle: Giant Score on Left (Facing P1) -> Break in Middle -> Frame on Right */}
-          <div className="my-1 sm:my-2 py-0.5 sm:py-1 flex items-center justify-between gap-1 sm:gap-3">
+          {/* Player 2 Middle: Giant Score on Left (Facing P1) -> Break in Middle -> [Ga] -> Frame on Right */}
+          <div className="my-1 sm:my-2 py-0.5 sm:py-1 flex items-center justify-between gap-1 sm:gap-2.5">
             {/* Giant Score on the LEFT (Facing Player 1) */}
             <div className="flex-1 text-left">
               <span className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-white font-mono drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] leading-none select-none inline-block">
@@ -180,7 +197,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             </div>
 
             {/* Current Break in the MIDDLE (No word "เบรก", flame icon + bold number) */}
-            <div className={`flex flex-col items-center justify-center rounded-lg sm:rounded-2xl px-1.5 sm:px-3.5 py-1 sm:py-2.5 border transition-all flex-shrink-0 ${
+            <div className={`flex flex-col items-center justify-center rounded-lg sm:rounded-2xl px-1.5 sm:px-3 py-1 sm:py-2.5 border transition-all flex-shrink-0 ${
               activeStrikerIndex === 1 && p2Break > 0
                 ? 'bg-gradient-to-b from-orange-500/30 to-amber-950/60 border-orange-400/80 shadow-md shadow-orange-950/50 scale-105'
                 : 'bg-slate-950/50 border-slate-800/80 opacity-60'
@@ -193,8 +210,21 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
               </span>
             </div>
 
+            {/* Ga Box (Shown in Snooker Ga mode) */}
+            {isGaMode && (
+              <div className="flex flex-col items-center justify-center bg-gradient-to-b from-purple-500/25 to-purple-950/50 border-2 border-purple-400/80 rounded-lg sm:rounded-2xl px-1.5 sm:px-3 py-1 sm:py-2.5 shadow-md flex-shrink-0 animate-pulse">
+                <div className="text-[8px] sm:text-xs text-purple-300 font-extrabold uppercase tracking-wider flex items-center space-x-0.5">
+                  <Target className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-purple-400" />
+                  <span>กา</span>
+                </div>
+                <span className="text-lg sm:text-3xl md:text-4xl lg:text-5xl font-black font-mono text-purple-300 leading-none mt-0.5">
+                  {p2Ga}
+                </span>
+              </div>
+            )}
+
             {/* Frame Box on the RIGHT */}
-            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/50 border border-amber-400/80 rounded-lg sm:rounded-2xl px-1.5 sm:px-3.5 py-1 sm:py-2.5 shadow-md flex-shrink-0">
+            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/50 border border-amber-400/80 rounded-lg sm:rounded-2xl px-1.5 sm:px-3 py-1 sm:py-2.5 shadow-md flex-shrink-0">
               <div className="text-[8px] sm:text-xs text-amber-300 font-extrabold uppercase tracking-wider flex items-center space-x-0.5">
                 <Trophy className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-amber-400" />
                 <span>เฟรม</span>

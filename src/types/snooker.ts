@@ -1,6 +1,15 @@
-export type GameMode = '15-reds' | '6-reds';
+export type GameMode = '15-reds' | '6-reds' | 'snooker-ga';
 
 export type BallColor = 'red' | 'yellow' | 'green' | 'brown' | 'blue' | 'pink' | 'black';
+
+export type PocketLocation = 
+  | 'top-left' 
+  | 'top-right' 
+  | 'middle-left' 
+  | 'middle-right' 
+  | 'bottom-left' 
+  | 'bottom-right' 
+  | 'any';
 
 export type LegalTarget = 
   | 'red' 
@@ -42,6 +51,8 @@ export interface Shot {
   isBreakAttempt: boolean;
   concededOpportunity?: boolean;
   notes?: string;
+  gaCount?: number;
+  pocket?: PocketLocation;
 }
 
 export interface Visit {
@@ -54,6 +65,7 @@ export interface Visit {
   foulPointsGiven: number;
   totalTimeSec: number;
   endedWithOpportunityGiven: boolean;
+  gaEarned?: number;
 }
 
 export interface PlayerStats {
@@ -79,6 +91,7 @@ export interface PlayerStats {
   errorRate: number; // %
   totalShotTimeSec: number;
   averageShotTime: number; // AST in seconds
+  totalGa?: number;
 }
 
 export interface Frame {
@@ -91,6 +104,8 @@ export interface Frame {
   player2Score: number;
   player1FramesWon: number;
   player2FramesWon: number;
+  player1Ga?: number;
+  player2Ga?: number;
   redsRemaining: number;
   legalTarget: LegalTarget;
   freeBallActive: boolean;
@@ -114,6 +129,8 @@ export interface Match {
   bestOfFrames: number; // 0 = unlimited / practice
   player1FramesWon: number;
   player2FramesWon: number;
+  player1Ga?: number;
+  player2Ga?: number;
   frames: Frame[];
   currentFrameIndex: number;
   isCompleted: boolean;

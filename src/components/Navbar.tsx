@@ -47,8 +47,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           
           <div className="flex items-center space-x-1.5 text-xs font-semibold">
-            <span className="bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 px-2 py-0.5 rounded-full">
-              {gameMode === '15-reds' ? '15 แดง' : '6 แดง'}
+            <span className={`px-2 py-0.5 rounded-full border ${
+              gameMode === 'snooker-ga' 
+                ? 'bg-amber-950/90 text-amber-300 border-amber-500 font-extrabold shadow-sm' 
+                : 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60'
+            }`}>
+              {gameMode === 'snooker-ga' ? '🎯 สนุ๊กกา' : (gameMode === '15-reds' ? '15 แดง' : '6 แดง')}
             </span>
             <span className={`px-2 py-0.5 rounded-full border ${isUnlimited ? 'bg-purple-950/80 text-purple-300 border-purple-700' : 'bg-slate-800 text-slate-300 border-slate-700'}`}>
               {isUnlimited ? `เฟรม ${currentFrameNumber} (เล่นไปเรื่อยๆ ♾️)` : `เฟรม ${currentFrameNumber} / Best of ${bestOfFrames}`}

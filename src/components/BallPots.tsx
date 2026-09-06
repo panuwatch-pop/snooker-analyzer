@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { AlertTriangle, RotateCcw, Shield, Undo2, Flag, Layers, Edit3 } from 'lucide-react';
-import { BallColor } from '../types/snooker';
+import { BallColor, PocketLocation } from '../types/snooker';
 import { BALL_MAP } from '../utils/snookerRules';
+import { SnookerTablePockets } from './SnookerTablePockets';
 
 interface BallPotsProps {
   redsRemaining: number;
   currentVisitShots: any[];
   isFoulMode: boolean;
+  isGaMode?: boolean;
   onToggleFoulMode: () => void;
-  onPotBall: (ball: BallColor) => void;
+  onPotBall: (ball: BallColor, pocket?: PocketLocation) => void;
   onFoul: (points: number) => void;
   onAddCustomPoints: (points: number, label: string) => void;
   onEndTurn: (reason: 'miss' | 'safety') => void;
@@ -22,6 +24,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
   redsRemaining,
   currentVisitShots,
   isFoulMode,
+  isGaMode = false,
   onToggleFoulMode,
   onPotBall,
   onFoul,
@@ -32,6 +35,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
   onMultiRedPot,
   canUndo,
 }) => {
+  const [pendingGaBall, setPendingGaBall] = useState<BallColor | null>(null);
   const [showMultiRedModal, setShowMultiRedModal] = useState<boolean>(false);
   const [customPointsInput, setCustomPointsInput] = useState<string>('');
   const [showCustomPointsModal, setShowCustomPointsModal] = useState<boolean>(false);
@@ -48,9 +52,32 @@ export const BallPots: React.FC<BallPotsProps> = ({
     }
   };
 
+  const handleBallClick = (ballKey: BallColor) => {
+    if (isFoulMode) {
+      onFoul(BALL_MAP[ballKey].points);
+      return;
+    }
+
+    // In Snooker Ga mode, show the 6-pocket snooker table for color balls
+    if (isGaMode && ballKey !== 'red') {
+      setPendingGaBall(ballKey);
+      return;
+    }
+
+    // Standard pot
+    onPotBall(ballKey);
+  };
+
+  const handlePocketSelected = (pocket: PocketLocation) => {
+    if (pendingGaBall) {
+      onPotBall(pendingGaBall, pocket);
+      setPendingGaBall(null);
+    }
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto space-y-2 sm:space-y-3 relative">
-      {/* Potted Balls in Current Break - Mini colored spheres with numbers only */}
+      {/* Potted Balls in Current Break - Mini colored spheres with numbers and Ga badges */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-2.5 shadow-lg flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center space-x-1.5 text-[11px] sm:text-xs font-bold text-slate-300">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -67,10 +94,15 @@ export const BallPots: React.FC<BallPotsProps> = ({
               return (
                 <div
                   key={s.id || idx}
-                  className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-mono font-black text-[11px] sm:text-xs md:text-sm text-white shadow-md border border-white/30 select-none ${b.cssClass}`}
-                  title={`ลูก${b.nameTh} (+${b.points})`}
+                  className={`relative w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-mono font-black text-[11px] sm:text-xs md:text-sm text-white shadow-md border border-white/30 select-none ${b.cssClass}`}
+                  title={`ลูก${b.nameTh} (+${b.points}${s.gaCount ? ` | +${s.gaCount} กา` : ''})`}
                 >
                   <span className="drop-shadow-sm">{b.points}</span>
+                  {s.gaCount && s.gaCount > 0 ? (
+                    <span className="absolute -bottom-1 -right-1 bg-purple-600 text-white font-mono text-[8px] font-black px-1 rounded-full border border-purple-300 shadow">
+                      +{s.gaCount}
+                    </span>
+                  ) : null}
                 </div>
               );
             })
@@ -104,13 +136,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
             return (
               <button
                 key={ballKey}
-                onClick={() => {
-                  if (isFoulMode) {
-                    onFoul(ball.points);
-                  } else {
-                    onPotBall(ballKey);
-                  }
-                }}
+                onClick={() => handleBallClick(ballKey)}
                 className={`group relative flex flex-col items-center justify-center py-2.5 sm:py-3.5 md:py-4 px-0.5 sm:px-1 rounded-xl sm:rounded-2xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5`}
                 title={isFoulMode ? `เสียฟาวล์ ${ball.points} แต้ม` : `ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
               >
@@ -195,6 +221,15 @@ export const BallPots: React.FC<BallPotsProps> = ({
           </div>
         </button>
       </div>
+
+      {/* Snooker Table 6-Pocket Selector Modal for Snooker Ga */}
+      {pendingGaBall && (
+        <SnookerTablePockets
+          selectedBall={pendingGaBall}
+          onSelectPocket={handlePocketSelected}
+          onCancel={() => setPendingGaBall(null)}
+        />
+      )}
 
       {/* Multi-Red Pot Modal */}
       {showMultiRedModal && (

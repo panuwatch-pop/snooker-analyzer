@@ -9,8 +9,8 @@ import { AnalyticsTab } from './components/AnalyticsTab';
 import { HistoryTab } from './components/HistoryTab';
 import { NewMatchModal } from './components/NewMatchModal';
 import { FrameEndModal } from './components/FrameEndModal';
-import { Match, Frame, Shot, Visit, BallColor, GameMode } from './types/snooker';
-import { BALL_MAP, createInitialFrame, calculatePlayerStats } from './utils/snookerRules';
+import { Match, Frame, Shot, Visit, BallColor, GameMode, PocketLocation } from './types/snooker';
+import { BALL_MAP, createInitialFrame, calculatePlayerStats, calculateGaForPot } from './utils/snookerRules';
 import { soundManager } from './utils/audio';
 import { saveActiveMatch, loadActiveMatch, saveMatchToHistory } from './utils/storage';
 
@@ -171,11 +171,14 @@ export function App() {
     shotStartTime,
   ]);
 
-  // Unconstrained Ball Potting
-  const handlePotBall = useCallback((ball: BallColor) => {
+  // Unconstrained Ball Potting with Ga Pocket Calculation
+  const handlePotBall = useCallback((ball: BallColor, pocket?: PocketLocation) => {
     const ballInfo = BALL_MAP[ball];
     const points = ballInfo.points;
     soundManager.playPotSound(points);
+
+    const isGa = match.gameMode === 'snooker-ga';
+    const gaEarned = isGa ? calculateGaForPot(ball, pocket) : 0;
 
     const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
     const newBreak = currentBreak + points;
@@ -227,7 +230,9 @@ export function App() {
       ballsInVisit: newBallsCount,
       visitBreakPoints: newBreak,
       isBreakAttempt: true,
-      notes: `ตบลูก ${ballInfo.nameTh} (+${points})`,
+      gaCount: gaEarned,
+      pocket,
+      notes: `ตบลูก ${ballInfo.nameTh} (+${points})${gaEarned > 0 ? ` (+${gaEarned} กา)` : ''}`,
     };
 
     updatedShots.push(newShot);
@@ -235,6 +240,8 @@ export function App() {
 
     const newP1Score = activeStrikerIndex === 0 ? currentFrame.player1Score + points : currentFrame.player1Score;
     const newP2Score = activeStrikerIndex === 1 ? currentFrame.player2Score + points : currentFrame.player2Score;
+    const newP1Ga = activeStrikerIndex === 0 ? (currentFrame.player1Ga || 0) + gaEarned : (currentFrame.player1Ga || 0);
+    const newP2Ga = activeStrikerIndex === 1 ? (currentFrame.player2Ga || 0) + gaEarned : (currentFrame.player2Ga || 0);
 
     const p1Stats = calculatePlayerStats(updatedShots, updatedVisits, 0, updatedShots.filter(s => s.playerIndex === 1));
     const p2Stats = calculatePlayerStats(updatedShots, updatedVisits, 1, updatedShots.filter(s => s.playerIndex === 0));
@@ -243,6 +250,8 @@ export function App() {
       ...currentFrame,
       player1Score: newP1Score,
       player2Score: newP2Score,
+      player1Ga: newP1Ga,
+      player2Ga: newP2Ga,
       redsRemaining: nextReds,
       shots: updatedShots,
       visits: updatedVisits,
@@ -668,6 +677,7 @@ export function App() {
               frame={currentFrame}
               frameDurationFormatted={formatTime(frameDurationSec)}
               shotDurationSec={shotDurationSec}
+              isGaMode={match.gameMode === 'snooker-ga'}
               onSwitchStriker={() => handleEndTurn('miss')}
               onEndFrame={() => setIsFrameEndModalOpen(true)}
             />
@@ -676,6 +686,7 @@ export function App() {
               redsRemaining={currentFrame.redsRemaining}
               currentVisitShots={currentVisitShots}
               isFoulMode={isFoulMode}
+              isGaMode={match.gameMode === 'snooker-ga'}
               onToggleFoulMode={() => setIsFoulMode(prev => !prev)}
               onPotBall={handlePotBall}
               onFoul={(pts) => {

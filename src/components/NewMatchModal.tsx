@@ -77,34 +77,47 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
-          {/* Format Selection: 15 Reds vs 6 Reds */}
+          {/* Format Selection: 15 Reds vs 6 Reds vs Snooker Ga */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300">1. เลือกประเภทลูก</label>
-            <div className="grid grid-cols-2 gap-2.5">
+            <label className="text-xs font-bold text-slate-300">1. เลือกรูปแบบกติกา</label>
+            <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setGameMode('15-reds')}
-                className={`p-2.5 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
+                className={`p-2 sm:p-2.5 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
                   gameMode === '15-reds'
                     ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-600/30 font-bold'
                     : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
                 }`}
               >
-                <span className="text-sm sm:text-base font-black">🔴 15 แดง (Standard)</span>
-                <span className="text-[10px] opacity-80">Max Break 147</span>
+                <span className="text-xs sm:text-sm font-black">🔴 15 แดง</span>
+                <span className="text-[10px] opacity-80">มาตรฐานสากล</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setGameMode('6-reds')}
-                className={`p-2.5 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
+                className={`p-2 sm:p-2.5 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
                   gameMode === '6-reds'
                     ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-600/30 font-bold'
                     : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
                 }`}
               >
-                <span className="text-sm sm:text-base font-black">🔴 6 แดง (Six-red)</span>
-                <span className="text-[10px] opacity-80">Max Break 75</span>
+                <span className="text-xs sm:text-sm font-black">🔴 6 แดง</span>
+                <span className="text-[10px] opacity-80">Six-reds</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setGameMode('snooker-ga')}
+                className={`p-2 sm:p-2.5 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
+                  gameMode === 'snooker-ga'
+                    ? 'bg-amber-600 border-amber-400 text-white shadow-lg shadow-amber-600/40 font-bold ring-2 ring-amber-400/50'
+                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                <span className="text-xs sm:text-sm font-black text-amber-200">🎯 สนุ๊กกา</span>
+                <span className="text-[10px] opacity-90 text-amber-300">นับแต้ม + สะสมกา</span>
               </button>
             </div>
           </div>
