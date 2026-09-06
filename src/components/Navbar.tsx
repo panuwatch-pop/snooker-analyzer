@@ -10,6 +10,7 @@ import {
   Tv 
 } from 'lucide-react';
 import { GameMode } from '../types/snooker';
+import { APP_VERSION } from '../version';
 
 interface NavbarProps {
   activeTab: 'scoreboard' | 'raw-data' | 'analytics' | 'history';
@@ -43,7 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold px-3 py-1.5 rounded-lg shadow-md">
             <Trophy className="w-5 h-5 text-amber-300 animate-pulse" />
             <span className="text-base tracking-wide font-black uppercase">SNOOKER PRO</span>
-            <span className="text-[10px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded shadow">v2.5.0</span>
+            <span className="text-[10px] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded shadow">{APP_VERSION}</span>
           </div>
           
           <div className="flex items-center space-x-1.5 text-xs font-semibold">

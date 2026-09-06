@@ -337,7 +337,56 @@ export function App() {
     }
   };
 
-  const handleSubmitFoul = useCallback((points: number, options?: { isFreeBall?: boolean; switchStriker?: boolean; note?: string; recipientPlayerIndex?: 0 | 1 }) => {
+  // Add Direct Manual Ga
+  const handleManualAddGa = useCallback((gaCount: number) => {
+    soundManager.playApplause();
+    const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
+    const shotNumber = (currentFrame.shots?.length || 0) + 1;
+
+    const gaShot: Shot = {
+      id: 'shot-' + Date.now(),
+      shotNumber,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      shotTimeSec: duration,
+      playerIndex: activeStrikerIndex,
+      action: 'pot',
+      points: 0,
+      redsRemainingBefore: currentFrame.redsRemaining,
+      redsRemainingAfter: currentFrame.redsRemaining,
+      legalTargetBefore: 'red',
+      legalTargetAfter: 'red',
+      visitNumber: currentVisitNumber,
+      ballsInVisit: ballsInCurrentVisit,
+      visitBreakPoints: currentBreak,
+      isBreakAttempt: false,
+      gaCount: gaCount,
+      notes: `เพิ่มกาพิเศษ (+${gaCount} กา)`,
+    };
+
+    const updatedShots = [...(currentFrame.shots || []), gaShot];
+    const newP1Ga = activeStrikerIndex === 0 ? (currentFrame.player1Ga || 0) + gaCount : (currentFrame.player1Ga || 0);
+    const newP2Ga = activeStrikerIndex === 1 ? (currentFrame.player2Ga || 0) + gaCount : (currentFrame.player2Ga || 0);
+
+    const updatedVisits = [...(currentFrame.visits || [])];
+    const p1Stats = calculatePlayerStats(updatedShots, updatedVisits, 0, updatedShots.filter(s => s.playerIndex === 1));
+    const p2Stats = calculatePlayerStats(updatedShots, updatedVisits, 1, updatedShots.filter(s => s.playerIndex === 0));
+
+    const updatedFrame: Frame = {
+      ...currentFrame,
+      player1Ga: newP1Ga,
+      player2Ga: newP2Ga,
+      shots: updatedShots,
+      stats: [p1Stats, p2Stats],
+    };
+
+    const newFrames = [...match.frames];
+    newFrames[match.currentFrameIndex] = updatedFrame;
+
+    setMatch({ ...match, frames: newFrames });
+    setCurrentVisitShots(prev => [...prev, gaShot]);
+  }, [activeStrikerIndex, ballsInCurrentVisit, currentBreak, currentFrame, currentVisitNumber, match, shotStartTime]);
+
+  const handleSubmitFoul = useCallback((points: number, options?: { isFreeBall?: boolean; switchStriker?: boolean; note?: string; recipientPlayerIndex?: 0 | 1; gaPenalty?: number }) => {
     soundManager.playFoulSound();
     const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
     const shotNumber = (currentFrame.shots?.length || 0) + 1;
@@ -347,6 +396,7 @@ export function App() {
       : ((activeStrikerIndex === 0 ? 1 : 0) as 0 | 1);
     const foulPlayerIndex = (recipientIndex === 1 ? 0 : 1) as 0 | 1;
     const shouldSwitch = options?.switchStriker !== false;
+    const gaPenalty = options?.gaPenalty || 0;
 
     const foulShot: Shot = {
       id: 'shot-' + Date.now(),
@@ -364,7 +414,8 @@ export function App() {
       ballsInVisit: ballsInCurrentVisit,
       visitBreakPoints: currentBreak,
       isBreakAttempt: true,
-      notes: options?.note || `เสียฟาวล์ +${points} แต้ม`,
+      gaPenalty: gaPenalty,
+      notes: options?.note || `เสียฟาวล์ +${points} แต้ม${gaPenalty > 0 ? ` (หัก -${gaPenalty} กา)` : ''}`,
       concededOpportunity: true,
     };
 
@@ -387,6 +438,11 @@ export function App() {
 
     const newP1Score = recipientIndex === 0 ? currentFrame.player1Score + points : currentFrame.player1Score;
     const newP2Score = recipientIndex === 1 ? currentFrame.player2Score + points : currentFrame.player2Score;
+
+    // Deduct Ga from the foul committing player (if gaPenalty > 0)
+    const newP1Ga = foulPlayerIndex === 0 ? Math.max(0, (currentFrame.player1Ga || 0) - gaPenalty) : (currentFrame.player1Ga || 0);
+    const newP2Ga = foulPlayerIndex === 1 ? Math.max(0, (currentFrame.player2Ga || 0) - gaPenalty) : (currentFrame.player2Ga || 0);
+
     const nextStrikerIndex = (shouldSwitch ? (recipientIndex === 0 ? 0 : 1) : activeStrikerIndex) as 0 | 1;
 
     const p1Stats = calculatePlayerStats(updatedShots, updatedVisits, 0, updatedShots.filter(s => s.playerIndex === 1));
@@ -396,6 +452,8 @@ export function App() {
       ...currentFrame,
       player1Score: newP1Score,
       player2Score: newP2Score,
+      player1Ga: newP1Ga,
+      player2Ga: newP2Ga,
       shots: updatedShots,
       visits: updatedVisits,
       stats: [p1Stats, p2Stats],
@@ -434,13 +492,25 @@ export function App() {
 
     let newP1Score = currentFrame.player1Score;
     let newP2Score = currentFrame.player2Score;
+    let newP1Ga = currentFrame.player1Ga || 0;
+    let newP2Ga = currentFrame.player2Ga || 0;
 
     if (lastShot.action === 'pot') {
-      if (lastShot.playerIndex === 0) newP1Score -= lastShot.points;
-      else newP2Score -= lastShot.points;
+      if (lastShot.playerIndex === 0) {
+        newP1Score -= lastShot.points;
+        if (lastShot.gaCount) newP1Ga = Math.max(0, newP1Ga - lastShot.gaCount);
+      } else {
+        newP2Score -= lastShot.points;
+        if (lastShot.gaCount) newP2Ga = Math.max(0, newP2Ga - lastShot.gaCount);
+      }
     } else if (lastShot.action === 'foul') {
-      if (lastShot.playerIndex === 0) newP2Score -= lastShot.points;
-      else newP1Score -= lastShot.points;
+      if (lastShot.playerIndex === 0) {
+        newP2Score -= lastShot.points;
+        if (lastShot.gaPenalty) newP1Ga += lastShot.gaPenalty;
+      } else {
+        newP1Score -= lastShot.points;
+        if (lastShot.gaPenalty) newP2Ga += lastShot.gaPenalty;
+      }
     }
 
     const newReds = lastShot.redsRemainingBefore;
@@ -472,6 +542,8 @@ export function App() {
       ...currentFrame,
       player1Score: Math.max(0, newP1Score),
       player2Score: Math.max(0, newP2Score),
+      player1Ga: Math.max(0, newP1Ga),
+      player2Ga: Math.max(0, newP2Ga),
       redsRemaining: newReds,
       shots: newShots,
       visits: newVisits,
@@ -689,11 +761,12 @@ export function App() {
               isGaMode={match.gameMode === 'snooker-ga'}
               onToggleFoulMode={() => setIsFoulMode(prev => !prev)}
               onPotBall={handlePotBall}
-              onFoul={(pts) => {
-                handleSubmitFoul(pts, { isFreeBall: false, switchStriker: true, note: `ฟาวล์ +${pts} แต้ม` });
+              onFoul={(pts, gaPenalty) => {
+                handleSubmitFoul(pts, { isFreeBall: false, switchStriker: true, note: `ฟาวล์ +${pts} แต้ม${gaPenalty && gaPenalty > 0 ? ` (หัก -${gaPenalty} กา)` : ''}`, gaPenalty });
                 setIsFoulMode(false);
               }}
               onAddCustomPoints={handleAddCustomPoints}
+              onManualAddGa={handleManualAddGa}
               onEndTurn={handleEndTurn}
               onUndo={handleUndo}
               onEndFrame={() => setIsFrameEndModalOpen(true)}

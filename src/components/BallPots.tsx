@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, RotateCcw, Shield, Undo2, Flag, Layers, Edit3 } from 'lucide-react';
+import { AlertTriangle, RotateCcw, Shield, Undo2, Flag, Layers, Edit3, Target, Plus, Minus } from 'lucide-react';
 import { BallColor, PocketLocation } from '../types/snooker';
 import { BALL_MAP } from '../utils/snookerRules';
 import { SnookerTablePockets } from './SnookerTablePockets';
@@ -11,8 +11,9 @@ interface BallPotsProps {
   isGaMode?: boolean;
   onToggleFoulMode: () => void;
   onPotBall: (ball: BallColor, pocket?: PocketLocation) => void;
-  onFoul: (points: number) => void;
+  onFoul: (points: number, gaPenalty?: number) => void;
   onAddCustomPoints: (points: number, label: string) => void;
+  onManualAddGa: (gaCount: number) => void;
   onEndTurn: (reason: 'miss' | 'safety') => void;
   onUndo: () => void;
   onEndFrame: () => void;
@@ -29,6 +30,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
   onPotBall,
   onFoul,
   onAddCustomPoints,
+  onManualAddGa,
   onEndTurn,
   onUndo,
   onEndFrame,
@@ -39,6 +41,8 @@ export const BallPots: React.FC<BallPotsProps> = ({
   const [showMultiRedModal, setShowMultiRedModal] = useState<boolean>(false);
   const [customPointsInput, setCustomPointsInput] = useState<string>('');
   const [showCustomPointsModal, setShowCustomPointsModal] = useState<boolean>(false);
+  const [showManualGaModal, setShowManualGaModal] = useState<boolean>(false);
+  const [selectedGaPenalty, setSelectedGaPenalty] = useState<number>(0);
 
   const pottedInVisit = currentVisitShots.filter(s => s.action === 'pot' && s.ballPotted);
   const ballList: BallColor[] = ['red', 'yellow', 'green', 'brown', 'blue', 'pink', 'black'];
@@ -54,7 +58,12 @@ export const BallPots: React.FC<BallPotsProps> = ({
 
   const handleBallClick = (ballKey: BallColor) => {
     if (isFoulMode) {
-      onFoul(BALL_MAP[ballKey].points);
+      if (isGaMode) {
+        // Snooker Ga foul is strictly 7 points + optional Ga penalty
+        onFoul(7, selectedGaPenalty);
+      } else {
+        onFoul(BALL_MAP[ballKey].points);
+      }
       return;
     }
 
@@ -116,47 +125,111 @@ export const BallPots: React.FC<BallPotsProps> = ({
           ? 'bg-gradient-to-b from-rose-950/80 via-slate-900 to-slate-900 border-rose-500/80 ring-2 ring-rose-500/40'
           : 'bg-slate-900/95 border-slate-800'
       }`}>
-        {/* 7-Column Ball Grid (Responsive for all screen sizes) */}
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 md:gap-2.5">
-          {ballList.map((ballKey) => {
-            const ball = BALL_MAP[ballKey];
-            const isRed = ballKey === 'red';
-            const isFoulTarget = ball.points >= 4;
+        {/* If in Foul Mode & Ga Mode: Show Snooker Ga Dedicated Foul Selector */}
+        {isFoulMode && isGaMode ? (
+          <div className="space-y-3 py-1 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-rose-400">
+                <AlertTriangle className="w-5 h-5 text-rose-400 animate-pulse" />
+                <span className="text-sm sm:text-base font-black text-white">สนุ๊กกา: เสียฟาวล์ (-7 แต้ม)</span>
+              </div>
+              <span className="text-xs bg-rose-950 text-rose-300 px-2 py-0.5 rounded-full border border-rose-700 font-mono font-bold">
+                คู่แข่งได้ +7 แต้ม
+              </span>
+            </div>
 
-            // In Foul mode: hide balls 1, 2, 3 (Red, Yellow, Green)
-            if (isFoulMode && !isFoulTarget) {
-              return (
-                <div
-                  key={ballKey}
-                  className="invisible pointer-events-none py-2.5 sm:py-3.5 md:py-4 px-0.5"
-                />
-              );
-            }
+            {/* Ga deduction options */}
+            <div className="bg-slate-950/80 p-2.5 rounded-xl border border-rose-900/60 space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-300 font-bold">
+                <span className="flex items-center space-x-1">
+                  <Target className="w-4 h-4 text-purple-400" />
+                  <span>หักกากับผู้เล่นที่ทำฟาวล์:</span>
+                </span>
+                <span className="text-purple-300 font-mono font-black">
+                  {selectedGaPenalty > 0 ? `หัก -${selectedGaPenalty} กา` : 'ไม่เสียกา (0 กา)'}
+                </span>
+              </div>
 
-            return (
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
+                {[0, 1, 2, 3, 4, 5, 6].map((ga) => (
+                  <button
+                    key={ga}
+                    type="button"
+                    onClick={() => setSelectedGaPenalty(ga)}
+                    className={`py-2 px-1 rounded-xl font-mono font-bold text-xs sm:text-sm border transition-all cursor-pointer ${
+                      selectedGaPenalty === ga
+                        ? 'bg-purple-600 text-white border-purple-400 ring-2 ring-purple-400 shadow-md shadow-purple-950/60 font-black'
+                        : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700'
+                    }`}
+                  >
+                    {ga === 0 ? '0 กา' : `-${ga} กา`}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons for Submitting Ga Foul */}
+            <div className="flex space-x-2 pt-1">
               <button
-                key={ballKey}
-                onClick={() => handleBallClick(ballKey)}
-                className={`group relative flex flex-col items-center justify-center py-2.5 sm:py-3.5 md:py-4 px-0.5 sm:px-1 rounded-xl sm:rounded-2xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5`}
-                title={isFoulMode ? `เสียฟาวล์ ${ball.points} แต้ม` : `ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
+                onClick={onToggleFoulMode}
+                className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs sm:text-sm border border-slate-700 cursor-pointer"
               >
-                {/* Display -4, -5, -6, -7 in foul mode, or 1-7 in normal mode */}
-                <span className="font-mono font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-none drop-shadow-md select-none">
-                  {isFoulMode ? `-${ball.points}` : ball.points}
-                </span>
-
-                {/* Keyboard Shortcut Hint Badge */}
-                <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[8px] sm:text-[9px] md:text-[10px] font-mono font-bold px-1 rounded-full border border-slate-700 shadow">
-                  {ball.numpadKey}
-                </span>
+                ยกเลิก
               </button>
-            );
-          })}
-        </div>
+              <button
+                onClick={() => {
+                  onFoul(7, selectedGaPenalty);
+                  setSelectedGaPenalty(0);
+                }}
+                className="flex-2 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs sm:text-sm border border-rose-400 shadow-lg shadow-rose-950/60 cursor-pointer active:scale-98 flex items-center justify-center space-x-2"
+              >
+                <AlertTriangle className="w-4 h-4" />
+                <span>ยืนยันเสียฟาวล์ (-7 แต้ม {selectedGaPenalty > 0 ? `| -${selectedGaPenalty} กา` : ''})</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Standard Ball Potting Grid / Standard Foul 4-7 */
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 md:gap-2.5">
+            {ballList.map((ballKey) => {
+              const ball = BALL_MAP[ballKey];
+              const isFoulTarget = ball.points >= 4;
+
+              // In Foul mode (Standard): hide balls 1, 2, 3 (Red, Yellow, Green)
+              if (isFoulMode && !isFoulTarget) {
+                return (
+                  <div
+                    key={ballKey}
+                    className="invisible pointer-events-none py-2.5 sm:py-3.5 md:py-4 px-0.5"
+                  />
+                );
+              }
+
+              return (
+                <button
+                  key={ballKey}
+                  onClick={() => handleBallClick(ballKey)}
+                  className={`group relative flex flex-col items-center justify-center py-2.5 sm:py-3.5 md:py-4 px-0.5 sm:px-1 rounded-xl sm:rounded-2xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5`}
+                  title={isFoulMode ? `เสียฟาวล์ ${ball.points} แต้ม` : `ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
+                >
+                  {/* Display -4, -5, -6, -7 in foul mode, or 1-7 in normal mode */}
+                  <span className="font-mono font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-none drop-shadow-md select-none">
+                    {isFoulMode ? `-${ball.points}` : ball.points}
+                  </span>
+
+                  {/* Keyboard Shortcut Hint Badge */}
+                  <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[8px] sm:text-[9px] md:text-[10px] font-mono font-bold px-1 rounded-full border border-slate-700 shadow">
+                    {ball.numpadKey}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Main Action Controls: 5 Buttons in 1 Row (Responsive & Mobile-Ready) */}
-      <div className="grid grid-cols-5 gap-1 sm:gap-2 md:gap-2.5">
+      {/* Main Action Controls (Responsive & Mobile-Ready) */}
+      <div className={`grid ${isGaMode ? 'grid-cols-6' : 'grid-cols-5'} gap-1 sm:gap-2 md:gap-2.5`}>
         <button
           onClick={onToggleFoulMode}
           className={`flex items-center justify-center space-x-1 sm:space-x-1.5 font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border transition-all cursor-pointer active:scale-98 shadow-md ${
@@ -171,6 +244,21 @@ export const BallPots: React.FC<BallPotsProps> = ({
             <div className="text-[8px] sm:text-[9px] text-rose-200 font-normal hidden sm:block">[-] / [F]</div>
           </div>
         </button>
+
+        {/* Snooker Ga: Dedicated Add Ga / Adjust Ga Button */}
+        {isGaMode && (
+          <button
+            onClick={() => setShowManualGaModal(true)}
+            className="flex items-center justify-center space-x-1 sm:space-x-1.5 bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white font-extrabold py-2.5 sm:py-3 px-1 sm:px-2 rounded-xl border border-purple-500 shadow-md shadow-purple-950/50 cursor-pointer active:scale-98 transition-all"
+            title="เพิ่ม/ปรับจำนวนกาโดยตรง"
+          >
+            <Target className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 flex-shrink-0" />
+            <div className="text-left min-w-0">
+              <div className="text-[11px] sm:text-xs md:text-sm leading-tight font-black truncate">เพิ่มกา</div>
+              <div className="text-[8px] sm:text-[9px] text-purple-200 font-normal hidden sm:block">[+กา]</div>
+            </div>
+          </button>
+        )}
 
         <button
           onClick={() => onEndTurn('miss')}
@@ -305,6 +393,46 @@ export const BallPots: React.FC<BallPotsProps> = ({
                 ยืนยัน
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Add / Adjust Ga Modal */}
+      {showManualGaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-slate-900 border border-purple-500/80 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl ring-2 ring-purple-500/30">
+            <h3 className="text-lg font-black text-white flex items-center space-x-2">
+              <Target className="w-5 h-5 text-purple-400 animate-pulse" />
+              <span>เพิ่ม / ปรับจำนวนกา (Manual Ga)</span>
+            </h3>
+            <p className="text-xs text-slate-300">
+              กดเลือกจำนวนกาที่ต้องการเพิ่มให้ผู้เล่นคนปัจจุบัน:
+            </p>
+
+            <div className="grid grid-cols-3 gap-2">
+              {[1, 2, 3, 4, 5, 6].map((cnt) => (
+                <button
+                  key={cnt}
+                  type="button"
+                  onClick={() => {
+                    onManualAddGa(cnt);
+                    setShowManualGaModal(false);
+                  }}
+                  className="py-3.5 rounded-xl bg-gradient-to-b from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 text-white font-mono font-black text-lg border border-purple-400 shadow-md active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center"
+                >
+                  <span className="leading-tight">+{cnt}</span>
+                  <span className="text-[10px] opacity-80 font-sans font-semibold">กา</span>
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowManualGaModal(false)}
+              className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs cursor-pointer"
+            >
+              ปิดหน้าต่าง
+            </button>
           </div>
         </div>
       )}

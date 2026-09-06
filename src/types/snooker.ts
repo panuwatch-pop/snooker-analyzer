@@ -52,6 +52,7 @@ export interface Shot {
   concededOpportunity?: boolean;
   notes?: string;
   gaCount?: number;
+  gaPenalty?: number;
   pocket?: PocketLocation;
 }
 
