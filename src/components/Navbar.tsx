@@ -78,71 +78,72 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </div>
 
-        {/* Tab Navigation Row */}
-        <nav className="flex items-center bg-slate-950/70 p-0.5 sm:p-1 rounded-xl border border-slate-800/80 shadow-inner overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('scoreboard')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'scoreboard'
-                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-            }`}
-          >
-            <Tv className="w-4 h-4" />
-            <span>กระดานคะแนน</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('raw-data')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'raw-data'
-                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-            }`}
-          >
-            <TableProperties className="w-4 h-4" />
-            <span>ข้อมูลดิบ (Logs)</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'analytics'
-                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-            }`}
-          >
-            <BarChart3 className="w-4 h-4" />
-            <span>วิเคราะห์สถิติ %</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'history'
-                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-            }`}
-          >
-            <History className="w-4 h-4" />
-            <span>ประวัติการแข่ง</span>
-          </button>
-        </nav>
-
+        {/* Tab Navigation: Mobile Dropdown (< md) vs Desktop Full Buttons (>= md) */}
         <div className="flex items-center space-x-2">
-          {/* Mute / Unmute Button on Top (Top-right positioned) */}
-          <button
-            onClick={onToggleMute}
-            title={isMuted ? 'เปิดเสียง (Sound Unmuted)' : 'ปิดเสียง (Sound Muted)'}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition-all border font-bold text-xs cursor-pointer shadow-sm ${
-              isMuted
-                ? 'bg-rose-950/90 text-rose-300 border-rose-700 hover:bg-rose-900 shadow-rose-950/40'
-                : 'bg-emerald-950/90 text-emerald-300 border-emerald-600 hover:bg-emerald-900 shadow-emerald-950/40'
-            }`}
-          >
-            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400 animate-pulse" />}
-            <span>{isMuted ? 'เปิดเสียง' : 'เสียงเปิดอยู่'}</span>
-          </button>
+          {/* Mobile Tab Dropdown */}
+          <div className="md:hidden flex-1 sm:flex-initial">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value as any)}
+              className="w-full sm:w-auto bg-slate-950 text-emerald-300 font-bold text-xs rounded-lg px-2.5 py-1.5 border border-emerald-600/70 outline-none focus:ring-2 focus:ring-emerald-500 shadow-md cursor-pointer"
+            >
+              <option value="scoreboard" className="bg-slate-900 text-slate-100 font-semibold">📺 กระดานคะแนน</option>
+              <option value="raw-data" className="bg-slate-900 text-slate-100 font-semibold">📋 ข้อมูลดิบ (Logs)</option>
+              <option value="analytics" className="bg-slate-900 text-slate-100 font-semibold">📊 วิเคราะห์สถิติ %</option>
+              <option value="history" className="bg-slate-900 text-slate-100 font-semibold">📜 ประวัติการแข่ง</option>
+            </select>
+          </div>
+
+          {/* Desktop Horizontal Tabs */}
+          <nav className="hidden md:flex items-center bg-slate-950/70 p-0.5 sm:p-1 rounded-xl border border-slate-800/80 shadow-inner">
+            <button
+              onClick={() => setActiveTab('scoreboard')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs lg:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'scoreboard'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
+            >
+              <Tv className="w-4 h-4" />
+              <span>กระดานคะแนน</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('raw-data')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs lg:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'raw-data'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
+            >
+              <TableProperties className="w-4 h-4" />
+              <span>ข้อมูลดิบ (Logs)</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('analytics')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs lg:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'analytics'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>วิเคราะห์สถิติ %</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs lg:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'history'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
+            >
+              <History className="w-4 h-4" />
+              <span>ประวัติการแข่ง</span>
+            </button>
+          </nav>
         </div>
       </div>
     </header>
