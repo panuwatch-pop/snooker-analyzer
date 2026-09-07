@@ -39,7 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { isMobile } = useDevice();
 
   return (
-    <header className="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-1.5 sm:px-3 py-1 sm:py-1.5 shadow-md flex-shrink-0">
+    <header className="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-1.5 sm:px-3 py-0.5 sm:py-1.5 shadow-md flex-shrink-0">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-1 sm:gap-2">
         {/* Left Section: Logo & Version */}
         <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">

@@ -87,17 +87,17 @@ export const BallPots: React.FC<BallPotsProps> = ({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-1 sm:space-y-1.5 md:space-y-2 relative">
+    <div className="w-full max-w-7xl mx-auto space-y-0.5 xs:space-y-1 sm:space-y-1.5 flex-shrink-0 relative">
       {/* Potted Balls in Current Break - Mini colored spheres with numbers and Ga badges */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-lg md:rounded-2xl p-0.5 xs:p-1 md:p-1.5 shadow-sm md:shadow-md flex flex-wrap items-center justify-between gap-1 md:gap-2">
-        <div className="flex items-center space-x-1 xs:space-x-1.5 text-[8px] xs:text-[10px] md:text-xs font-bold text-slate-300">
-          <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span>ลูกที่ตบในเทิร์นนี้ ({pottedInVisit.length} ลูก):</span>
+      <div className="bg-slate-900/90 border border-slate-800 rounded-md xs:rounded-lg md:rounded-xl p-0.5 xs:p-1 shadow-sm flex flex-wrap items-center justify-between gap-0.5 xs:gap-1">
+        <div className="flex items-center space-x-1 text-[7px] xs:text-[9px] md:text-xs font-bold text-slate-300">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>ลูกที่ตบ ({pottedInVisit.length}):</span>
         </div>
 
-        <div className="flex items-center space-x-1 xs:space-x-1.5 overflow-x-auto max-w-full py-0.2 px-0.5">
+        <div className="flex items-center space-x-1 overflow-x-auto max-w-full py-0.2 px-0.5">
           {pottedInVisit.length === 0 ? (
-            <span className="text-[8px] xs:text-[10px] md:text-xs text-slate-500 italic">ยังไม่มีลูกที่ตบลงในรอบนี้</span>
+            <span className="text-[7px] xs:text-[9px] md:text-xs text-slate-500 italic">ยังไม่มีลูกที่ตบในรอบนี้</span>
           ) : (
             pottedInVisit.map((s, idx) => {
               const b = BALL_MAP[s.ballPotted as BallColor];
@@ -105,12 +105,12 @@ export const BallPots: React.FC<BallPotsProps> = ({
               return (
                 <div
                   key={s.id || idx}
-                  className={`relative w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center font-mono font-black text-[8px] xs:text-[10px] md:text-xs text-white shadow border border-white/30 select-none ${b.cssClass}`}
+                  className={`relative w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center font-mono font-black text-[7px] xs:text-[9px] md:text-xs text-white shadow border border-white/30 select-none ${b.cssClass}`}
                   title={`ลูก${b.nameTh} (+${b.points}${s.gaCount ? ` | +${s.gaCount} กา` : ''})`}
                 >
                   <span className="drop-shadow-sm">{b.points}</span>
                   {s.gaCount && s.gaCount > 0 ? (
-                    <span className="absolute -bottom-1 -right-1 bg-purple-600 text-white font-mono text-[6px] xs:text-[7px] md:text-[8px] font-black px-0.5 rounded-full border border-purple-300 shadow">
+                    <span className="absolute -bottom-1 -right-1 bg-purple-600 text-white font-mono text-[5px] xs:text-[6px] md:text-[8px] font-black px-0.5 rounded-full border border-purple-300 shadow">
                       +{s.gaCount}
                     </span>
                   ) : null}
@@ -122,35 +122,35 @@ export const BallPots: React.FC<BallPotsProps> = ({
       </div>
 
       {/* Ball Potting / Foul Mode Panel */}
-      <div className={`rounded-lg xs:rounded-xl md:rounded-2xl p-1 xs:p-1.5 md:p-2.5 shadow md:shadow-lg transition-all border ${
+      <div className={`rounded-md xs:rounded-lg md:rounded-xl p-0.5 xs:p-1 md:p-1.5 shadow transition-all border ${
         isFoulMode
-          ? 'bg-gradient-to-b from-rose-950/80 via-slate-900 to-slate-900 border-rose-500/80 ring-1 md:ring-2 ring-rose-500/40'
+          ? 'bg-gradient-to-b from-rose-950/80 via-slate-900 to-slate-900 border-rose-500/80 ring-1 ring-rose-500/40'
           : 'bg-slate-900/95 border-slate-800'
       }`}>
         {/* If in Foul Mode & Ga Mode: Show Snooker Ga Dedicated Foul Selector */}
         {isFoulMode && isGaMode ? (
-          <div className="space-y-1 xs:space-y-1.5 md:space-y-2 py-0.5 animate-fadeIn">
+          <div className="space-y-0.5 xs:space-y-1 py-0.2 animate-fadeIn">
             {/* Compact Ga deduction options */}
-            <div className="bg-slate-950/80 p-1 xs:p-1.5 md:p-2 rounded-lg md:rounded-xl border border-rose-900/60 space-y-0.5 xs:space-y-1 md:space-y-1.5">
-              <div className="flex items-center justify-between text-[9px] xs:text-[10px] md:text-xs text-slate-300 font-bold">
+            <div className="bg-slate-950/80 p-0.5 xs:p-1 rounded-md border border-rose-900/60 space-y-0.5">
+              <div className="flex items-center justify-between text-[7px] xs:text-[9px] md:text-xs text-slate-300 font-bold">
                 <span className="flex items-center space-x-1">
-                  <Target className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-3.5 md:h-3.5 text-purple-400" />
+                  <Target className="w-2 h-2 xs:w-2.5 xs:h-2.5 text-purple-400" />
                   <span>เลือกจำนวนกาที่เสีย:</span>
                 </span>
-                <span className="text-purple-300 font-mono font-black text-[9px] xs:text-[10px] md:text-xs">
-                  {selectedGaPenalty > 0 ? `-${selectedGaPenalty} กา (ไม่พอยกให้อีกฝ่าย)` : 'ไม่เสียกา (0 กา)'}
+                <span className="text-purple-300 font-mono font-black text-[7px] xs:text-[9px] md:text-xs">
+                  {selectedGaPenalty > 0 ? `-${selectedGaPenalty} กา` : 'ไม่เสียกา (0 กา)'}
                 </span>
               </div>
 
-              <div className="grid grid-cols-4 sm:grid-cols-7 gap-1 md:gap-1.5">
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-0.5 xs:gap-1">
                 {[0, 1, 2, 3, 4, 5, 6].map((ga) => (
                   <button
                     key={ga}
                     type="button"
                     onClick={() => setSelectedGaPenalty(ga)}
-                    className={`py-1 xs:py-1.5 md:py-2 px-1 rounded-md xs:rounded-lg md:rounded-xl font-mono font-bold text-[10px] xs:text-xs md:text-sm border transition-all cursor-pointer ${
+                    className={`py-0.5 xs:py-1 px-0.5 rounded-md font-mono font-bold text-[8px] xs:text-[10px] md:text-xs border transition-all cursor-pointer ${
                       selectedGaPenalty === ga
-                        ? 'bg-purple-600 text-white border-purple-400 ring-1 md:ring-2 ring-purple-400 shadow md:shadow-md shadow-purple-950/60 font-black'
+                        ? 'bg-purple-600 text-white border-purple-400 ring-1 ring-purple-400 font-black'
                         : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700'
                     }`}
                   >
@@ -161,11 +161,11 @@ export const BallPots: React.FC<BallPotsProps> = ({
             </div>
 
             {/* Action Buttons for Submitting Ga Foul */}
-            <div className="flex space-x-1 xs:space-x-1.5 md:space-x-2 pt-0.5">
+            <div className="flex space-x-1 pt-0.2">
               <button
                 type="button"
                 onClick={onToggleFoulMode}
-                className="flex-1 py-1.5 xs:py-2 md:py-2.5 rounded-lg md:rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[10px] xs:text-xs md:text-sm border border-slate-700 cursor-pointer"
+                className="flex-1 py-1 xs:py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[8px] xs:text-[10px] md:text-xs border border-slate-700 cursor-pointer"
               >
                 ยกเลิก
               </button>
@@ -175,26 +175,25 @@ export const BallPots: React.FC<BallPotsProps> = ({
                   onFoul(7, selectedGaPenalty);
                   setSelectedGaPenalty(0);
                 }}
-                className="flex-2 py-1.5 xs:py-2 md:py-2.5 rounded-lg md:rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-[10px] xs:text-xs md:text-sm border border-rose-400 shadow-md md:shadow-lg shadow-rose-950/60 cursor-pointer active:scale-98 flex items-center justify-center space-x-1"
+                className="flex-2 py-1 xs:py-1.5 rounded-md bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-[8px] xs:text-[10px] md:text-xs border border-rose-400 shadow-md flex items-center justify-center space-x-1"
               >
-                <AlertTriangle className="w-3 h-3 xs:w-3.5 xs:h-3.5 md:w-4 md:h-4 text-amber-300" />
+                <AlertTriangle className="w-2.5 h-2.5 xs:w-3 xs:h-3 text-amber-300" />
                 <span>ยืนยันฟาวล์ {selectedGaPenalty > 0 ? `(-${selectedGaPenalty} กา)` : ''}</span>
               </button>
             </div>
           </div>
         ) : (
           /* Standard Ball Potting Grid / Standard Foul 4-7 */
-          <div className="grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2">
+          <div className="grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-1.5">
             {ballList.map((ballKey) => {
               const ball = BALL_MAP[ballKey];
               const isFoulTarget = ball.points >= 4;
 
-              // In Foul mode (Standard): hide balls 1, 2, 3 (Red, Yellow, Green)
               if (isFoulMode && !isFoulTarget) {
                 return (
                   <div
                     key={ballKey}
-                    className="invisible pointer-events-none py-1.5 xs:py-2 sm:py-2.5 md:py-3 px-0.5"
+                    className="invisible pointer-events-none py-1 xs:py-1.5 sm:py-2 px-0.5"
                   />
                 );
               }
@@ -203,16 +202,14 @@ export const BallPots: React.FC<BallPotsProps> = ({
                 <button
                   key={ballKey}
                   onClick={() => handleBallClick(ballKey)}
-                  className={`group relative flex flex-col items-center justify-center py-1.5 xs:py-2 sm:py-2.5 md:py-3 px-0.5 sm:px-1 rounded-lg xs:rounded-xl md:rounded-2xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5`}
+                  className={`group relative flex flex-col items-center justify-center py-1 xs:py-1.5 sm:py-2 md:py-2.5 px-0.5 rounded-md xs:rounded-lg md:rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 shadow`}
                   title={isFoulMode ? `เสียฟาวล์ ${ball.points} แต้ม` : `ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
                 >
-                  {/* Display -4, -5, -6, -7 in foul mode, or 1-7 in normal mode */}
-                  <span className="font-mono font-black text-lg xs:text-xl sm:text-2xl md:text-3xl leading-none drop-shadow-md select-none">
+                  <span className="font-mono font-black text-base xs:text-lg sm:text-2xl md:text-3xl leading-none drop-shadow select-none">
                     {isFoulMode ? `-${ball.points}` : ball.points}
                   </span>
 
-                  {/* Keyboard Shortcut Hint Badge */}
-                  <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] font-mono font-bold px-0.5 xs:px-1 rounded-full border border-slate-700 shadow">
+                  <span className="absolute -top-0.5 -right-0.5 bg-slate-950/90 text-amber-300 text-[5px] xs:text-[6px] sm:text-[7px] font-mono font-bold px-0.5 rounded-full border border-slate-700">
                     {ball.numpadKey}
                   </span>
                 </button>
@@ -223,84 +220,84 @@ export const BallPots: React.FC<BallPotsProps> = ({
       </div>
 
       {/* Main Action Controls: Foul Button Large & Dominant, Other Buttons Compact */}
-      <div className="flex items-stretch gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2">
-        {/* Foul Button - Large & Dominant */}
+      <div className="flex items-stretch gap-0.5 xs:gap-1 sm:gap-1.5">
+        {/* Foul Button */}
         <button
           onClick={onToggleFoulMode}
-          className={`w-20 xs:w-24 sm:w-32 md:w-44 flex-shrink-0 flex items-center justify-center space-x-0.5 xs:space-x-1 md:space-x-2 font-extrabold py-1.5 xs:py-2 md:py-3 px-1 xs:px-1.5 md:px-3 rounded-lg xs:rounded-xl md:rounded-2xl border transition-all cursor-pointer active:scale-98 shadow-md ${
+          className={`w-16 xs:w-20 sm:w-28 md:w-36 flex-shrink-0 flex items-center justify-center space-x-0.5 xs:space-x-1 font-extrabold py-1 xs:py-1.5 md:py-2 px-0.5 xs:px-1 rounded-md xs:rounded-lg md:rounded-xl border transition-all cursor-pointer active:scale-98 shadow ${
             isFoulMode
-              ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 ring-2 md:ring-4 ring-rose-500/50 shadow-rose-950/80 animate-pulse'
-              : 'bg-gradient-to-r from-rose-700 via-rose-800 to-red-900 hover:from-rose-600 hover:to-red-800 text-white border-rose-600 shadow-rose-950/60'
+              ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 ring-2 ring-rose-500/50 animate-pulse'
+              : 'bg-gradient-to-r from-rose-700 via-rose-800 to-red-900 hover:from-rose-600 hover:to-red-800 text-white border-rose-600'
           }`}
         >
-          <AlertTriangle className="w-3.5 h-3.5 xs:w-4 xs:h-4 md:w-5 md:h-5 text-amber-300 flex-shrink-0 animate-bounce" />
+          <AlertTriangle className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 text-amber-300 flex-shrink-0 animate-bounce" />
           <div className="text-left min-w-0">
-            <div className="text-[11px] xs:text-xs sm:text-sm md:text-base leading-none font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
-            <div className="text-[7px] xs:text-[8px] md:text-[10px] text-rose-200 font-normal hidden xs:block mt-0.5">[-] / [F]</div>
+            <div className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm leading-none font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
+            <div className="text-[5px] xs:text-[6px] sm:text-[8px] text-rose-200 font-normal hidden xs:block mt-0.5">[-] / [F]</div>
           </div>
         </button>
 
-        {/* Snooker Ga: Dedicated Add Ga / Adjust Ga Button */}
+        {/* Snooker Ga Button */}
         {isGaMode && (
           <button
             onClick={() => setShowManualGaModal(true)}
-            className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white font-extrabold py-1 xs:py-1.5 md:py-2 px-0.5 xs:px-1 rounded-lg xs:rounded-xl border border-purple-500 shadow-sm cursor-pointer active:scale-98 transition-all"
+            className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white font-extrabold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-purple-500 shadow-sm cursor-pointer active:scale-98 transition-all"
             title="เพิ่ม/ปรับจำนวนกาโดยตรง"
           >
-            <Target className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-4 md:h-4 text-amber-300 flex-shrink-0" />
-            <span className="text-[8px] xs:text-[9px] md:text-xs leading-tight font-black truncate mt-0.5">เพิ่มกา</span>
+            <Target className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-amber-300 flex-shrink-0" />
+            <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-black truncate mt-0.5">เพิ่มกา</span>
           </button>
         )}
 
-        {/* Miss Button - Compact */}
+        {/* Miss Button */}
         <button
           onClick={() => onEndTurn('miss')}
-          className="flex-1 flex flex-col items-center justify-center bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-1 xs:py-1.5 md:py-2 px-0.5 xs:px-1 rounded-lg xs:rounded-xl border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex flex-col items-center justify-center bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
         >
-          <RotateCcw className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-4 md:h-4 text-amber-400 flex-shrink-0" />
-          <span className="text-[8px] xs:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">พลาด</span>
+          <RotateCcw className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-amber-400 flex-shrink-0" />
+          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">พลาด</span>
         </button>
 
-        {/* Safety Button - Compact */}
+        {/* Safety Button */}
         <button
           onClick={() => onEndTurn('safety')}
-          className="flex-1 flex flex-col items-center justify-center bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-1 xs:py-1.5 md:py-2 px-0.5 xs:px-1 rounded-lg xs:rounded-xl border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex flex-col items-center justify-center bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
         >
-          <Shield className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-4 md:h-4 text-sky-400 flex-shrink-0" />
-          <span className="text-[8px] xs:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">กัน/เซฟ</span>
+          <Shield className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-sky-400 flex-shrink-0" />
+          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">กัน/เซฟ</span>
         </button>
 
-        {/* Undo Button - Compact */}
+        {/* Undo Button */}
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className={`flex-1 flex flex-col items-center justify-center font-bold py-1 xs:py-1.5 md:py-2 px-0.5 xs:px-1 rounded-lg xs:rounded-xl border transition-all cursor-pointer ${
+          className={`flex-1 flex flex-col items-center justify-center font-bold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border transition-all cursor-pointer ${
             canUndo
               ? 'bg-amber-600/90 hover:bg-amber-500 text-white border-amber-500 shadow-sm active:scale-98'
               : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed'
           }`}
         >
-          <Undo2 className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-4 md:h-4 flex-shrink-0" />
-          <span className="text-[8px] xs:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">ย้อนกลับ</span>
+          <Undo2 className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">ย้อนกลับ</span>
         </button>
 
-        {/* End Frame Button - Compact */}
+        {/* End Frame Button */}
         <button
           onClick={onEndFrame}
-          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black py-1 xs:py-1.5 md:py-2 px-0.5 xs:px-1 rounded-lg xs:rounded-xl border border-amber-400 shadow-sm cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-amber-400 shadow-sm cursor-pointer active:scale-98 transition-all"
         >
-          <Flag className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-4 md:h-4 text-slate-950 flex-shrink-0" />
-          <span className="text-[8px] xs:text-[9px] md:text-xs font-black leading-tight truncate mt-0.5">จบเฟรม</span>
+          <Flag className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-slate-950 flex-shrink-0" />
+          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs font-black leading-tight truncate mt-0.5">จบเฟรม</span>
         </button>
 
-        {/* New Match Button Next to End Frame - Compact & Vibrant Neon */}
+        {/* New Match Button */}
         <button
           onClick={onNewMatch}
-          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-black py-1 xs:py-1.5 md:py-2 px-0.5 xs:px-1 rounded-lg xs:rounded-xl border-2 border-cyan-300 ring-1 ring-cyan-400/50 shadow-sm cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-black py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border-2 border-cyan-300 ring-1 ring-cyan-400/50 shadow-sm cursor-pointer active:scale-98 transition-all"
           title="เริ่มแมตช์ใหม่"
         >
-          <Sparkles className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-4 md:h-4 text-slate-950 flex-shrink-0 animate-pulse" />
-          <span className="text-[8px] xs:text-[9px] md:text-xs font-black leading-tight truncate mt-0.5">เริ่มใหม่</span>
+          <Sparkles className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-slate-950 flex-shrink-0 animate-pulse" />
+          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs font-black leading-tight truncate mt-0.5">เริ่มใหม่</span>
         </button>
       </div>
 
