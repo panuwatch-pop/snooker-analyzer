@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Trophy, ArrowRight, CheckCircle2, RotateCcw } from 'lucide-react';
 import { Frame, Match } from '../types/snooker';
 
 interface FrameEndModalProps {
@@ -31,72 +31,85 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
   const matchWinnerName = p1Frames >= framesNeeded ? match.player1Name : match.player2Name;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 text-center">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 mx-auto flex items-center justify-center shadow-lg shadow-amber-500/30">
-          <Trophy className="w-9 h-9 text-slate-950" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 xs:p-3 sm:p-4 bg-slate-950/90 backdrop-blur-md animate-fadeIn overflow-y-auto">
+      <div className="bg-slate-900 border border-slate-700/80 rounded-xl xs:rounded-2xl max-w-md w-full p-3.5 xs:p-5 sm:p-6 shadow-2xl space-y-2.5 xs:space-y-4 text-center max-h-[95dvh] overflow-y-auto my-auto">
+        
+        {/* Trophy Icon */}
+        <div className="w-10 h-10 xs:w-12 xs:h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 mx-auto flex items-center justify-center shadow-lg shadow-amber-500/30">
+          <Trophy className="w-6 h-6 xs:w-7 xs:h-7 sm:w-9 sm:h-9 text-slate-950" />
         </div>
 
+        {/* Title & Winner Header */}
         <div>
-          <span className="text-xs font-extrabold uppercase text-amber-400 tracking-widest block mb-1">
+          <span className="text-[10px] xs:text-xs font-extrabold uppercase text-amber-400 tracking-widest block mb-0.5">
             {isMatchWon ? '🏆 จบการแข่งขันทั้งแมตช์!' : `🎉 จบเฟรมที่ ${frame.frameNumber}`}
           </span>
-          <h3 className="text-2xl sm:text-3xl font-black text-white">
+          <h3 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black text-white leading-tight">
             {isMatchWon ? `${matchWinnerName} ชนะการแข่งขัน!` : `${winnerName} ชนะเฟรมนี้!`}
           </h3>
         </div>
 
         {/* Frame Score Summary Card */}
-        <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono">
-          <div className="text-3xl font-black text-white flex items-center justify-center space-x-4">
+        <div className="bg-slate-950 border border-slate-800 rounded-lg xs:rounded-xl p-2.5 xs:p-3 font-mono">
+          <div className="text-2xl xs:text-3xl sm:text-4xl font-black text-white flex items-center justify-center space-x-3 xs:space-x-4">
             <span className={winnerIndex === 0 ? 'text-emerald-400' : 'text-slate-400'}>{frame.player1Score}</span>
             <span className="text-slate-600">-</span>
             <span className={winnerIndex === 1 ? 'text-amber-400' : 'text-slate-400'}>{frame.player2Score}</span>
           </div>
-          <div className="text-xs text-slate-400 font-sans mt-1">
+          <div className="text-[11px] xs:text-xs text-slate-400 font-sans mt-0.5">
             {match.player1Name} vs {match.player2Name}
           </div>
         </div>
 
         {/* Frames Progress */}
-        <div className="text-xs text-slate-300 font-semibold flex items-center justify-center space-x-2">
-          <span>สกอร์เฟรมรวม:</span>
-          <span className="font-mono font-bold text-amber-300 text-sm">{p1Frames} - {p2Frames}</span>
+        <div className="text-[11px] xs:text-xs text-slate-300 font-semibold flex items-center justify-center space-x-1.5 xs:space-x-2">
+          <span>สกอร์รวม:</span>
+          <span className="font-mono font-bold text-amber-300 text-xs xs:text-sm">{p1Frames} - {p2Frames}</span>
           <span>{isUnlimited ? '(โหมดเล่นไปเรื่อยๆ ♾️)' : `(Best of ${match.bestOfFrames})`}</span>
         </div>
 
-        {/* Action Buttons */}
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+        {/* Action Buttons: Always Fully Clickable & Touch Friendly */}
+        <div className="pt-1 xs:pt-2 flex flex-col sm:flex-row items-stretch justify-center gap-2 xs:gap-2.5">
           {isUnlimited ? (
             <>
               <button
                 onClick={onNextFrame}
-                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-sm shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2 cursor-pointer transition-all active:scale-98"
+                className="flex-1 py-2 xs:py-2.5 sm:py-3 px-4 rounded-lg xs:rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs xs:text-sm shadow-md shadow-emerald-600/30 flex items-center justify-center space-x-1.5 cursor-pointer transition-all active:scale-98"
               >
                 <span>เริ่มเฟรมต่อไป</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
               </button>
 
               <button
                 onClick={onFinishMatch}
-                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-extrabold text-sm flex items-center justify-center space-x-2 cursor-pointer transition-all active:scale-98"
+                className="flex-1 py-2 xs:py-2.5 sm:py-3 px-4 rounded-lg xs:rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-extrabold text-xs xs:text-sm flex items-center justify-center space-x-1.5 cursor-pointer transition-all active:scale-98"
               >
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
                 <span>จบแมตช์ & บันทึกผล</span>
               </button>
             </>
           ) : !isMatchWon ? (
-            <button
-              onClick={onNextFrame}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-sm shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2 cursor-pointer transition-all active:scale-98"
-            >
-              <span>เริ่มเฟรมถัดไป (Next Frame)</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <>
+              <button
+                onClick={onNextFrame}
+                className="flex-1 py-2 xs:py-2.5 sm:py-3 px-4 rounded-lg xs:rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs xs:text-sm shadow-md shadow-emerald-600/30 flex items-center justify-center space-x-1.5 cursor-pointer transition-all active:scale-98"
+              >
+                <span>เริ่มเฟรมถัดไป</span>
+                <ArrowRight className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+              </button>
+
+              <button
+                onClick={onFinishMatch}
+                className="flex-1 py-2 xs:py-2.5 sm:py-3 px-4 rounded-lg xs:rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold text-xs xs:text-sm flex items-center justify-center space-x-1.5 cursor-pointer transition-all active:scale-98"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 xs:w-4 xs:h-4 text-amber-400" />
+                <span>จบแมตช์ตอนนี้</span>
+              </button>
+            </>
           ) : (
             <button
               onClick={onFinishMatch}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white font-extrabold text-sm shadow-lg shadow-amber-600/30 flex items-center justify-center space-x-2 cursor-pointer transition-all active:scale-98"
+              className="w-full py-2.5 xs:py-3 px-6 rounded-lg xs:rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-xs xs:text-sm shadow-lg shadow-amber-600/30 flex items-center justify-center space-x-2 cursor-pointer transition-all active:scale-98"
             >
               <span>บันทึกผลและปิดแมตช์</span>
               <Trophy className="w-4 h-4" />
