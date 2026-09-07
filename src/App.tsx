@@ -767,7 +767,7 @@ export function App() {
 
       <main className="flex-1 min-h-0 p-0.5 xs:p-1 sm:p-2 md:p-3 max-w-7xl w-full mx-auto flex flex-col overflow-hidden">
         {activeTab === 'scoreboard' && (
-          <div className="flex-1 min-h-0 flex flex-col justify-between space-y-0.5 xs:space-y-1 sm:space-y-1.5 md:space-y-2 animate-fadeIn overflow-hidden">
+          <div className="flex-1 min-h-0 flex flex-col justify-between space-y-0 xs:space-y-0.5 sm:space-y-1.5 md:space-y-2 animate-fadeIn overflow-hidden">
             <Scoreboard
               player1Name={match.player1Name}
               player2Name={match.player2Name}

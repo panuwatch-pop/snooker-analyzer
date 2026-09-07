@@ -48,14 +48,14 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
   const p2Break = activeStrikerIndex === 1 ? currentBreak : 0;
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-0.5 xs:space-y-1 sm:space-y-1.5 flex-shrink-0">
+    <div className="w-full max-w-7xl mx-auto space-y-0.5 xs:space-y-0.5 sm:space-y-1 flex-shrink-0">
       {/* Main Scoreboard: Mirrored Layout (User Sketch) */}
       <div className="grid grid-cols-2 gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2">
         
         {/* ==================== PLAYER 1 CARD (Left: [FRAME / BREAK] -> [SCORE]) ==================== */}
         <div
           onClick={onSwitchStriker}
-          className={`relative overflow-hidden rounded-lg xs:rounded-xl md:rounded-2xl p-0.5 xs:p-1 sm:p-2 md:p-2.5 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
+          className={`relative overflow-hidden rounded-lg xs:rounded-xl md:rounded-2xl p-0.5 xs:p-1 sm:p-1.5 md:p-2.5 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
             activeStrikerIndex === 0
               ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-emerald-500 ring-1 xs:ring-2 ring-emerald-500/50 shadow-md shadow-emerald-950/70'
               : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-90'
@@ -82,8 +82,8 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
           {/* 2. Body: Left Column [FRAME / BREAK] & Right Column [EXTRA LARGE SCORE] */}
           <div className="flex items-stretch gap-0.5 xs:gap-1 sm:gap-1.5 flex-1 my-0.5">
-            {/* Left Sub-Boxes Stack: FRAME & BREAK */}
-            <div className="w-[30%] xs:w-[28%] sm:w-[26%] flex flex-col justify-between gap-0.5 xs:gap-1">
+            {/* Left Sub-Boxes Stack: FRAME & BREAK (22-24% width) */}
+            <div className="w-[24%] xs:w-[22%] sm:w-[20%] flex flex-col justify-between gap-0.5 xs:gap-1">
               {/* Box 1: FRAME */}
               <div className="flex-1 flex flex-col items-center justify-center bg-slate-950/80 border border-slate-800/90 rounded-md p-0.5 shadow-inner">
                 <div className="text-[6px] xs:text-[7px] sm:text-[8px] text-amber-300 font-extrabold uppercase tracking-wider flex items-center space-x-0.5">
@@ -126,8 +126,8 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
               </div>
             </div>
 
-            {/* Right Column: Giant Wide Full-Height SCORE Box */}
-            <div className={`flex-1 flex flex-col justify-between rounded-lg xs:rounded-xl md:rounded-2xl p-0.5 xs:p-1 sm:p-1.5 border transition-all ${
+            {/* Right Column: Giant Wide Full-Height SCORE Box (Stretches to fill ~78-80%) */}
+            <div className={`flex-1 flex flex-col justify-between rounded-lg xs:rounded-xl md:rounded-2xl p-1 xs:p-1.5 md:p-2 border transition-all h-full ${
               activeStrikerIndex === 0
                 ? 'bg-gradient-to-b from-slate-950/95 to-emerald-950/50 border-emerald-500/90 shadow-md shadow-emerald-950/60'
                 : 'bg-slate-950/80 border-slate-800/80'
@@ -142,9 +142,9 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
               </div>
 
               <div className="flex-1 flex items-center justify-center py-0.5">
-                <span className={`text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-mono tracking-tight select-none leading-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] ${
+                <span className={`text-5xl xs:text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black font-mono tracking-tight select-none leading-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] ${
                   activeStrikerIndex === 0
-                    ? 'text-emerald-300 drop-shadow-[0_0_20px_rgba(52,211,153,0.5)]'
+                    ? 'text-emerald-300 drop-shadow-[0_0_24px_rgba(52,211,153,0.5)]'
                     : 'text-slate-100'
                 }`}>
                   {p1Score}
@@ -165,7 +165,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
         {/* ==================== PLAYER 2 CARD (Right: [SCORE] -> [FRAME / BREAK]) ==================== */}
         <div
           onClick={onSwitchStriker}
-          className={`relative overflow-hidden rounded-lg xs:rounded-xl md:rounded-2xl p-0.5 xs:p-1 sm:p-2 md:p-2.5 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
+          className={`relative overflow-hidden rounded-lg xs:rounded-xl md:rounded-2xl p-0.5 xs:p-1 sm:p-1.5 md:p-2.5 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
             activeStrikerIndex === 1
               ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-emerald-500 ring-1 xs:ring-2 ring-emerald-500/50 shadow-md shadow-emerald-950/70'
               : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-90'
@@ -192,8 +192,8 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
           {/* 2. Body: Left Column [EXTRA LARGE SCORE] & Right Column [FRAME / BREAK] */}
           <div className="flex items-stretch gap-0.5 xs:gap-1 sm:gap-1.5 flex-1 my-0.5">
-            {/* Left Column: Giant Wide Full-Height SCORE Box */}
-            <div className={`flex-1 flex flex-col justify-between rounded-lg xs:rounded-xl md:rounded-2xl p-0.5 xs:p-1 sm:p-1.5 border transition-all ${
+            {/* Left Column: Giant Wide Full-Height SCORE Box (Stretches to fill ~78-80%) */}
+            <div className={`flex-1 flex flex-col justify-between rounded-lg xs:rounded-xl md:rounded-2xl p-1 xs:p-1.5 md:p-2 border transition-all h-full ${
               activeStrikerIndex === 1
                 ? 'bg-gradient-to-b from-slate-950/95 to-emerald-950/50 border-emerald-500/90 shadow-md shadow-emerald-950/60'
                 : 'bg-slate-950/80 border-slate-800/80'
@@ -208,9 +208,9 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
               </div>
 
               <div className="flex-1 flex items-center justify-center py-0.5">
-                <span className={`text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-mono tracking-tight select-none leading-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] ${
+                <span className={`text-5xl xs:text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black font-mono tracking-tight select-none leading-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] ${
                   activeStrikerIndex === 1
-                    ? 'text-emerald-300 drop-shadow-[0_0_20px_rgba(52,211,153,0.5)]'
+                    ? 'text-emerald-300 drop-shadow-[0_0_24px_rgba(52,211,153,0.5)]'
                     : 'text-slate-100'
                 }`}>
                   {p2Score}
@@ -226,8 +226,8 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
               )}
             </div>
 
-            {/* Right Sub-Boxes Stack: FRAME & BREAK */}
-            <div className="w-[30%] xs:w-[28%] sm:w-[26%] flex flex-col justify-between gap-0.5 xs:gap-1">
+            {/* Right Sub-Boxes Stack: FRAME & BREAK (22-24% width) */}
+            <div className="w-[24%] xs:w-[22%] sm:w-[20%] flex flex-col justify-between gap-0.5 xs:gap-1">
               {/* Box 1: FRAME */}
               <div className="flex-1 flex flex-col items-center justify-center bg-slate-950/80 border border-slate-800/90 rounded-md p-0.5 shadow-inner">
                 <div className="text-[6px] xs:text-[7px] sm:text-[8px] text-amber-300 font-extrabold uppercase tracking-wider flex items-center space-x-0.5">
@@ -273,8 +273,8 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
         </div>
       </div>
 
-      {/* Frame Status Bar */}
-      <div className="bg-slate-950/90 border border-slate-800 rounded-md xs:rounded-lg md:rounded-xl p-0.5 xs:p-1 md:p-1.5 shadow-sm flex flex-wrap items-center justify-between gap-0.5 xs:gap-1 text-[7px] xs:text-[8px] md:text-xs font-semibold">
+      {/* Frame Status Bar (Seamless touching on mobile) */}
+      <div className="bg-slate-950/90 border border-slate-800 rounded-md xs:rounded-lg md:rounded-xl p-0.5 xs:p-1 md:p-1.5 shadow-sm flex flex-wrap items-center justify-between gap-0.5 xs:gap-1 text-[7px] xs:text-[8px] md:text-xs font-semibold mb-0">
         <div className="flex items-center space-x-1">
           <span className="text-slate-400">แดงบนโต๊ะ:</span>
           <span className="font-bold font-mono text-red-400 bg-red-950/80 border border-red-800 px-1 py-0.2 rounded">

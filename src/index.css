@@ -11,47 +11,46 @@
   }
 }
 
-/* 3D Snooker Ball Gradients */
+/* Solid Vivid Flat Snooker Ball Colors (No Shadows, Bright Solid Tone) */
 .ball-red {
-  background: radial-gradient(circle at 35% 35%, #ff5252, #d32f2f 40%, #850000 85%, #400000 100%);
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.6), inset -2px -2px 6px rgba(0, 0, 0, 0.7), inset 2px 2px 4px rgba(255, 255, 255, 0.6);
+  background: #ef4444;
+  color: #ffffff;
 }
 
 .ball-yellow {
-  background: radial-gradient(circle at 35% 35%, #fff9c4, #fbc02d 40%, #c49000 85%, #614800 100%);
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.6), inset -2px -2px 6px rgba(0, 0, 0, 0.7), inset 2px 2px 4px rgba(255, 255, 255, 0.7);
-  color: #1a1a1a;
+  background: #facc15;
+  color: #0f172a;
 }
 
 .ball-green {
-  background: radial-gradient(circle at 35% 35%, #81c784, #2e7d32 40%, #1b5e20 85%, #052607 100%);
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.6), inset -2px -2px 6px rgba(0, 0, 0, 0.7), inset 2px 2px 4px rgba(255, 255, 255, 0.6);
+  background: #22c55e;
+  color: #ffffff;
 }
 
 .ball-brown {
-  background: radial-gradient(circle at 35% 35%, #bcaaa4, #795548 40%, #4e342e 85%, #27140e 100%);
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.6), inset -2px -2px 6px rgba(0, 0, 0, 0.7), inset 2px 2px 4px rgba(255, 255, 255, 0.5);
+  background: #92400e;
+  color: #ffffff;
 }
 
 .ball-blue {
-  background: radial-gradient(circle at 35% 35%, #64b5f6, #1976d2 40%, #0d47a1 85%, #051b40 100%);
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.6), inset -2px -2px 6px rgba(0, 0, 0, 0.7), inset 2px 2px 4px rgba(255, 255, 255, 0.6);
+  background: #2563eb;
+  color: #ffffff;
 }
 
 .ball-pink {
-  background: radial-gradient(circle at 35% 35%, #f8bbd0, #ec407a 40%, #ad1457 85%, #500525 100%);
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.6), inset -2px -2px 6px rgba(0, 0, 0, 0.7), inset 2px 2px 4px rgba(255, 255, 255, 0.6);
+  background: #ec4899;
+  color: #ffffff;
 }
 
 .ball-black {
-  background: radial-gradient(circle at 35% 35%, #757575, #212121 40%, #0d0d0d 85%, #000000 100%);
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.7), inset -2px -2px 6px rgba(0, 0, 0, 0.9), inset 2px 2px 4px rgba(255, 255, 255, 0.4);
+  background: #09090b;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .ball-white {
-  background: radial-gradient(circle at 35% 35%, #ffffff, #eceff1 40%, #b0bec5 85%, #546e7a 100%);
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.6), inset -2px -2px 6px rgba(0, 0, 0, 0.5), inset 2px 2px 4px rgba(255, 255, 255, 0.9);
-  color: #1e293b;
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 /* Snooker Table Felt Effect */
