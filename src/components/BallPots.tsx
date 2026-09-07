@@ -87,9 +87,9 @@ export const BallPots: React.FC<BallPotsProps> = ({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-1 sm:space-y-1.5 md:space-y-2.5 relative">
+    <div className="w-full max-w-7xl mx-auto space-y-1 sm:space-y-1.5 md:space-y-2 relative">
       {/* Potted Balls in Current Break - Mini colored spheres with numbers and Ga badges */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-lg md:rounded-2xl p-0.5 xs:p-1 md:p-2 shadow-sm md:shadow-md flex flex-wrap items-center justify-between gap-1 md:gap-2">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-lg md:rounded-2xl p-0.5 xs:p-1 md:p-1.5 shadow-sm md:shadow-md flex flex-wrap items-center justify-between gap-1 md:gap-2">
         <div className="flex items-center space-x-1 xs:space-x-1.5 text-[8px] xs:text-[10px] md:text-xs font-bold text-slate-300">
           <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>ลูกที่ตบในเทิร์นนี้ ({pottedInVisit.length} ลูก):</span>
@@ -105,7 +105,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
               return (
                 <div
                   key={s.id || idx}
-                  className={`relative w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-mono font-black text-[8px] xs:text-[10px] md:text-sm text-white shadow border border-white/30 select-none ${b.cssClass}`}
+                  className={`relative w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center font-mono font-black text-[8px] xs:text-[10px] md:text-xs text-white shadow border border-white/30 select-none ${b.cssClass}`}
                   title={`ลูก${b.nameTh} (+${b.points}${s.gaCount ? ` | +${s.gaCount} กา` : ''})`}
                 >
                   <span className="drop-shadow-sm">{b.points}</span>
@@ -122,7 +122,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
       </div>
 
       {/* Ball Potting / Foul Mode Panel */}
-      <div className={`rounded-lg xs:rounded-xl md:rounded-2xl p-1 xs:p-1.5 md:p-3 shadow md:shadow-lg transition-all border ${
+      <div className={`rounded-lg xs:rounded-xl md:rounded-2xl p-1 xs:p-1.5 md:p-2.5 shadow md:shadow-lg transition-all border ${
         isFoulMode
           ? 'bg-gradient-to-b from-rose-950/80 via-slate-900 to-slate-900 border-rose-500/80 ring-1 md:ring-2 ring-rose-500/40'
           : 'bg-slate-900/95 border-slate-800'
@@ -131,7 +131,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
         {isFoulMode && isGaMode ? (
           <div className="space-y-1 xs:space-y-1.5 md:space-y-2 py-0.5 animate-fadeIn">
             {/* Compact Ga deduction options */}
-            <div className="bg-slate-950/80 p-1 xs:p-1.5 md:p-2.5 rounded-lg md:rounded-xl border border-rose-900/60 space-y-0.5 xs:space-y-1 md:space-y-1.5">
+            <div className="bg-slate-950/80 p-1 xs:p-1.5 md:p-2 rounded-lg md:rounded-xl border border-rose-900/60 space-y-0.5 xs:space-y-1 md:space-y-1.5">
               <div className="flex items-center justify-between text-[9px] xs:text-[10px] md:text-xs text-slate-300 font-bold">
                 <span className="flex items-center space-x-1">
                   <Target className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-3.5 md:h-3.5 text-purple-400" />
@@ -184,7 +184,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
           </div>
         ) : (
           /* Standard Ball Potting Grid / Standard Foul 4-7 */
-          <div className="grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-2">
+          <div className="grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2">
             {ballList.map((ballKey) => {
               const ball = BALL_MAP[ballKey];
               const isFoulTarget = ball.points >= 4;
@@ -194,7 +194,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
                 return (
                   <div
                     key={ballKey}
-                    className="invisible pointer-events-none py-1.5 xs:py-2 sm:py-3 px-0.5"
+                    className="invisible pointer-events-none py-1.5 xs:py-2 sm:py-2.5 md:py-3 px-0.5"
                   />
                 );
               }
@@ -203,16 +203,16 @@ export const BallPots: React.FC<BallPotsProps> = ({
                 <button
                   key={ballKey}
                   onClick={() => handleBallClick(ballKey)}
-                  className={`group relative flex flex-col items-center justify-center py-1 xs:py-1.5 sm:py-2.5 md:py-3.5 px-0.5 sm:px-1 rounded-lg xs:rounded-xl md:rounded-2xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5`}
+                  className={`group relative flex flex-col items-center justify-center py-1.5 xs:py-2 sm:py-2.5 md:py-3 px-0.5 sm:px-1 rounded-lg xs:rounded-xl md:rounded-2xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 hover:shadow-lg shadow-md hover:-translate-y-0.5`}
                   title={isFoulMode ? `เสียฟาวล์ ${ball.points} แต้ม` : `ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
                 >
                   {/* Display -4, -5, -6, -7 in foul mode, or 1-7 in normal mode */}
-                  <span className="font-mono font-black text-base xs:text-lg sm:text-2xl md:text-4xl leading-none drop-shadow-md select-none">
+                  <span className="font-mono font-black text-lg xs:text-xl sm:text-2xl md:text-3xl leading-none drop-shadow-md select-none">
                     {isFoulMode ? `-${ball.points}` : ball.points}
                   </span>
 
                   {/* Keyboard Shortcut Hint Badge */}
-                  <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[6px] xs:text-[7px] sm:text-[9px] md:text-[10px] font-mono font-bold px-0.5 xs:px-1 rounded-full border border-slate-700 shadow">
+                  <span className="absolute -top-1 -right-1 bg-slate-950/90 text-amber-300 text-[6px] xs:text-[7px] sm:text-[8px] md:text-[9px] font-mono font-bold px-0.5 xs:px-1 rounded-full border border-slate-700 shadow">
                     {ball.numpadKey}
                   </span>
                 </button>
@@ -227,15 +227,15 @@ export const BallPots: React.FC<BallPotsProps> = ({
         {/* Foul Button - Large & Dominant */}
         <button
           onClick={onToggleFoulMode}
-          className={`w-16 xs:w-20 sm:w-28 md:w-44 flex-shrink-0 flex items-center justify-center space-x-0.5 xs:space-x-1 md:space-x-2 font-extrabold py-1 xs:py-1.5 sm:py-2 md:py-3.5 px-1 xs:px-1.5 md:px-3 rounded-lg xs:rounded-xl md:rounded-2xl border transition-all cursor-pointer active:scale-98 shadow-md ${
+          className={`w-20 xs:w-24 sm:w-32 md:w-44 flex-shrink-0 flex items-center justify-center space-x-0.5 xs:space-x-1 md:space-x-2 font-extrabold py-1.5 xs:py-2 md:py-3 px-1 xs:px-1.5 md:px-3 rounded-lg xs:rounded-xl md:rounded-2xl border transition-all cursor-pointer active:scale-98 shadow-md ${
             isFoulMode
               ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 ring-2 md:ring-4 ring-rose-500/50 shadow-rose-950/80 animate-pulse'
               : 'bg-gradient-to-r from-rose-700 via-rose-800 to-red-900 hover:from-rose-600 hover:to-red-800 text-white border-rose-600 shadow-rose-950/60'
           }`}
         >
-          <AlertTriangle className="w-3 h-3 xs:w-3.5 xs:h-3.5 md:w-6 md:h-6 text-amber-300 flex-shrink-0 animate-bounce" />
+          <AlertTriangle className="w-3.5 h-3.5 xs:w-4 xs:h-4 md:w-5 md:h-5 text-amber-300 flex-shrink-0 animate-bounce" />
           <div className="text-left min-w-0">
-            <div className="text-[10px] xs:text-xs sm:text-sm md:text-lg leading-none font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
+            <div className="text-[11px] xs:text-xs sm:text-sm md:text-base leading-none font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
             <div className="text-[7px] xs:text-[8px] md:text-[10px] text-rose-200 font-normal hidden xs:block mt-0.5">[-] / [F]</div>
           </div>
         </button>

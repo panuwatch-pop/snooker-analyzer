@@ -48,13 +48,13 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
   const p2Break = activeStrikerIndex === 1 ? currentBreak : 0;
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-1 sm:space-y-1.5 md:space-y-3">
+    <div className="w-full max-w-7xl mx-auto space-y-1 sm:space-y-1.5 md:space-y-2">
       {/* Main Scoreboard: ALWAYS 2 COLUMNS (Left-Right Side by Side on Mobile and Desktop) */}
-      <div className="grid grid-cols-2 gap-1 sm:gap-2 md:gap-3">
+      <div className="grid grid-cols-2 gap-1 sm:gap-1.5 md:gap-2.5">
         {/* Player 1 Card (Left Card: Frame -> [Ga] -> Break -> Score) */}
         <div
           onClick={onSwitchStriker}
-          className={`relative overflow-hidden rounded-lg xs:rounded-xl md:rounded-2xl p-1 xs:p-1.5 sm:p-2.5 md:p-5 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
+          className={`relative overflow-hidden rounded-xl md:rounded-2xl p-1.5 xs:p-2 sm:p-3 md:p-4 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
             activeStrikerIndex === 0
               ? 'bg-gradient-to-br from-slate-900 via-emerald-950/60 to-slate-900 border-emerald-500 ring-2 ring-emerald-500/50 shadow-md md:shadow-2xl shadow-emerald-950/70'
               : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-90'
@@ -65,19 +65,19 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
           )}
 
           {/* Player 1 Header */}
-          <div className="flex items-center justify-between gap-0.5 xs:gap-1">
+          <div className="flex items-center justify-between gap-1">
             <div className="flex items-center space-x-1 xs:space-x-1.5 md:space-x-2 min-w-0">
-              <div className={`p-0.5 xs:p-1 md:p-1.5 rounded xs:rounded-md md:rounded-lg ${activeStrikerIndex === 0 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400'}`}>
+              <div className={`p-0.5 xs:p-1 md:p-1.5 rounded-md md:rounded-lg ${activeStrikerIndex === 0 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400'}`}>
                 <User className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-4 md:h-4" />
               </div>
-              <h3 className="text-[11px] xs:text-xs sm:text-base md:text-2xl font-black text-slate-100 tracking-tight truncate">
+              <h3 className="text-xs xs:text-sm sm:text-base md:text-xl lg:text-2xl font-black text-slate-100 tracking-tight truncate">
                 {player1Name}
               </h3>
             </div>
 
             <div className="flex items-center space-x-1 md:space-x-2 flex-shrink-0">
               {activeStrikerIndex === 0 && (
-                <span className="inline-flex items-center px-1 xs:px-1.5 md:px-2 py-0.2 md:py-0.5 text-[7px] xs:text-[8px] md:text-[11px] font-extrabold uppercase bg-emerald-500 text-slate-950 rounded-full animate-pulse shadow">
+                <span className="inline-flex items-center px-1.5 py-0.2 md:py-0.5 text-[8px] xs:text-[9px] md:text-[11px] font-extrabold uppercase bg-emerald-500 text-slate-950 rounded-full animate-pulse shadow">
                   กำลังแทง
                 </span>
               )}
@@ -88,42 +88,42 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
           </div>
 
           {/* Player 1 Middle: Frame on Left -> [Ga] -> Break in Middle -> Giant Score on Right (Facing P2) */}
-          <div className="my-0.5 md:my-2 py-0.5 md:py-1 flex items-center justify-between gap-1 xs:gap-1.5 md:gap-2.5">
+          <div className="my-0.5 xs:my-1 md:my-1.5 py-0.5 flex items-center justify-between gap-1 xs:gap-1.5 md:gap-2.5">
             {/* Frame Box on the LEFT */}
-            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/50 border border-amber-400/80 rounded xs:rounded-lg md:rounded-2xl px-1 xs:px-1.5 md:px-3 py-0.5 md:py-2.5 shadow-sm md:shadow-md flex-shrink-0">
+            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/50 border border-amber-400/80 rounded-lg md:rounded-xl px-1.5 xs:px-2 md:px-3 py-0.5 xs:py-1 md:py-2 shadow-sm md:shadow-md flex-shrink-0">
               <div className="text-[7px] xs:text-[8px] md:text-xs text-amber-300 font-extrabold uppercase tracking-wider flex items-center space-x-0.5">
                 <Trophy className="w-2 h-2 xs:w-2.5 xs:h-2.5 md:w-3.5 md:h-3.5 text-amber-400" />
                 <span>เฟรม</span>
               </div>
-              <span className="text-xs xs:text-sm sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono text-amber-300 leading-none mt-0.5">
+              <span className="text-sm xs:text-lg sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono text-amber-300 leading-none mt-0.5">
                 {p1Frames}
               </span>
             </div>
 
             {/* Ga Box (Shown in Snooker Ga mode) */}
             {isGaMode && (
-              <div className="flex flex-col items-center justify-center bg-gradient-to-b from-purple-500/25 to-purple-950/50 border md:border-2 border-purple-400/80 rounded xs:rounded-lg md:rounded-2xl px-1 xs:px-1.5 md:px-3 py-0.5 md:py-2.5 shadow-sm md:shadow-md flex-shrink-0 animate-pulse">
+              <div className="flex flex-col items-center justify-center bg-gradient-to-b from-purple-500/25 to-purple-950/50 border md:border-2 border-purple-400/80 rounded-lg md:rounded-xl px-1.5 xs:px-2 md:px-3 py-0.5 xs:py-1 md:py-2 shadow-sm md:shadow-md flex-shrink-0 animate-pulse">
                 <div className="text-[7px] xs:text-[8px] md:text-xs text-purple-300 font-extrabold uppercase tracking-wider flex items-center space-x-0.5">
                   <Target className="w-2 h-2 xs:w-2.5 xs:h-2.5 md:w-3.5 md:h-3.5 text-purple-400" />
                   <span>กา</span>
                 </div>
-                <span className="text-xs xs:text-sm sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono text-purple-300 leading-none mt-0.5">
+                <span className="text-sm xs:text-lg sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono text-purple-300 leading-none mt-0.5">
                   {p1Ga}
                 </span>
               </div>
             )}
 
             {/* Current Break in the MIDDLE (Vibrant Neon Glow & High Contrast) */}
-            <div className={`flex flex-col items-center justify-center rounded xs:rounded-lg md:rounded-2xl px-1 xs:px-1.5 md:px-3.5 py-0.5 md:py-2.5 border md:border-2 transition-all duration-200 flex-shrink-0 ${
+            <div className={`flex flex-col items-center justify-center rounded-lg md:rounded-xl px-1.5 xs:px-2 md:px-3.5 py-0.5 xs:py-1 md:py-2 border md:border-2 transition-all duration-200 flex-shrink-0 ${
               activeStrikerIndex === 0 && p1Break > 0
                 ? 'bg-gradient-to-b from-amber-500 via-orange-600 to-amber-700 text-white border-yellow-300 ring-1 md:ring-2 ring-yellow-400/80 shadow md:shadow-lg shadow-orange-500/60 scale-105 animate-pulse'
                 : 'bg-slate-950/70 border-slate-700/60 opacity-60'
             }`}>
               <div className="flex items-center space-x-0.5">
-                <Flame className={`w-2 h-2 xs:w-2.5 xs:h-2.5 md:w-5 md:h-5 ${activeStrikerIndex === 0 && p1Break > 0 ? 'text-yellow-200 fill-yellow-300 animate-bounce' : 'text-slate-500'}`} />
+                <Flame className={`w-2.5 h-2.5 md:w-4 md:h-4 ${activeStrikerIndex === 0 && p1Break > 0 ? 'text-yellow-200 fill-yellow-300 animate-bounce' : 'text-slate-500'}`} />
                 <span className={`text-[7px] xs:text-[8px] md:text-[10px] font-black uppercase tracking-wider ${activeStrikerIndex === 0 && p1Break > 0 ? 'text-yellow-100 drop-shadow' : 'text-slate-500'}`}>เบรก</span>
               </div>
-              <span className={`text-xs xs:text-sm sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono leading-none mt-0.5 ${
+              <span className={`text-sm xs:text-lg sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono leading-none mt-0.5 ${
                 activeStrikerIndex === 0 && p1Break > 0 ? 'text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]' : 'text-slate-500'
               }`}>
                 {p1Break}
@@ -132,7 +132,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
             {/* Giant Score on the RIGHT (Facing Player 2) */}
             <div className="flex-1 text-right">
-              <span className="text-3xl xs:text-4xl sm:text-6xl md:text-9xl lg:text-[10rem] font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] leading-none select-none inline-block">
+              <span className="text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] leading-none select-none inline-block">
                 {p1Score}
               </span>
             </div>
@@ -140,12 +140,12 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
           {/* Shot Time Footer for active striker */}
           {activeStrikerIndex === 0 && (
-            <div className="pt-0.5 md:pt-1.5 border-t border-emerald-800/40 flex items-center justify-between text-[7px] xs:text-[8px] md:text-xs font-bold text-slate-400">
-              <div className="flex items-center space-x-0.5 xs:space-x-1">
+            <div className="pt-0.5 md:pt-1 border-t border-emerald-800/40 flex items-center justify-between text-[8px] xs:text-[9px] md:text-xs font-bold text-slate-400">
+              <div className="flex items-center space-x-1">
                 <span>ตบ: <strong className="text-emerald-400 font-mono">{ballsInCurrentVisit}</strong></span>
               </div>
               <div className="flex items-center space-x-0.5 md:space-x-1 text-slate-300 bg-slate-800/80 px-1 md:px-1.5 py-0.2 md:py-0.5 rounded">
-                <Clock className="w-2 h-2 xs:w-2.5 xs:h-2.5 md:w-3.5 md:h-3.5 text-slate-400" />
+                <Clock className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-400" />
                 <span><strong className="text-amber-300 font-mono">{shotDurationSec}s</strong></span>
               </div>
             </div>
@@ -155,7 +155,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
         {/* Player 2 Card (Right Card: Score -> Break -> [Ga] -> Frame) */}
         <div
           onClick={onSwitchStriker}
-          className={`relative overflow-hidden rounded-lg xs:rounded-xl md:rounded-2xl p-1 xs:p-1.5 sm:p-2.5 md:p-5 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
+          className={`relative overflow-hidden rounded-xl md:rounded-2xl p-1.5 xs:p-2 sm:p-3 md:p-4 transition-all duration-300 cursor-pointer border active:scale-[0.99] flex flex-col justify-between ${
             activeStrikerIndex === 1
               ? 'bg-gradient-to-br from-slate-900 via-emerald-950/60 to-slate-900 border-emerald-500 ring-2 ring-emerald-500/50 shadow-md md:shadow-2xl shadow-emerald-950/70'
               : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-90'
@@ -166,10 +166,10 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
           )}
 
           {/* Player 2 Header */}
-          <div className="flex items-center justify-between gap-0.5 xs:gap-1">
+          <div className="flex items-center justify-between gap-1">
             <div className="flex items-center space-x-1 md:space-x-2 flex-shrink-0">
               {activeStrikerIndex === 1 && (
-                <span className="inline-flex items-center px-1 xs:px-1.5 md:px-2 py-0.2 md:py-0.5 text-[7px] xs:text-[8px] md:text-[11px] font-extrabold uppercase bg-emerald-500 text-slate-950 rounded-full animate-pulse shadow">
+                <span className="inline-flex items-center px-1.5 py-0.2 md:py-0.5 text-[8px] xs:text-[9px] md:text-[11px] font-extrabold uppercase bg-emerald-500 text-slate-950 rounded-full animate-pulse shadow">
                   กำลังแทง
                 </span>
               )}
@@ -179,35 +179,35 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             </div>
 
             <div className="flex items-center space-x-1 xs:space-x-1.5 md:space-x-2 min-w-0">
-              <h3 className="text-[11px] xs:text-xs sm:text-base md:text-2xl font-black text-slate-100 tracking-tight truncate">
+              <h3 className="text-xs xs:text-sm sm:text-base md:text-xl lg:text-2xl font-black text-slate-100 tracking-tight truncate">
                 {player2Name}
               </h3>
-              <div className={`p-0.5 xs:p-1 md:p-1.5 rounded xs:rounded-md md:rounded-lg ${activeStrikerIndex === 1 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400'}`}>
+              <div className={`p-0.5 xs:p-1 md:p-1.5 rounded-md md:rounded-lg ${activeStrikerIndex === 1 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400'}`}>
                 <User className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-4 md:h-4" />
               </div>
             </div>
           </div>
 
           {/* Player 2 Middle: Giant Score on Left (Facing P1) -> Break in Middle -> [Ga] -> Frame on Right */}
-          <div className="my-0.5 md:my-2 py-0.5 md:py-1 flex items-center justify-between gap-1 xs:gap-1.5 md:gap-2.5">
+          <div className="my-0.5 xs:my-1 md:my-1.5 py-0.5 flex items-center justify-between gap-1 xs:gap-1.5 md:gap-2.5">
             {/* Giant Score on the LEFT (Facing Player 1) */}
             <div className="flex-1 text-left">
-              <span className="text-3xl xs:text-4xl sm:text-6xl md:text-9xl lg:text-[10rem] font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] leading-none select-none inline-block">
+              <span className="text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter text-white font-mono drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] leading-none select-none inline-block">
                 {p2Score}
               </span>
             </div>
 
             {/* Current Break in the MIDDLE (Vibrant Neon Glow & High Contrast) */}
-            <div className={`flex flex-col items-center justify-center rounded xs:rounded-lg md:rounded-2xl px-1 xs:px-1.5 md:px-3.5 py-0.5 md:py-2.5 border md:border-2 transition-all duration-200 flex-shrink-0 ${
+            <div className={`flex flex-col items-center justify-center rounded-lg md:rounded-xl px-1.5 xs:px-2 md:px-3.5 py-0.5 xs:py-1 md:py-2 border md:border-2 transition-all duration-200 flex-shrink-0 ${
               activeStrikerIndex === 1 && p2Break > 0
                 ? 'bg-gradient-to-b from-amber-500 via-orange-600 to-amber-700 text-white border-yellow-300 ring-1 md:ring-2 ring-yellow-400/80 shadow md:shadow-lg shadow-orange-500/60 scale-105 animate-pulse'
                 : 'bg-slate-950/70 border-slate-700/60 opacity-60'
             }`}>
               <div className="flex items-center space-x-0.5">
-                <Flame className={`w-2 h-2 xs:w-2.5 xs:h-2.5 md:w-5 md:h-5 ${activeStrikerIndex === 1 && p2Break > 0 ? 'text-yellow-200 fill-yellow-300 animate-bounce' : 'text-slate-500'}`} />
+                <Flame className={`w-2.5 h-2.5 md:w-4 md:h-4 ${activeStrikerIndex === 1 && p2Break > 0 ? 'text-yellow-200 fill-yellow-300 animate-bounce' : 'text-slate-500'}`} />
                 <span className={`text-[7px] xs:text-[8px] md:text-[10px] font-black uppercase tracking-wider ${activeStrikerIndex === 1 && p2Break > 0 ? 'text-yellow-100 drop-shadow' : 'text-slate-500'}`}>เบรก</span>
               </div>
-              <span className={`text-xs xs:text-sm sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono leading-none mt-0.5 ${
+              <span className={`text-sm xs:text-lg sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono leading-none mt-0.5 ${
                 activeStrikerIndex === 1 && p2Break > 0 ? 'text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]' : 'text-slate-500'
               }`}>
                 {p2Break}
@@ -216,24 +216,24 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
             {/* Ga Box (Shown in Snooker Ga mode) */}
             {isGaMode && (
-              <div className="flex flex-col items-center justify-center bg-gradient-to-b from-purple-500/25 to-purple-950/50 border md:border-2 border-purple-400/80 rounded xs:rounded-lg md:rounded-2xl px-1 xs:px-1.5 md:px-3 py-0.5 md:py-2.5 shadow-sm md:shadow-md flex-shrink-0 animate-pulse">
+              <div className="flex flex-col items-center justify-center bg-gradient-to-b from-purple-500/25 to-purple-950/50 border md:border-2 border-purple-400/80 rounded-lg md:rounded-xl px-1.5 xs:px-2 md:px-3 py-0.5 xs:py-1 md:py-2 shadow-sm md:shadow-md flex-shrink-0 animate-pulse">
                 <div className="text-[7px] xs:text-[8px] md:text-xs text-purple-300 font-extrabold uppercase tracking-wider flex items-center space-x-0.5">
                   <Target className="w-2 h-2 xs:w-2.5 xs:h-2.5 md:w-3.5 md:h-3.5 text-purple-400" />
                   <span>กา</span>
                 </div>
-                <span className="text-xs xs:text-sm sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono text-purple-300 leading-none mt-0.5">
+                <span className="text-sm xs:text-lg sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono text-purple-300 leading-none mt-0.5">
                   {p2Ga}
                 </span>
               </div>
             )}
 
             {/* Frame Box on the RIGHT */}
-            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/50 border border-amber-400/80 rounded xs:rounded-lg md:rounded-2xl px-1 xs:px-1.5 md:px-3 py-0.5 md:py-2.5 shadow-sm md:shadow-md flex-shrink-0">
+            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500/25 to-amber-950/50 border border-amber-400/80 rounded-lg md:rounded-xl px-1.5 xs:px-2 md:px-3 py-0.5 xs:py-1 md:py-2 shadow-sm md:shadow-md flex-shrink-0">
               <div className="text-[7px] xs:text-[8px] md:text-xs text-amber-300 font-extrabold uppercase tracking-wider flex items-center space-x-0.5">
                 <Trophy className="w-2 h-2 xs:w-2.5 xs:h-2.5 md:w-3.5 md:h-3.5 text-amber-400" />
                 <span>เฟรม</span>
               </div>
-              <span className="text-xs xs:text-sm sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono text-amber-300 leading-none mt-0.5">
+              <span className="text-sm xs:text-lg sm:text-2xl md:text-4xl lg:text-5xl font-black font-mono text-amber-300 leading-none mt-0.5">
                 {p2Frames}
               </span>
             </div>
@@ -241,12 +241,12 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
           {/* Shot Time Footer for active striker */}
           {activeStrikerIndex === 1 && (
-            <div className="pt-0.5 md:pt-1.5 border-t border-emerald-800/40 flex items-center justify-between text-[7px] xs:text-[8px] md:text-xs font-bold text-slate-400">
+            <div className="pt-0.5 md:pt-1 border-t border-emerald-800/40 flex items-center justify-between text-[8px] xs:text-[9px] md:text-xs font-bold text-slate-400">
               <div className="flex items-center space-x-0.5 md:space-x-1 text-slate-300 bg-slate-800/80 px-1 md:px-1.5 py-0.2 md:py-0.5 rounded">
-                <Clock className="w-2 h-2 xs:w-2.5 xs:h-2.5 md:w-3.5 md:h-3.5 text-slate-400" />
+                <Clock className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-400" />
                 <span><strong className="text-amber-300 font-mono">{shotDurationSec}s</strong></span>
               </div>
-              <div className="flex items-center space-x-0.5 xs:space-x-1">
+              <div className="flex items-center space-x-1">
                 <span>ตบ: <strong className="text-emerald-400 font-mono">{ballsInCurrentVisit}</strong></span>
               </div>
             </div>
@@ -255,42 +255,42 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
       </div>
 
       {/* Frame Status Bar */}
-      <div className="bg-slate-950/90 border border-slate-800 rounded-lg md:rounded-xl p-1 xs:p-1.5 md:p-3 shadow-sm md:shadow-md flex flex-wrap items-center justify-between gap-1 md:gap-2 text-[9px] xs:text-[10px] md:text-sm font-semibold">
+      <div className="bg-slate-950/90 border border-slate-800 rounded-lg md:rounded-xl p-1 xs:p-1.5 md:p-2.5 shadow-sm md:shadow-md flex flex-wrap items-center justify-between gap-1 md:gap-2 text-[9px] xs:text-[10px] md:text-xs font-semibold">
         <div className="flex items-center space-x-1 md:space-x-1.5">
           <span className="text-slate-400">แดงบนโต๊ะ:</span>
-          <span className="font-bold font-mono text-red-400 bg-red-950/80 border border-red-800 px-1 xs:px-1.5 md:px-2.5 py-0.2 md:py-0.5 rounded md:rounded-lg">
+          <span className="font-bold font-mono text-red-400 bg-red-950/80 border border-red-800 px-1 xs:px-1.5 md:px-2 py-0.2 md:py-0.5 rounded md:rounded-lg">
             {redsRemaining} ลูก
           </span>
         </div>
 
         <div className="flex items-center flex-wrap gap-0.5 xs:gap-1 md:gap-2">
-          <div className="bg-slate-900 border border-slate-700/80 px-1 xs:px-1.5 md:px-2.5 py-0.2 md:py-1 rounded md:rounded-lg flex items-center space-x-0.5 md:space-x-1">
+          <div className="bg-slate-900 border border-slate-700/80 px-1 xs:px-1.5 md:px-2 py-0.2 md:py-0.5 rounded md:rounded-lg flex items-center space-x-0.5 md:space-x-1">
             <span className="text-slate-400 text-[8px] xs:text-[9px] md:text-xs">แต้มบนโต๊ะ:</span>
-            <span className="font-bold font-mono text-emerald-400 text-[10px] xs:text-xs md:text-base">{remaining}</span>
+            <span className="font-bold font-mono text-emerald-400 text-[10px] xs:text-xs md:text-sm">{remaining}</span>
           </div>
 
-          <div className="bg-slate-900 border border-slate-700/80 px-1 xs:px-1.5 md:px-2.5 py-0.2 md:py-1 rounded md:rounded-lg flex items-center space-x-0.5 md:space-x-1">
+          <div className="bg-slate-900 border border-slate-700/80 px-1 xs:px-1.5 md:px-2 py-0.2 md:py-0.5 rounded md:rounded-lg flex items-center space-x-0.5 md:space-x-1">
             <span className="text-slate-400 text-[8px] xs:text-[9px] md:text-xs">นำ/ตาม:</span>
-            <span className="font-bold font-mono text-amber-300 text-[10px] xs:text-xs md:text-base">{diff}</span>
+            <span className="font-bold font-mono text-amber-300 text-[10px] xs:text-xs md:text-sm">{diff}</span>
           </div>
 
           {isSafeLead ? (
-            <div className="bg-rose-950/90 border border-rose-600 text-rose-200 px-1 xs:px-1.5 md:px-2 py-0.2 md:py-1 rounded md:rounded-lg flex items-center space-x-0.5 md:space-x-1 animate-pulse shadow-sm md:shadow-md font-bold text-[8px] xs:text-[9px] md:text-xs">
-              <ShieldAlert className="w-2.5 h-2.5 md:w-3.5 md:h-3.5 text-rose-400 flex-shrink-0" />
+            <div className="bg-rose-950/90 border border-rose-600 text-rose-200 px-1 xs:px-1.5 md:px-2 py-0.2 md:py-0.5 rounded md:rounded-lg flex items-center space-x-0.5 md:space-x-1 animate-pulse shadow-sm md:shadow-md font-bold text-[8px] xs:text-[9px] md:text-xs">
+              <ShieldAlert className="w-2.5 h-2.5 md:w-3 md:h-3 text-rose-400 flex-shrink-0" />
               <span>
                 แต้มขาด! {remaining > 0 ? `สนุ๊ก: ${snookersNeeded}` : `(${leaderName} ชนะ)`}
               </span>
             </div>
           ) : (
-            <div className="bg-emerald-950/50 border border-emerald-700/60 text-emerald-300 px-1 xs:px-1.5 md:px-2 py-0.2 md:py-1 rounded md:rounded-lg flex items-center space-x-0.5 md:space-x-1 font-bold text-[8px] xs:text-[9px] md:text-xs">
-              <Sparkles className="w-2.5 h-2.5 md:w-3.5 md:h-3.5 text-emerald-400 flex-shrink-0" />
+            <div className="bg-emerald-950/50 border border-emerald-700/60 text-emerald-300 px-1 xs:px-1.5 md:px-2 py-0.2 md:py-0.5 rounded md:rounded-lg flex items-center space-x-0.5 md:space-x-1 font-bold text-[8px] xs:text-[9px] md:text-xs">
+              <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 text-emerald-400 flex-shrink-0" />
               <span>แต้มยังไม่ขาด</span>
             </div>
           )}
 
-          <div className="bg-slate-900 border border-slate-700/80 px-1 xs:px-1.5 md:px-2.5 py-0.2 md:py-1 rounded md:rounded-lg flex items-center space-x-0.5 md:space-x-1">
-            <Clock className="w-2.5 h-2.5 md:w-3.5 md:h-3.5 text-slate-400" />
-            <span className="font-mono font-bold text-slate-200 text-[10px] xs:text-xs md:text-sm">{frameDurationFormatted}</span>
+          <div className="bg-slate-900 border border-slate-700/80 px-1 xs:px-1.5 md:px-2 py-0.2 md:py-0.5 rounded md:rounded-lg flex items-center space-x-0.5 md:space-x-1">
+            <Clock className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-400" />
+            <span className="font-mono font-bold text-slate-200 text-[10px] xs:text-xs md:text-xs">{frameDurationFormatted}</span>
           </div>
         </div>
       </div>
