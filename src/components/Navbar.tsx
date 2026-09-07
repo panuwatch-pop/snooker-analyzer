@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { GameMode } from '../types/snooker';
 import { APP_VERSION } from '../version';
+import { useDevice } from '../utils/device';
 
 interface NavbarProps {
   activeTab: 'scoreboard' | 'raw-data' | 'analytics' | 'history';
@@ -35,6 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleMute,
 }) => {
   const isUnlimited = matchLengthType === 'unlimited' || bestOfFrames === 0;
+  const { isMobile } = useDevice();
 
   return (
     <header className="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-1.5 sm:px-3 py-1 sm:py-1.5 shadow-md flex-shrink-0">
@@ -61,25 +63,26 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Center / Right Section: Mobile Dropdown (Top Row) OR Desktop Tabs */}
+        {/* Center / Right Section: Mobile Dropdown (Top Row) OR Desktop/Tablet Tabs */}
         <div className="flex items-center space-x-1 sm:space-x-2 flex-1 justify-end min-w-0">
-          {/* Mobile Tab Dropdown in the TOP ROW with Down Arrow */}
-          <div className="md:hidden relative flex items-center min-w-0 max-w-[170px] xs:max-w-[210px]">
-            <select
-              value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value as any)}
-              className="appearance-none w-full bg-slate-950 text-emerald-300 font-bold text-[11px] xs:text-xs rounded-lg pl-2 pr-6 py-1 border border-emerald-600/80 outline-none focus:ring-1 focus:ring-emerald-400 shadow cursor-pointer truncate"
-            >
-              <option value="scoreboard" className="bg-slate-900 text-slate-100 font-semibold">📺 กระดานคะแนน</option>
-              <option value="raw-data" className="bg-slate-900 text-slate-100 font-semibold">📋 ข้อมูลดิบ (Logs)</option>
-              <option value="analytics" className="bg-slate-900 text-slate-100 font-semibold">📊 วิเคราะห์สถิติ %</option>
-              <option value="history" className="bg-slate-900 text-slate-100 font-semibold">📜 ประวัติการแข่ง</option>
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-emerald-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-
-          {/* Desktop Horizontal Tabs (Visible on md and larger) */}
-          <nav className="hidden md:flex items-center bg-slate-950/70 p-0.5 rounded-xl border border-slate-800/80 shadow-inner">
+          {isMobile ? (
+            /* Mobile Tab Dropdown in the TOP ROW with Down Arrow (for Phones in Portrait & Landscape) */
+            <div className="relative flex items-center min-w-0 max-w-[170px] xs:max-w-[210px]">
+              <select
+                value={activeTab}
+                onChange={(e) => setActiveTab(e.target.value as any)}
+                className="appearance-none w-full bg-slate-950 text-emerald-300 font-bold text-[11px] xs:text-xs rounded-lg pl-2 pr-6 py-1 border border-emerald-600/80 outline-none focus:ring-1 focus:ring-emerald-400 shadow cursor-pointer truncate"
+              >
+                <option value="scoreboard" className="bg-slate-900 text-slate-100 font-semibold">📺 กระดานคะแนน</option>
+                <option value="raw-data" className="bg-slate-900 text-slate-100 font-semibold">📋 ข้อมูลดิบ (Logs)</option>
+                <option value="analytics" className="bg-slate-900 text-slate-100 font-semibold">📊 วิเคราะห์สถิติ %</option>
+                <option value="history" className="bg-slate-900 text-slate-100 font-semibold">📜 ประวัติการแข่ง</option>
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-emerald-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          ) : (
+            /* Tablet / Desktop Horizontal Tabs */
+            <nav className="flex items-center bg-slate-950/70 p-0.5 rounded-xl border border-slate-800/80 shadow-inner">
             <button
               onClick={() => setActiveTab('scoreboard')}
               className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs lg:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
@@ -128,6 +131,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>ประวัติการแข่ง</span>
             </button>
           </nav>
+        )}
 
           {/* Mute / Unmute Button: Top Right */}
           <button
