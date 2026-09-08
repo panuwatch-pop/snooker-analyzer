@@ -775,6 +775,10 @@ export function App() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const previousFrames = match.frames.slice(0, match.currentFrameIndex);
+  const p1CumulativeScore = previousFrames.reduce((sum, f) => sum + f.player1Score, 0) + currentFrame.player1Score;
+  const p2CumulativeScore = previousFrames.reduce((sum, f) => sum + f.player2Score, 0) + currentFrame.player2Score;
+
   return (
     <div className="h-[100dvh] max-h-[100dvh] w-full bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white overflow-hidden">
       <Navbar
@@ -804,6 +808,10 @@ export function App() {
               isGaMode={match.gameMode === 'snooker-ga'}
               isElectricMode={match.gameMode === 'electric-count'}
               electricConfig={match.electricConfig || currentFrame.electricConfig}
+              p1CumulativeScore={p1CumulativeScore}
+              p2CumulativeScore={p2CumulativeScore}
+              currentGameNumber={match.currentFrameIndex + 1}
+              totalGames={match.bestOfFrames}
               onSwitchStriker={() => handleEndTurn('miss')}
             />
 

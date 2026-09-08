@@ -117,14 +117,15 @@ export function getBallBasePoints(
 }
 
 /**
- * Calculate pot points for Electric Snooker / Ball Count with Handicap
+ * Calculate pot points for Electric Snooker / Ball Count
+ * Live play scores raw ball points. Handicap is calculated at game/frame end.
  */
 export function calculateElectricPotPoints(
   ball: BallColor,
   pocket?: PocketLocation,
   isFinalBlack: boolean = false,
   electricConfig?: ElectricConfig,
-  playerIndex: 0 | 1 = 0
+  _playerIndex: 0 | 1 = 0
 ): { points: number; rawPoints: number; isGaBonus: boolean; description: string } {
   if (!electricConfig) {
     const raw = BALL_MAP[ball].points;
@@ -157,21 +158,26 @@ export function calculateElectricPotPoints(
     }
   }
 
-  // Apply handicap multiplier if enabled
-  let multiplier = 1;
-  if (electricConfig.handicapEnabled && playerIndex === electricConfig.handicapGiverIndex) {
-    multiplier = electricConfig.handicapGiverRatio / 100;
-  }
-
-  const effectivePoints = Math.round(rawPoints * multiplier * 10) / 10;
-  const desc = `ตบลูก ${BALL_MAP[ball].nameTh}${isGaBonus ? ' (หลุมกา)' : ''} (+${effectivePoints}${multiplier !== 1 ? ` [ต่อ ${electricConfig.handicapGiverRatio}%]` : ''})`;
+  const desc = `ตบลูก ${BALL_MAP[ball].nameTh}${isGaBonus ? ' (หลุมกา)' : ''} (+${rawPoints})`;
 
   return {
-    points: effectivePoints,
+    points: rawPoints,
     rawPoints,
     isGaBonus,
     description: desc,
   };
+}
+
+/**
+ * Calculate handicap adjusted score for game/match summaries
+ */
+export function calculateHandicapScore(
+  rawScore: number,
+  isGiver: boolean,
+  giverRatio: number
+): number {
+  if (!isGiver) return rawScore;
+  return Math.round(rawScore * (giverRatio / 100) * 10) / 10;
 }
 
 /**

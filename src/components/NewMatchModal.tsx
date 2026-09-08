@@ -410,24 +410,32 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
             </div>
           )}
 
-          {/* Match Length Mode: Best of vs Unlimited */}
+          {/* Match Length Mode: Best of / Total Games vs Unlimited */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-300">2. เลือกความยาวของเกม / รูปแบบการแข่ง</label>
+            <label className="text-xs font-bold text-slate-300">
+              {gameMode === 'electric-count' ? '2. เลือกจำนวนเกม / รูปแบบการแข่ง' : '2. เลือกความยาวของเกม / รูปแบบการแข่ง'}
+            </label>
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => setMatchLengthType('best-of')}
                 className={`p-2.5 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
                   matchLengthType === 'best-of'
-                    ? 'bg-gradient-to-br from-amber-600 to-amber-700 border-amber-400 text-white shadow-md font-bold'
+                    ? (gameMode === 'electric-count'
+                        ? 'bg-gradient-to-br from-cyan-600 to-cyan-700 border-cyan-400 text-white shadow-md font-bold'
+                        : 'bg-gradient-to-br from-amber-600 to-amber-700 border-amber-400 text-white shadow-md font-bold')
                     : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
                 }`}
               >
                 <div className="flex items-center space-x-1.5">
-                  <Trophy className="w-4 h-4 text-amber-300" />
-                  <span className="text-sm font-black">แข่งแบบนับเฟรม (Best of)</span>
+                  <Trophy className={`w-4 h-4 ${gameMode === 'electric-count' ? 'text-cyan-300' : 'text-amber-300'}`} />
+                  <span className="text-sm font-black">
+                    {gameMode === 'electric-count' ? 'แข่งแบบกำหนดจำนวนเกม' : 'แข่งแบบนับเฟรม (Best of)'}
+                  </span>
                 </div>
-                <span className="text-[10px] opacity-90 mt-0.5">ชนะครบตามที่ตั้งไว้จบแมตช์</span>
+                <span className="text-[10px] opacity-90 mt-0.5">
+                  {gameMode === 'electric-count' ? 'เล่นครบจำนวนเกมแล้วรวมแต้ม' : 'ชนะครบตามที่ตั้งไว้จบแมตช์'}
+                </span>
               </button>
 
               <button
@@ -443,40 +451,75 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
                   <InfinityIcon className="w-4 h-4 text-purple-300" />
                   <span className="text-sm font-black">เล่นไปเรื่อยๆ (Unlimited)</span>
                 </div>
-                <span className="text-[10px] opacity-90 mt-0.5">ไม่จำกัดเฟรม / เล่นซ้อมทั้งวัน</span>
+                <span className="text-[10px] opacity-90 mt-0.5">
+                  {gameMode === 'electric-count' ? 'ไม่จำกัดเกม / เล่นสะสมแต้มทั้งวัน' : 'ไม่จำกัดเฟรม / เล่นซ้อมทั้งวัน'}
+                </span>
               </button>
             </div>
 
-            {/* If Best of selected: choose Quick Frame Chips */}
+            {/* If Best of / Total Games selected: choose Quick Game / Frame Chips */}
             {matchLengthType === 'best-of' ? (
               <div className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 space-y-2">
                 <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span>เลือกจำนวนเฟรม (ชนะ {Math.ceil(bestOfFrames / 2)} ใน {bestOfFrames} เฟรม):</span>
-                  <span className="text-amber-400 font-mono font-bold">Best of {bestOfFrames}</span>
+                  <span>
+                    {gameMode === 'electric-count'
+                      ? `เลือกจำนวนเกมที่ต้องการเล่น (${bestOfFrames} เกม):`
+                      : `เลือกจำนวนเฟรม (ชนะ ${Math.ceil(bestOfFrames / 2)} ใน ${bestOfFrames} เฟรม):`}
+                  </span>
+                  <span className={`font-mono font-bold ${gameMode === 'electric-count' ? 'text-cyan-400' : 'text-amber-400'}`}>
+                    {gameMode === 'electric-count' ? `${bestOfFrames} เกม` : `Best of ${bestOfFrames}`}
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
-                  {quickBestOfOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setBestOfFrames(opt.value);
-                        setCustomFramesInput(opt.value.toString());
-                      }}
-                      className={`p-1.5 rounded-lg border text-center transition-all cursor-pointer ${
-                        bestOfFrames === opt.value
-                          ? 'bg-amber-500 text-slate-950 border-amber-300 font-black shadow'
-                          : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800 font-semibold'
-                      }`}
-                    >
-                      <div className="text-xs">{opt.label}</div>
-                      <div className="text-[9px] opacity-80 truncate">{opt.desc}</div>
-                    </button>
-                  ))}
+                  {gameMode === 'electric-count' ? (
+                    [
+                      { value: 5, label: '5 เกม', desc: 'มินิเกม' },
+                      { value: 10, label: '10 เกม', desc: 'มาตรฐาน (แนะนำ)' },
+                      { value: 15, label: '15 เกม', desc: 'แมตช์ยาว' },
+                      { value: 20, label: '20 เกม', desc: 'แมตช์ใหญ่' },
+                      { value: 30, label: '30 เกม', desc: 'ชิงแชมป์' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setBestOfFrames(opt.value);
+                          setCustomFramesInput(opt.value.toString());
+                        }}
+                        className={`p-1.5 rounded-lg border text-center transition-all cursor-pointer ${
+                          bestOfFrames === opt.value
+                            ? 'bg-cyan-500 text-slate-950 border-cyan-300 font-black shadow'
+                            : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800 font-semibold'
+                        }`}
+                      >
+                        <div className="text-xs">{opt.label}</div>
+                        <div className="text-[9px] opacity-80 truncate">{opt.desc}</div>
+                      </button>
+                    ))
+                  ) : (
+                    quickBestOfOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setBestOfFrames(opt.value);
+                          setCustomFramesInput(opt.value.toString());
+                        }}
+                        className={`p-1.5 rounded-lg border text-center transition-all cursor-pointer ${
+                          bestOfFrames === opt.value
+                            ? 'bg-amber-500 text-slate-950 border-amber-300 font-black shadow'
+                            : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800 font-semibold'
+                        }`}
+                      >
+                        <div className="text-xs">{opt.label}</div>
+                        <div className="text-[9px] opacity-80 truncate">{opt.desc}</div>
+                      </button>
+                    ))
+                  )}
                 </div>
 
-                {/* Custom Frames Input */}
+                {/* Custom Frames / Games Input */}
                 <div className="flex items-center space-x-2 pt-1 border-t border-slate-800 text-xs">
                   <span className="text-slate-400">หรือกำหนดเอง:</span>
                   <input
@@ -489,17 +532,23 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
                       const val = parseInt(e.target.value, 10);
                       if (val > 0) setBestOfFrames(val);
                     }}
-                    className="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-center font-mono font-bold text-amber-300 outline-none focus:border-amber-500"
-                    placeholder="เช่น 13"
+                    className={`w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-center font-mono font-bold outline-none ${
+                      gameMode === 'electric-count' ? 'text-cyan-300 focus:border-cyan-500' : 'text-amber-300 focus:border-amber-500'
+                    }`}
+                    placeholder="เช่น 10"
                   />
-                  <span className="text-slate-400">เฟรม (ชนะ {Math.ceil(bestOfFrames / 2)} เฟรม)</span>
+                  <span className="text-slate-400">
+                    {gameMode === 'electric-count'
+                      ? `เกม (เล่นทั้งหมด ${bestOfFrames} เกม)`
+                      : `เฟรม (ชนะ ${Math.ceil(bestOfFrames / 2)} เฟรม)`}
+                  </span>
                 </div>
               </div>
             ) : (
               <div className="bg-purple-950/30 border border-purple-800/40 p-2.5 rounded-xl text-xs text-purple-200 flex items-start space-x-2">
                 <Sparkles className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
                 <span>
-                  <strong>โหมดเล่นไปเรื่อยๆ:</strong> ระบบจะนับเฟรมสะสมไปเรื่อยๆ (เช่น 1, 2, 3, ...) โดยไม่มีการตัดจบเกมอัตโนมัติ เมื่อต้องการเลิกเล่นสามารถกดปุ่ม <strong>"บันทึกและจบแมตช์"</strong> ได้ตลอดเวลา
+                  <strong>โหมดเล่นไปเรื่อยๆ:</strong> ระบบจะนับ{gameMode === 'electric-count' ? 'เกม' : 'เฟรม'}สะสมไปเรื่อยๆ โดยไม่มีการตัดจบเกมอัตโนมัติ เมื่อต้องการเลิกเล่นสามารถกดปุ่ม <strong>"บันทึกและจบแมตช์"</strong> ได้ตลอดเวลา
                 </span>
               </div>
             )}
