@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { AlertTriangle, RotateCcw, Shield, Undo2, Flag, Layers, Edit3, Target, Plus, Minus, Sparkles } from 'lucide-react';
-import { BallColor, PocketLocation } from '../types/snooker';
-import { BALL_MAP } from '../utils/snookerRules';
+import { AlertTriangle, RotateCcw, Shield, Undo2, Flag, Layers, Edit3, Target, Plus, Minus, Sparkles, Zap } from 'lucide-react';
+import { BallColor, PocketLocation, ElectricConfig } from '../types/snooker';
+import { BALL_MAP, getBallBasePoints } from '../utils/snookerRules';
 import { SnookerTablePockets } from './SnookerTablePockets';
 
 interface BallPotsProps {
@@ -9,6 +9,8 @@ interface BallPotsProps {
   currentVisitShots: any[];
   isFoulMode: boolean;
   isGaMode?: boolean;
+  isElectricMode?: boolean;
+  electricConfig?: ElectricConfig;
   onToggleFoulMode: () => void;
   onPotBall: (ball: BallColor, pocket?: PocketLocation) => void;
   onFoul: (points: number, gaPenalty?: number) => void;
@@ -27,6 +29,8 @@ export const BallPots: React.FC<BallPotsProps> = ({
   currentVisitShots,
   isFoulMode,
   isGaMode = false,
+  isElectricMode = false,
+  electricConfig,
   onToggleFoulMode,
   onPotBall,
   onFoul,
@@ -58,19 +62,28 @@ export const BallPots: React.FC<BallPotsProps> = ({
     }
   };
 
+  const getDisplayedBallPoints = (ballKey: BallColor): number => {
+    if (isElectricMode && electricConfig) {
+      return getBallBasePoints(ballKey, redsRemaining === 0 && ballKey === 'black', electricConfig);
+    }
+    return BALL_MAP[ballKey].points;
+  };
+
   const handleBallClick = (ballKey: BallColor) => {
     if (isFoulMode) {
       if (isGaMode) {
-        // Snooker Ga foul is strictly 7 points + optional Ga penalty
         onFoul(7, selectedGaPenalty);
+      } else if (isElectricMode && electricConfig) {
+        onFoul(electricConfig.foulPenalty);
       } else {
         onFoul(BALL_MAP[ballKey].points);
       }
       return;
     }
 
-    // In Snooker Ga mode, show the 6-pocket snooker table for color balls
-    if (isGaMode && ballKey !== 'red') {
+    // In Snooker Ga mode or Electric + Ga mode, show the 6-pocket selector for color balls
+    const isBallPlusGa = isElectricMode && electricConfig?.countMode === 'ball-plus-ga';
+    if ((isGaMode || isBallPlusGa) && ballKey !== 'red') {
       setPendingGaBall(ballKey);
       return;
     }
@@ -187,7 +200,8 @@ export const BallPots: React.FC<BallPotsProps> = ({
           <div className="grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-1.5">
             {ballList.map((ballKey) => {
               const ball = BALL_MAP[ballKey];
-              const isFoulTarget = ball.points >= 4;
+              const displayPts = getDisplayedBallPoints(ballKey);
+              const isFoulTarget = isElectricMode ? true : ball.points >= 4;
 
               if (isFoulMode && !isFoulTarget) {
                 return (
@@ -203,10 +217,10 @@ export const BallPots: React.FC<BallPotsProps> = ({
                   key={ballKey}
                   onClick={() => handleBallClick(ballKey)}
                   className={`group relative flex flex-col items-center justify-center py-1 xs:py-1.5 sm:py-2 md:py-2.5 px-0.5 rounded-md xs:rounded-lg md:rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 shadow`}
-                  title={isFoulMode ? `เสียฟาวล์ ${ball.points} แต้ม` : `ลูก${ball.nameTh} (+${ball.points} แต้ม)`}
+                  title={isFoulMode ? `เสียฟาวล์ ${isElectricMode && electricConfig ? electricConfig.foulPenalty : ball.points} แต้ม` : `ลูก${ball.nameTh} (+${displayPts} แต้ม)`}
                 >
                   <span className="font-mono font-black text-base xs:text-lg sm:text-2xl md:text-3xl leading-none drop-shadow select-none">
-                    {isFoulMode ? `-${ball.points}` : ball.points}
+                    {isFoulMode ? `-${isElectricMode && electricConfig ? electricConfig.foulPenalty : ball.points}` : displayPts}
                   </span>
 
                   <span className="absolute -top-0.5 -right-0.5 bg-slate-950/90 text-amber-300 text-[5px] xs:text-[6px] sm:text-[7px] font-mono font-bold px-0.5 rounded-full border border-slate-700">

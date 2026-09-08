@@ -1,6 +1,6 @@
 import React from 'react';
-import { User, Flame, Clock, Sparkles, ShieldAlert, Trophy, Target } from 'lucide-react';
-import { Frame } from '../types/snooker';
+import { User, Flame, Clock, Sparkles, ShieldAlert, Trophy, Target, Zap, Percent } from 'lucide-react';
+import { Frame, ElectricConfig } from '../types/snooker';
 import { calculateRemainingPoints, calculateSnookersRequired } from '../utils/snookerRules';
 
 interface ScoreboardProps {
@@ -13,6 +13,8 @@ interface ScoreboardProps {
   frameDurationFormatted: string;
   shotDurationSec: number;
   isGaMode?: boolean;
+  isElectricMode?: boolean;
+  electricConfig?: ElectricConfig;
   onSwitchStriker: () => void;
 }
 
@@ -26,6 +28,8 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
   frameDurationFormatted = '00:00',
   shotDurationSec = 0,
   isGaMode = false,
+  isElectricMode = false,
+  electricConfig,
   onSwitchStriker,
 }) => {
   const p1Score = frame?.player1Score ?? 0;
@@ -38,8 +42,16 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
   const p1HighBreak = frame?.stats?.[0]?.highestBreak ?? 0;
   const p2HighBreak = frame?.stats?.[1]?.highestBreak ?? 0;
 
+  const currentConfig = electricConfig || frame?.electricConfig;
+  const hasHandicap = isElectricMode && currentConfig?.handicapEnabled;
+
   const diff = Math.abs(p1Score - p2Score);
-  const remaining = calculateRemainingPoints(redsRemaining, frame?.shots || []);
+  const remaining = calculateRemainingPoints(
+    redsRemaining,
+    frame?.shots || [],
+    isElectricMode ? 'electric-count' : (isGaMode ? 'snooker-ga' : '15-reds'),
+    currentConfig
+  );
   const isSafeLead = diff > remaining;
   const snookersNeeded = calculateSnookersRequired(diff, remaining);
   const leaderName = p1Score >= p2Score ? player1Name : player2Name;
@@ -65,15 +77,26 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             <div className="absolute top-0 right-0 left-0 h-0.5 xs:h-1 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 animate-pulse" />
           )}
 
-          {/* 1. Header: Avatar + Player Name + High Break Underneath */}
+          {/* 1. Header: Avatar + Player Name + High Break & Handicap Underneath */}
           <div className="flex items-center space-x-1 xs:space-x-1.5 min-w-0 mb-0.5">
             <div className={`p-0.5 xs:p-1 rounded-md flex-shrink-0 ${activeStrikerIndex === 0 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400'}`}>
               <User className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-[11px] xs:text-xs sm:text-sm md:text-lg font-black text-slate-100 tracking-tight truncate leading-tight">
-                {player1Name}
-              </h3>
+              <div className="flex items-center space-x-1">
+                <h3 className="text-[11px] xs:text-xs sm:text-sm md:text-lg font-black text-slate-100 tracking-tight truncate leading-tight">
+                  {player1Name}
+                </h3>
+                {hasHandicap && (
+                  <span className={`text-[6px] xs:text-[7px] font-black px-1 py-0.2 rounded leading-none ${
+                    currentConfig?.handicapGiverIndex === 0
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50'
+                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
+                  }`}>
+                    {currentConfig?.handicapGiverIndex === 0 ? `ต่อ 100:${currentConfig?.handicapGiverRatio}` : 'รอง 100%'}
+                  </span>
+                )}
+              </div>
               <div className="text-[6px] xs:text-[7px] sm:text-[9px] text-slate-400 font-semibold leading-none">
                 เบรกสูง: <strong className="text-emerald-400 font-bold font-mono">{p1HighBreak}</strong>
               </div>
@@ -175,12 +198,23 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             <div className="absolute top-0 right-0 left-0 h-0.5 xs:h-1 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 animate-pulse" />
           )}
 
-          {/* 1. Header: Name + High Break Underneath + Avatar */}
+          {/* 1. Header: Name + High Break & Handicap Underneath + Avatar */}
           <div className="flex items-center justify-end space-x-1 xs:space-x-1.5 min-w-0 mb-0.5">
             <div className="min-w-0 flex-1 text-right">
-              <h3 className="text-[11px] xs:text-xs sm:text-sm md:text-lg font-black text-slate-100 tracking-tight truncate leading-tight">
-                {player2Name}
-              </h3>
+              <div className="flex items-center justify-end space-x-1">
+                {hasHandicap && (
+                  <span className={`text-[6px] xs:text-[7px] font-black px-1 py-0.2 rounded leading-none ${
+                    currentConfig?.handicapGiverIndex === 1
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50'
+                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
+                  }`}>
+                    {currentConfig?.handicapGiverIndex === 1 ? `ต่อ 100:${currentConfig?.handicapGiverRatio}` : 'รอง 100%'}
+                  </span>
+                )}
+                <h3 className="text-[11px] xs:text-xs sm:text-sm md:text-lg font-black text-slate-100 tracking-tight truncate leading-tight">
+                  {player2Name}
+                </h3>
+              </div>
               <div className="text-[6px] xs:text-[7px] sm:text-[9px] text-slate-400 font-semibold leading-none">
                 เบรกสูง: <strong className="text-emerald-400 font-bold font-mono">{p2HighBreak}</strong>
               </div>

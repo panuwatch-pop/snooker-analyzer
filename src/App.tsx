@@ -9,8 +9,8 @@ import { AnalyticsTab } from './components/AnalyticsTab';
 import { HistoryTab } from './components/HistoryTab';
 import { NewMatchModal } from './components/NewMatchModal';
 import { FrameEndModal } from './components/FrameEndModal';
-import { Match, Frame, Shot, Visit, BallColor, GameMode, PocketLocation } from './types/snooker';
-import { BALL_MAP, createInitialFrame, calculatePlayerStats, calculateGaForPot } from './utils/snookerRules';
+import { Match, Frame, Shot, Visit, BallColor, GameMode, PocketLocation, ElectricConfig } from './types/snooker';
+import { BALL_MAP, createInitialFrame, calculatePlayerStats, calculateGaForPot, calculateElectricPotPoints } from './utils/snookerRules';
 import { soundManager } from './utils/audio';
 import { saveActiveMatch, loadActiveMatch, saveMatchToHistory } from './utils/storage';
 
@@ -171,17 +171,32 @@ export function App() {
     shotStartTime,
   ]);
 
-  // Unconstrained Ball Potting with Ga Pocket Calculation
+  // Unconstrained Ball Potting with Ga Pocket Calculation & Electric Snooker
   const handlePotBall = useCallback((ball: BallColor, pocket?: PocketLocation) => {
-    const ballInfo = BALL_MAP[ball];
-    const points = ballInfo.points;
-    soundManager.playPotSound(points);
-
+    const isElectric = match.gameMode === 'electric-count';
     const isGa = match.gameMode === 'snooker-ga';
-    const gaEarned = isGa ? calculateGaForPot(ball, pocket) : 0;
+    const effectiveElectricConfig = match.electricConfig || currentFrame.electricConfig;
+
+    let points = BALL_MAP[ball].points;
+    let rawPoints = points;
+    let gaEarned = 0;
+    let noteText = `ตบลูก ${BALL_MAP[ball].nameTh} (+${points})`;
+
+    if (isElectric) {
+      const isLastBlack = currentFrame.redsRemaining === 0 && ball === 'black';
+      const electricRes = calculateElectricPotPoints(ball, pocket, isLastBlack, effectiveElectricConfig, activeStrikerIndex);
+      points = electricRes.points;
+      rawPoints = electricRes.rawPoints;
+      noteText = electricRes.description;
+    } else if (isGa) {
+      gaEarned = calculateGaForPot(ball, pocket);
+      noteText = `ตบลูก ${BALL_MAP[ball].nameTh} (+${points})${gaEarned > 0 ? ` (+${gaEarned} กา)` : ''}`;
+    }
+
+    soundManager.playPotSound(Math.round(points));
 
     const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
-    const newBreak = currentBreak + points;
+    const newBreak = Math.round((currentBreak + points) * 10) / 10;
     const newBallsCount = ballsInCurrentVisit + 1;
 
     if (newBreak >= 50 && currentBreak < 50) {
@@ -222,6 +237,7 @@ export function App() {
       action: 'pot',
       ballPotted: ball,
       points,
+      rawPoints,
       redsRemainingBefore: currentFrame.redsRemaining,
       redsRemainingAfter: nextReds,
       legalTargetBefore: 'red',
@@ -232,14 +248,14 @@ export function App() {
       isBreakAttempt: true,
       gaCount: gaEarned,
       pocket,
-      notes: `ตบลูก ${ballInfo.nameTh} (+${points})${gaEarned > 0 ? ` (+${gaEarned} กา)` : ''}`,
+      notes: noteText,
     };
 
     updatedShots.push(newShot);
     setCurrentVisitShots(prev => [...prev, newShot]);
 
-    const newP1Score = activeStrikerIndex === 0 ? currentFrame.player1Score + points : currentFrame.player1Score;
-    const newP2Score = activeStrikerIndex === 1 ? currentFrame.player2Score + points : currentFrame.player2Score;
+    const newP1Score = activeStrikerIndex === 0 ? Math.round((currentFrame.player1Score + points) * 10) / 10 : currentFrame.player1Score;
+    const newP2Score = activeStrikerIndex === 1 ? Math.round((currentFrame.player2Score + points) * 10) / 10 : currentFrame.player2Score;
     const newP1Ga = activeStrikerIndex === 0 ? (currentFrame.player1Ga || 0) + gaEarned : (currentFrame.player1Ga || 0);
     const newP2Ga = activeStrikerIndex === 1 ? (currentFrame.player2Ga || 0) + gaEarned : (currentFrame.player2Ga || 0);
 
@@ -656,7 +672,13 @@ export function App() {
     const newP2Frames = !p1Won ? match.player2FramesWon + 1 : match.player2FramesWon;
 
     const nextFrameNumber = match.frames.length + 1;
-    const nextFrame = createInitialFrame(nextFrameNumber, match.gameMode, newP1Frames, newP2Frames);
+    const nextFrame = createInitialFrame(
+      nextFrameNumber,
+      match.gameMode,
+      newP1Frames,
+      newP2Frames,
+      match.electricConfig
+    );
 
     const updatedCurrentFrame: Frame = {
       ...currentFrame,
@@ -715,8 +737,9 @@ export function App() {
     bestOfFrames: number;
     title: string;
     date: string;
+    electricConfig?: ElectricConfig;
   }) => {
-    const initialFrame = createInitialFrame(1, config.gameMode, 0, 0);
+    const initialFrame = createInitialFrame(1, config.gameMode, 0, 0, config.electricConfig);
     const newMatch: Match = {
       id: 'match-' + Date.now(),
       date: config.date,
@@ -732,6 +755,7 @@ export function App() {
       currentFrameIndex: 0,
       isCompleted: false,
       totalDurationSec: 0,
+      electricConfig: config.electricConfig,
     };
 
     setMatch(newMatch);
@@ -778,6 +802,8 @@ export function App() {
               frameDurationFormatted={formatTime(frameDurationSec)}
               shotDurationSec={shotDurationSec}
               isGaMode={match.gameMode === 'snooker-ga'}
+              isElectricMode={match.gameMode === 'electric-count'}
+              electricConfig={match.electricConfig || currentFrame.electricConfig}
               onSwitchStriker={() => handleEndTurn('miss')}
             />
 
@@ -786,6 +812,8 @@ export function App() {
               currentVisitShots={currentVisitShots}
               isFoulMode={isFoulMode}
               isGaMode={match.gameMode === 'snooker-ga'}
+              isElectricMode={match.gameMode === 'electric-count'}
+              electricConfig={match.electricConfig || currentFrame.electricConfig}
               onToggleFoulMode={() => setIsFoulMode(prev => !prev)}
               onPotBall={handlePotBall}
               onFoul={(pts, gaPenalty) => {

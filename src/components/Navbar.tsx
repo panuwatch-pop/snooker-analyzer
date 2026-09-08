@@ -53,9 +53,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className={`px-1.5 py-0.5 rounded-full border ${
               gameMode === 'snooker-ga' 
                 ? 'bg-amber-950/90 text-amber-300 border-amber-500 font-extrabold shadow-sm' 
-                : 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60'
+                : (gameMode === 'electric-count'
+                    ? 'bg-cyan-950/90 text-cyan-300 border-cyan-500 font-extrabold shadow-sm'
+                    : 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60')
             }`}>
-              {gameMode === 'snooker-ga' ? '🎯 กา' : (gameMode === '15-reds' ? '15 แดง' : '6 แดง')}
+              {gameMode === 'snooker-ga' ? '🎯 กา' : (gameMode === 'electric-count' ? '⚡ ไฟฟ้า' : (gameMode === '15-reds' ? '15 แดง' : '6 แดง'))}
             </span>
             <span className={`px-1.5 py-0.5 rounded-full border hidden sm:inline-block ${isUnlimited ? 'bg-purple-950/80 text-purple-300 border-purple-700' : 'bg-slate-800 text-slate-300 border-slate-700'}`}>
               {isUnlimited ? `เฟรม ${currentFrameNumber} (♾️)` : `เฟรม ${currentFrameNumber}/${bestOfFrames}`}

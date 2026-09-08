@@ -85,6 +85,8 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ onLoadMatch }) => {
               <option value="all">ทั้งหมด</option>
               <option value="15-reds">15 แดง (Standard)</option>
               <option value="6-reds">6 แดง (Six-red)</option>
+              <option value="snooker-ga">🎯 สนุ๊กกา (Snooker Ga)</option>
+              <option value="electric-count">⚡ สนุ๊กไฟฟ้า / นับลูก (Electric)</option>
             </select>
           </div>
 
@@ -101,33 +103,37 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ onLoadMatch }) => {
         </div>
       </div>
 
-      {/* Match Cards List */}
+      {/* Match List */}
       {filteredMatches.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center text-slate-500 space-y-2">
-          <Trophy className="w-12 h-12 mx-auto text-slate-700 opacity-50" />
-          <p className="text-sm font-semibold">ยังไม่มีประวัติการแข่งขันที่บันทึกไว้</p>
-          <p className="text-xs">เมื่อเล่นจบเฟรมหรือจบแมตช์ ข้อมูลจะถูกจัดเก็บบันทึกอัตโนมัติที่นี่</p>
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-400">
+          <History className="w-12 h-12 mx-auto text-slate-600 mb-3" />
+          <p className="text-base font-bold text-slate-300">ไม่พบประวัติการแข่งขัน</p>
+          <p className="text-xs text-slate-500 mt-1">เริ่มเล่นและบันทึกผลการแข่งเพื่อดูสถิติที่นี่</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {filteredMatches.map((m) => {
-            const isExpanded = expandedMatchId === m.id;
             const p1Won = m.player1FramesWon;
             const p2Won = m.player2FramesWon;
-            const winnerName = m.winnerIndex !== undefined 
-              ? (m.winnerIndex === 0 ? m.player1Name : m.player2Name)
-              : (p1Won > p2Won ? m.player1Name : p2Won > p1Won ? m.player2Name : 'เสมอ');
+            const winnerName = m.winnerIndex === 0 ? m.player1Name : (m.winnerIndex === 1 ? m.player2Name : (p1Won > p2Won ? m.player1Name : m.player2Name));
+            const isExpanded = expandedMatchId === m.id;
 
             return (
-              <div
-                key={m.id}
-                className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg transition-all"
-              >
-                <div className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
+              <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  {/* Match Basic Info */}
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
-                      <span className="bg-emerald-950 text-emerald-300 border border-emerald-700/60 px-2 py-0.5 rounded text-[11px] font-extrabold">
-                        {m.gameMode === '15-reds' ? '15 แดง' : '6 แดง'}
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border ${
+                        m.gameMode === 'snooker-ga'
+                          ? 'bg-amber-950/80 text-amber-300 border-amber-500/60'
+                          : (m.gameMode === 'electric-count'
+                              ? 'bg-cyan-950/80 text-cyan-300 border-cyan-500/60'
+                              : (m.gameMode === '15-reds'
+                                  ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60'
+                                  : 'bg-indigo-950/80 text-indigo-300 border-indigo-700/60'))
+                      }`}>
+                        {m.gameMode === 'snooker-ga' ? '🎯 สนุ๊กกา' : (m.gameMode === 'electric-count' ? '⚡ สนุ๊กไฟฟ้า' : (m.gameMode === '15-reds' ? '15 แดง' : '6 แดง'))}
                       </span>
                       <h3 className="text-base font-black text-white">{m.title || 'แมตช์กระชับมิตร'}</h3>
                       <span className="text-xs text-slate-400 font-mono">({m.date})</span>

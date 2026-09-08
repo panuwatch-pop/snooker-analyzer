@@ -1,4 +1,4 @@
-import { BallInfo, BallColor, LegalTarget, Shot, Visit, PlayerStats, GameMode, PocketLocation } from '../types/snooker';
+import { BallInfo, BallColor, LegalTarget, Shot, Visit, PlayerStats, GameMode, PocketLocation, ElectricConfig } from '../types/snooker';
 
 export const BALLS: BallInfo[] = [
   { color: 'red', nameTh: 'ลูกแดง', nameEn: 'Red', points: 1, cssClass: 'ball-red', numpadKey: '1', regularKey: '1' },
@@ -16,6 +16,26 @@ export const BALL_MAP: Record<BallColor, BallInfo> = BALLS.reduce((acc, b) => {
 }, {} as Record<BallColor, BallInfo>);
 
 export const FINAL_COLORS: BallColor[] = ['yellow', 'green', 'brown', 'blue', 'pink', 'black'];
+
+/**
+ * Default Electric Snooker Configuration
+ */
+export const DEFAULT_ELECTRIC_CONFIG: ElectricConfig = {
+  countMode: 'ball-only',
+  redPoints: 1,
+  yellowPoints: 2,
+  greenPoints: 1,
+  brownPoints: 1,
+  bluePoints: 1,
+  pinkPoints: 1,
+  blackPoints: 4,
+  lastBlackPoints: 7,
+  foulPenalty: 4,
+  handicapEnabled: false,
+  handicapGiverIndex: 0,
+  handicapGiverRatio: 80,
+  handicapReceiverRatio: 100,
+};
 
 /**
  * Calculate "Ga" (กา) count according to Snooker Ga rules:
@@ -56,23 +76,138 @@ export function calculateGaForPot(ball: BallColor, pocket?: PocketLocation): num
 }
 
 /**
- * Calculates remaining points on the table accurately:
- * - When Reds remaining > 0:
- *   Table points = (Reds * 8) + 27.
- *   If the VERY LAST shot was a pot of a red in the current ongoing visit (striker is currently on color), +7.
- *   After any foul, miss, safety, or color pot, the table points is strictly (Reds * 8) + 27.
- * - When 0 Reds remaining:
- *   Clears 6 colors in order (Yellow 2 -> Green 3 -> Brown 4 -> Blue 5 -> Pink 6 -> Black 7 = 27 total).
+ * Check if pocket is a Ga pocket for a specific ball
+ */
+export function isGaPocket(ball: BallColor, pocket?: PocketLocation): boolean {
+  if (ball === 'red') return false;
+  if (ball === 'yellow' || ball === 'black') return true;
+  if (!pocket || pocket === 'any') return false;
+  if (ball === 'green') return pocket === 'bottom-left' || pocket === 'bottom-right';
+  if (ball === 'brown' || ball === 'blue') return pocket === 'middle-left' || pocket === 'middle-right';
+  if (ball === 'pink') return pocket === 'top-left' || pocket === 'top-right';
+  return false;
+}
+
+/**
+ * Get base ball points taking Electric Snooker config into account
+ */
+export function getBallBasePoints(
+  ball: BallColor,
+  isFinalBlack: boolean = false,
+  electricConfig?: ElectricConfig
+): number {
+  if (!electricConfig) {
+    return BALL_MAP[ball].points;
+  }
+
+  if (isFinalBlack && ball === 'black') {
+    return electricConfig.lastBlackPoints;
+  }
+
+  switch (ball) {
+    case 'red': return electricConfig.redPoints;
+    case 'yellow': return electricConfig.yellowPoints;
+    case 'green': return electricConfig.greenPoints;
+    case 'brown': return electricConfig.brownPoints;
+    case 'blue': return electricConfig.bluePoints;
+    case 'pink': return electricConfig.pinkPoints;
+    case 'black': return electricConfig.blackPoints;
+    default: return 1;
+  }
+}
+
+/**
+ * Calculate pot points for Electric Snooker / Ball Count with Handicap
+ */
+export function calculateElectricPotPoints(
+  ball: BallColor,
+  pocket?: PocketLocation,
+  isFinalBlack: boolean = false,
+  electricConfig?: ElectricConfig,
+  playerIndex: 0 | 1 = 0
+): { points: number; rawPoints: number; isGaBonus: boolean; description: string } {
+  if (!electricConfig) {
+    const raw = BALL_MAP[ball].points;
+    return {
+      points: raw,
+      rawPoints: raw,
+      isGaBonus: false,
+      description: `ตบลูก ${BALL_MAP[ball].nameTh} (+${raw})`,
+    };
+  }
+
+  let rawPoints = 1;
+  let isGaBonus = false;
+
+  if (electricConfig.countMode === 'ball-only') {
+    // Pure ball count: custom points per ball or 1 pt each
+    rawPoints = getBallBasePoints(ball, isFinalBlack, electricConfig);
+  } else {
+    // Ball count + Ga bonus
+    if (ball === 'red') {
+      rawPoints = electricConfig.redPoints;
+    } else {
+      const isGa = isGaPocket(ball, pocket);
+      if (isGa) {
+        rawPoints = getBallBasePoints(ball, isFinalBlack, electricConfig);
+        isGaBonus = true;
+      } else {
+        rawPoints = 1; // Standard non-ga pocket counts as 1 ball
+      }
+    }
+  }
+
+  // Apply handicap multiplier if enabled
+  let multiplier = 1;
+  if (electricConfig.handicapEnabled && playerIndex === electricConfig.handicapGiverIndex) {
+    multiplier = electricConfig.handicapGiverRatio / 100;
+  }
+
+  const effectivePoints = Math.round(rawPoints * multiplier * 10) / 10;
+  const desc = `ตบลูก ${BALL_MAP[ball].nameTh}${isGaBonus ? ' (หลุมกา)' : ''} (+${effectivePoints}${multiplier !== 1 ? ` [ต่อ ${electricConfig.handicapGiverRatio}%]` : ''})`;
+
+  return {
+    points: effectivePoints,
+    rawPoints,
+    isGaBonus,
+    description: desc,
+  };
+}
+
+/**
+ * Calculates remaining points on the table accurately
  */
 export function calculateRemainingPoints(
   redsRemaining: number,
   shots: Shot[] = [],
-  _gameMode: GameMode = '15-reds'
+  gameMode: GameMode = '15-reds',
+  electricConfig?: ElectricConfig
 ): number {
+  const isElectric = gameMode === 'electric-count';
+  const redVal = isElectric && electricConfig ? electricConfig.redPoints : 1;
+  const topColorVal = isElectric && electricConfig ? electricConfig.blackPoints : 7;
+  const colorPoints: Record<string, number> = isElectric && electricConfig ? {
+    yellow: electricConfig.yellowPoints,
+    green: electricConfig.greenPoints,
+    brown: electricConfig.brownPoints,
+    blue: electricConfig.bluePoints,
+    pink: electricConfig.pinkPoints,
+    black: electricConfig.lastBlackPoints,
+  } : {
+    yellow: 2,
+    green: 3,
+    brown: 4,
+    blue: 5,
+    pink: 6,
+    black: 7,
+  };
+
+  const totalColorsVal = Object.values(colorPoints).reduce((sum, v) => sum + v, 0);
+
   if (redsRemaining > 0) {
     const lastShot = shots.length > 0 ? shots[shots.length - 1] : null;
     const isCurrentlyOnColor = lastShot?.action === 'pot' && lastShot?.ballPotted === 'red';
-    return (redsRemaining * 8) + 27 + (isCurrentlyOnColor ? 7 : 0);
+    return (redsRemaining * (redVal + topColorVal)) + totalColorsVal + (isCurrentlyOnColor ? topColorVal : 0);
   }
 
   // 0 reds remaining
@@ -80,8 +215,7 @@ export function calculateRemainingPoints(
   const isCurrentlyOnColorForLastRed = lastShot?.action === 'pot' && lastShot?.ballPotted === 'red';
 
   if (isCurrentlyOnColorForLastRed) {
-    // Striker just potted the last red and is currently on the color (+7) + 27 final colors
-    return 34;
+    return topColorVal + totalColorsVal;
   }
 
   // Find index of the very last red pot
@@ -96,7 +230,6 @@ export function calculateRemainingPoints(
   const shotsAfterLastRed = lastRedIndex >= 0 ? shots.slice(lastRedIndex + 1) : shots;
   const potShotsAfterLastRed = shotsAfterLastRed.filter(s => s.action === 'pot' && s.ballPotted);
 
-  // If the very first pot after the last red was in the same visit as the last red, that was the color for the last red
   let colorPotsToExclude = 0;
   if (lastRedIndex >= 0 && potShotsAfterLastRed.length > 0) {
     const lastRedShot = shots[lastRedIndex];
@@ -112,15 +245,6 @@ export function calculateRemainingPoints(
       pottedColors.add(shot.ballPotted);
     }
   }
-
-  const colorPoints: Record<string, number> = {
-    yellow: 2,
-    green: 3,
-    brown: 4,
-    blue: 5,
-    pink: 6,
-    black: 7,
-  };
 
   let remaining = 0;
   for (const [color, pts] of Object.entries(colorPoints)) {
@@ -299,26 +423,9 @@ export function createInitialFrame(
   frameNumber: number,
   gameMode: GameMode,
   p1FramesWon: number = 0,
-  p2FramesWon: number = 0
-): {
-  id: string;
-  frameNumber: number;
-  startTime: number;
-  durationSec: number;
-  player1Score: number;
-  player2Score: number;
-  player1FramesWon: number;
-  player2FramesWon: number;
-  player1Ga: number;
-  player2Ga: number;
-  redsRemaining: number;
-  legalTarget: LegalTarget;
-  freeBallActive: boolean;
-  shots: Shot[];
-  visits: Visit[];
-  isCompleted: boolean;
-  stats: [PlayerStats, PlayerStats];
-} {
+  p2FramesWon: number = 0,
+  electricConfig?: ElectricConfig
+): Frame {
   const redsRemaining = gameMode === '15-reds' ? 15 : 6;
   const emptyStats: PlayerStats = {
     totalPoints: 0,
@@ -358,5 +465,6 @@ export function createInitialFrame(
     visits: [],
     isCompleted: false,
     stats: [emptyStats, { ...emptyStats }],
+    electricConfig: electricConfig ? { ...electricConfig } : undefined,
   };
 }
