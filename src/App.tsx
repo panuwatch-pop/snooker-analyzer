@@ -624,48 +624,102 @@ export function App() {
       const key = e.key;
       const code = e.code;
 
-      // Minus key or F toggles Foul Mode
-      if (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') {
+      // 1. NumLock or H / ? -> Open Keypad Guide
+      if (code === 'NumLock' || key === 'NumLock' || key === '?' || key === 'h' || key === 'H') {
+        setIsKeypadGuideOpen(prev => !prev);
+        return;
+      }
+
+      // 2. Calculator / Equal key (=) or 'e'/'E' -> Open End Frame Modal
+      if (key === '=' || code === 'NumpadEqual' || code === 'Equal' || key === 'LaunchApplication2' || key === 'Calculator' || key === 'e' || key === 'E' || code === 'KeyE' || key === 'ำ') {
+        e.preventDefault();
+        setIsFrameEndModalOpen(true);
+        return;
+      }
+
+      // 3. Clear / Escape -> Cancel foul mode / reset
+      if (key === 'Escape' || key === 'Clear') {
+        if (isFoulMode) {
+          setIsFoulMode(false);
+          return;
+        }
+      }
+
+      // 4. Backspace or Asterisk (*) or Ctrl+Z -> Undo
+      if (key === 'Backspace' || code === 'Backspace' || key === '*' || code === 'NumpadMultiply' || (e.ctrlKey && (key.toLowerCase() === 'z' || code === 'KeyZ'))) {
+        e.preventDefault();
+        handleUndo();
+        return;
+      }
+
+      // 5. Tab -> Switch Striker
+      if (key === 'Tab' || code === 'Tab') {
+        e.preventDefault();
+        handleEndTurn('miss');
+        return;
+      }
+
+      // 6. Minus (-) or Plus (+) or F -> Toggle Foul Mode
+      if (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === '+' || code === 'NumpadAdd' || code === 'Equal' && e.shiftKey || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') {
         e.preventDefault();
         setIsFoulMode(prev => !prev);
         return;
       }
 
-      // When Foul Mode is active: 4, 5, 6, 7 submit foul points
+      // When Foul Mode is active: 4, 5, 6, 7 (or 0 for standard 4) submit foul points
       if (isFoulMode) {
-        if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ภ') {
+        if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ArrowLeft' || key === 'ภ' || key === '0' || code === 'Digit0' || code === 'Numpad0' || key === 'Insert') {
           handleSubmitFoul(4, { switchStriker: true, note: 'ฟาวล์ +4 แต้ม' });
           setIsFoulMode(false);
-        } else if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') {
+        } else if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'Clear' || key === 'ถ') {
           handleSubmitFoul(5, { switchStriker: true, note: 'ฟาวล์ +5 แต้ม' });
           setIsFoulMode(false);
-        } else if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ุ') {
+        } else if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ArrowRight' || key === 'ุ') {
           handleSubmitFoul(6, { switchStriker: true, note: 'ฟาวล์ +6 แต้ม' });
           setIsFoulMode(false);
-        } else if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'ึ') {
+        } else if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'Home' || key === 'ึ') {
           handleSubmitFoul(7, { switchStriker: true, note: 'ฟาวล์ +7 แต้ม' });
           setIsFoulMode(false);
         }
         return;
       }
 
-      // Normal Potting Mode
-      if (key === '1' || code === 'Digit1' || code === 'Numpad1' || key === 'ๅ') handlePotBall('red');
-      else if (key === '2' || code === 'Digit2' || code === 'Numpad2' || key === '/') handlePotBall('yellow');
-      else if (key === '3' || code === 'Digit3' || code === 'Numpad3' || key === '-') handlePotBall('green');
-      else if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ภ') handlePotBall('brown');
+      // 7. Key 0 / Insert -> Quick White Ball Foul (+4 pts)
+      if (key === '0' || code === 'Digit0' || code === 'Numpad0' || key === 'Insert') {
+        handleSubmitFoul(4, { switchStriker: true, note: 'ขาวเปลี่ยน / ฟาวล์ +4 แต้ม' });
+        return;
+      }
+
+      // 8. Key 8 / Slash / 'S' -> Safety shot (แทงกัน)
+      if (key === '/' || code === 'NumpadDivide' || code === 'Slash' || key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ArrowUp' || key === 's' || key === 'S' || code === 'KeyS' || key === 'ห') {
+        handleEndTurn('safety');
+        return;
+      }
+
+      // 9. Key 9 / PageUp -> Multi-red pot (ตบแดงซ้อน)
+      if (key === '9' || code === 'Digit9' || code === 'Numpad9' || key === 'PageUp') {
+        handleMultiRedPot(1);
+        return;
+      }
+
+      // 10. Normal Potting Mode (1 to 7)
+      if (key === '1' || code === 'Digit1' || code === 'Numpad1' || key === 'End' || key === 'ๅ') handlePotBall('red');
+      else if (key === '2' || code === 'Digit2' || code === 'Numpad2' || key === 'ArrowDown') handlePotBall('yellow');
+      else if (key === '3' || code === 'Digit3' || code === 'Numpad3' || key === 'PageDown') handlePotBall('green');
+      else if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ArrowLeft' || key === 'ภ') handlePotBall('brown');
       else if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') handlePotBall('blue');
-      else if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ุ') handlePotBall('pink');
-      else if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'ึ') handlePotBall('black');
-      else if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === ' ' || code === 'Space' || key === 'Delete' || key === 'ใ') handleEndTurn('miss');
-      else if (key === 's' || key === 'S' || code === 'KeyS' || key === 'ห') handleEndTurn('safety');
-      else if (key === '*' || code === 'NumpadMultiply' || (e.ctrlKey && (key.toLowerCase() === 'z' || code === 'KeyZ'))) handleUndo();
-      else if (key === 'e' || key === 'E' || code === 'KeyE' || key === 'ำ') setIsFrameEndModalOpen(true);
+      else if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ArrowRight' || key === 'ุ') handlePotBall('pink');
+      else if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'Home' || key === 'ึ') handlePotBall('black');
+      
+      // 11. End Turn (., Delete, Space, Enter)
+      else if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === ' ' || code === 'Space' || key === 'Delete' || key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === 'ใ') {
+        handleEndTurn('miss');
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isNewMatchModalOpen, isFrameEndModalOpen, isKeypadGuideOpen, isFoulMode, handlePotBall, handleSubmitFoul, handleEndTurn, handleUndo]);
+  }, [isNewMatchModalOpen, isFrameEndModalOpen, isKeypadGuideOpen, isFoulMode, handlePotBall, handleSubmitFoul, handleEndTurn, handleUndo, handleMultiRedPot]);
 
   const handleNextFrame = () => {
     const p1Won = currentFrame.player1Score > currentFrame.player2Score;
@@ -864,6 +918,7 @@ export function App() {
             onUndo={handleUndo}
             onEndFrame={() => setIsFrameEndModalOpen(true)}
             onNewMatch={() => setIsNewMatchModalOpen(true)}
+            onOpenKeypadGuide={() => setIsKeypadGuideOpen(true)}
             canUndo={currentFrame.shots && currentFrame.shots.length > 0}
           />
         )}

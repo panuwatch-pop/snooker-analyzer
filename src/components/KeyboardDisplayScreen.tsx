@@ -40,6 +40,7 @@ interface KeyboardDisplayScreenProps {
   onUndo?: () => void;
   onEndFrame?: () => void;
   onNewMatch?: () => void;
+  onOpenKeypadGuide?: () => void;
   canUndo?: boolean;
 }
 
@@ -65,6 +66,7 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
   onUndo,
   onEndFrame,
   onNewMatch,
+  onOpenKeypadGuide,
   canUndo = false,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -121,11 +123,16 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
         
         {/* Left: Mode Badge & Frame/Game */}
         <div className="flex items-center space-x-1 xs:space-x-1.5 min-w-0">
-          <div className="flex items-center space-x-1 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-extrabold px-1.5 xs:px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg shadow-sm text-[10px] xs:text-xs sm:text-sm uppercase tracking-wider flex-shrink-0">
+          <button
+            type="button"
+            onClick={onOpenKeypadGuide}
+            className="flex items-center space-x-1 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-extrabold px-1.5 xs:px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg shadow-sm text-[10px] xs:text-xs sm:text-sm uppercase tracking-wider flex-shrink-0 cursor-pointer transition active:scale-95"
+            title="คลิกเพื่อดูผังปุ่มกด Wireless Keypad (22 ปุ่ม)"
+          >
             <Keyboard className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-amber-300 animate-pulse flex-shrink-0" />
-            <span className="hidden xs:inline">จอคีย์บอร์ด</span>
-            <span className="xs:hidden">คีย์บอร์ด</span>
-          </div>
+            <span className="hidden xs:inline">ผังปุ่มกด (Keypad)</span>
+            <span className="xs:hidden">ปุ่มกด</span>
+          </button>
 
           <div className={`px-1.5 xs:px-2 py-0.5 rounded-md border font-bold text-[9px] xs:text-[10px] sm:text-xs flex-shrink-0 ${
             isElectricMode
