@@ -624,6 +624,39 @@ export function App() {
       const key = e.key;
       const code = e.code;
 
+      // 0. When in Foul Mode: Pressing 4, 5, 6, 7 submits that foul point
+      if (isFoulMode) {
+        if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ArrowLeft' || key === 'ภ') {
+          handleSubmitFoul(4, { switchStriker: true, note: 'ฟาวล์ +4 แต้ม' });
+          setIsFoulMode(false);
+          return;
+        }
+        if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') {
+          handleSubmitFoul(5, { switchStriker: true, note: 'ฟาวล์ +5 แต้ม (น้ำเงิน)' });
+          setIsFoulMode(false);
+          return;
+        }
+        if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ArrowRight' || key === 'ุ') {
+          handleSubmitFoul(6, { switchStriker: true, note: 'ฟาวล์ +6 แต้ม (ชมพู)' });
+          setIsFoulMode(false);
+          return;
+        }
+        if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'Home' || key === 'ึ') {
+          handleSubmitFoul(7, { switchStriker: true, note: 'ฟาวล์ +7 แต้ม (ดำ)' });
+          setIsFoulMode(false);
+          return;
+        }
+        if (key === 'Enter' || code === 'NumpadEnter' || key === '0' || code === 'Numpad0' || key === '-' || key === '+') {
+          handleSubmitFoul(4, { switchStriker: true, note: 'ฟาวล์ +4 แต้ม' });
+          setIsFoulMode(false);
+          return;
+        }
+        if (key === 'Escape' || key === 'Clear') {
+          setIsFoulMode(false);
+          return;
+        }
+      }
+
       // 1. Keys 1 to 7: ALWAYS Direct Scoring Buttons (+1 to +7 points)
       if (key === '1' || code === 'Digit1' || code === 'Numpad1' || key === 'End' || key === 'ๅ') {
         handlePotBall('red');
@@ -681,10 +714,16 @@ export function App() {
         return;
       }
 
-      // 6. Minus (-) or Plus (+) or 0 / Ins -> Foul (+4 pts foul given to opponent)
-      if (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === '+' || code === 'NumpadAdd' || (code === 'Equal' && e.shiftKey) || key === '0' || code === 'Digit0' || code === 'Numpad0' || key === 'Insert' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') {
+      // 6. Minus (-) or Plus (+) -> Open Foul Mode (ให้เลือกฟาวล์ 4, 5, 6, 7)
+      if (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === '+' || code === 'NumpadAdd' || (code === 'Equal' && e.shiftKey) || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') {
         e.preventDefault();
-        handleSubmitFoul(4, { switchStriker: true, note: 'ฟาวล์ +4 แต้ม' });
+        setIsFoulMode(true);
+        return;
+      }
+
+      // 7. Key 0 / Insert -> Quick White Ball Foul (+4 pts)
+      if (key === '0' || code === 'Digit0' || code === 'Numpad0' || key === 'Insert') {
+        handleSubmitFoul(4, { switchStriker: true, note: 'ขาวเปลี่ยน / ฟาวล์ +4 แต้ม' });
         return;
       }
 
@@ -909,6 +948,12 @@ export function App() {
             currentGameNumber={match.currentFrameIndex + 1}
             totalGames={match.bestOfFrames}
             currentVisitShots={currentVisitShots}
+            isFoulMode={isFoulMode}
+            onFoulSelect={(pts) => {
+              handleSubmitFoul(pts, { switchStriker: true, note: `ฟาวล์ +${pts} แต้ม` });
+              setIsFoulMode(false);
+            }}
+            onCancelFoulMode={() => setIsFoulMode(false)}
             onSwitchStriker={() => handleEndTurn('miss')}
             onEndTurn={handleEndTurn}
             onUndo={handleUndo}

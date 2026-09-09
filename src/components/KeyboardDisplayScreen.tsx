@@ -5,6 +5,7 @@ import {
   Clock, 
   Sparkles, 
   ShieldAlert, 
+  AlertTriangle,
   Trophy, 
   Target, 
   Zap, 
@@ -35,6 +36,9 @@ interface KeyboardDisplayScreenProps {
   currentGameNumber?: number;
   totalGames?: number;
   currentVisitShots: Shot[];
+  isFoulMode?: boolean;
+  onFoulSelect?: (points: number) => void;
+  onCancelFoulMode?: () => void;
   onSwitchStriker: () => void;
   onEndTurn?: (reason: 'miss' | 'safety') => void;
   onUndo?: () => void;
@@ -61,6 +65,9 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
   currentGameNumber = 1,
   totalGames = 0,
   currentVisitShots = [],
+  isFoulMode = false,
+  onFoulSelect,
+  onCancelFoulMode,
   onSwitchStriker,
   onEndTurn,
   onUndo,
@@ -195,6 +202,53 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
           </button>
         </div>
       </div>
+
+      {/* 1.5 FOUL MODE ACTIVE BANNER */}
+      {isFoulMode && (
+        <div className="bg-gradient-to-r from-rose-950 via-red-900 to-rose-950 border-2 border-rose-500 rounded-xl p-1.5 xs:p-2 sm:p-2.5 shadow-2xl flex flex-wrap items-center justify-between gap-1.5 animate-pulse flex-shrink-0">
+          <div className="flex items-center space-x-1.5 text-white font-black text-[11px] xs:text-xs sm:text-sm">
+            <AlertTriangle className="w-4 h-4 text-yellow-300 flex-shrink-0" />
+            <span>โหมดบันทึกฟาวล์ (กดแต้มบนคีย์แพด):</span>
+          </div>
+          <div className="flex items-center space-x-1 sm:space-x-1.5 flex-wrap">
+            <button
+              type="button"
+              onClick={() => onFoulSelect?.(4)}
+              className="bg-amber-900 hover:bg-amber-800 text-amber-200 font-mono font-black text-[10px] xs:text-xs sm:text-sm px-2 xs:px-2.5 py-0.5 sm:py-1 rounded-md border border-amber-500 shadow cursor-pointer active:scale-95"
+            >
+              [4] 4 แต้ม
+            </button>
+            <button
+              type="button"
+              onClick={() => onFoulSelect?.(5)}
+              className="bg-blue-900 hover:bg-blue-800 text-blue-200 font-mono font-black text-[10px] xs:text-xs sm:text-sm px-2 xs:px-2.5 py-0.5 sm:py-1 rounded-md border border-blue-400 shadow cursor-pointer active:scale-95"
+            >
+              [5] 5 แต้ม
+            </button>
+            <button
+              type="button"
+              onClick={() => onFoulSelect?.(6)}
+              className="bg-pink-900 hover:bg-pink-800 text-pink-200 font-mono font-black text-[10px] xs:text-xs sm:text-sm px-2 xs:px-2.5 py-0.5 sm:py-1 rounded-md border border-pink-400 shadow cursor-pointer active:scale-95"
+            >
+              [6] 6 แต้ม
+            </button>
+            <button
+              type="button"
+              onClick={() => onFoulSelect?.(7)}
+              className="bg-zinc-900 hover:bg-zinc-800 text-zinc-100 font-mono font-black text-[10px] xs:text-xs sm:text-sm px-2 xs:px-2.5 py-0.5 sm:py-1 rounded-md border border-zinc-500 shadow cursor-pointer active:scale-95"
+            >
+              [7] 7 แต้ม
+            </button>
+            <button
+              type="button"
+              onClick={onCancelFoulMode}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] xs:text-xs px-2 py-0.5 sm:py-1 rounded-md border border-slate-600 shadow cursor-pointer"
+            >
+              [Clear] ยกเลิก
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 2. GIANT MAIN SCOREBOARDS (2 PLAYERS) */}
       <div className="flex-1 min-h-0 grid grid-cols-2 gap-1 xs:gap-1.5 sm:gap-2 md:gap-3">
