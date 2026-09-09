@@ -9,13 +9,14 @@ import { AnalyticsTab } from './components/AnalyticsTab';
 import { HistoryTab } from './components/HistoryTab';
 import { NewMatchModal } from './components/NewMatchModal';
 import { FrameEndModal } from './components/FrameEndModal';
+import { KeyboardDisplayScreen } from './components/KeyboardDisplayScreen';
 import { Match, Frame, Shot, Visit, BallColor, GameMode, PocketLocation, ElectricConfig } from './types/snooker';
 import { BALL_MAP, createInitialFrame, calculatePlayerStats, calculateGaForPot, calculateElectricPotPoints } from './utils/snookerRules';
 import { soundManager } from './utils/audio';
 import { saveActiveMatch, loadActiveMatch, saveMatchToHistory } from './utils/storage';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<'scoreboard' | 'raw-data' | 'analytics' | 'history'>('scoreboard');
+  const [activeTab, setActiveTab] = useState<'scoreboard' | 'keyboard-display' | 'raw-data' | 'analytics' | 'history'>('scoreboard');
   const [isMuted, setIsMuted] = useState<boolean>(soundManager.isMuted());
   const [isKeypadGuideOpen, setIsKeypadGuideOpen] = useState<boolean>(false);
   const [isNewMatchModalOpen, setIsNewMatchModalOpen] = useState<boolean>(false);
@@ -838,6 +839,33 @@ export function App() {
               canUndo={currentFrame.shots && currentFrame.shots.length > 0}
             />
           </div>
+        )}
+
+        {activeTab === 'keyboard-display' && (
+          <KeyboardDisplayScreen
+            player1Name={match.player1Name}
+            player2Name={match.player2Name}
+            activeStrikerIndex={activeStrikerIndex}
+            currentBreak={currentBreak}
+            ballsInCurrentVisit={ballsInCurrentVisit}
+            frame={currentFrame}
+            frameDurationFormatted={formatTime(frameDurationSec)}
+            shotDurationSec={shotDurationSec}
+            isGaMode={match.gameMode === 'snooker-ga'}
+            isElectricMode={match.gameMode === 'electric-count'}
+            electricConfig={match.electricConfig || currentFrame.electricConfig}
+            p1CumulativeScore={p1CumulativeScore}
+            p2CumulativeScore={p2CumulativeScore}
+            currentGameNumber={match.currentFrameIndex + 1}
+            totalGames={match.bestOfFrames}
+            currentVisitShots={currentVisitShots}
+            onSwitchStriker={() => handleEndTurn('miss')}
+            onEndTurn={handleEndTurn}
+            onUndo={handleUndo}
+            onEndFrame={() => setIsFrameEndModalOpen(true)}
+            onNewMatch={() => setIsNewMatchModalOpen(true)}
+            canUndo={currentFrame.shots && currentFrame.shots.length > 0}
+          />
         )}
 
         {activeTab === 'raw-data' && (

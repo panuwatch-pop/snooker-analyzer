@@ -7,6 +7,7 @@ import {
   TableProperties, 
   History, 
   Tv,
+  Keyboard,
   ChevronDown 
 } from 'lucide-react';
 import { GameMode } from '../types/snooker';
@@ -14,8 +15,8 @@ import { APP_VERSION } from '../version';
 import { useDevice } from '../utils/device';
 
 interface NavbarProps {
-  activeTab: 'scoreboard' | 'raw-data' | 'analytics' | 'history';
-  setActiveTab: (tab: 'scoreboard' | 'raw-data' | 'analytics' | 'history') => void;
+  activeTab: 'scoreboard' | 'keyboard-display' | 'raw-data' | 'analytics' | 'history';
+  setActiveTab: (tab: 'scoreboard' | 'keyboard-display' | 'raw-data' | 'analytics' | 'history') => void;
   gameMode: GameMode;
   matchLengthType?: 'best-of' | 'unlimited';
   bestOfFrames: number;
@@ -76,6 +77,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="appearance-none w-full bg-slate-950 text-emerald-300 font-bold text-[11px] xs:text-xs rounded-lg pl-2 pr-6 py-1 border border-emerald-600/80 outline-none focus:ring-1 focus:ring-emerald-400 shadow cursor-pointer truncate"
               >
                 <option value="scoreboard" className="bg-slate-900 text-slate-100 font-semibold">📺 กระดานคะแนน</option>
+                <option value="keyboard-display" className="bg-slate-900 text-slate-100 font-semibold">⌨️ จอคีย์บอร์ด / TV</option>
                 <option value="raw-data" className="bg-slate-900 text-slate-100 font-semibold">📋 ข้อมูลดิบ (Logs)</option>
                 <option value="analytics" className="bg-slate-900 text-slate-100 font-semibold">📊 วิเคราะห์สถิติ %</option>
                 <option value="history" className="bg-slate-900 text-slate-100 font-semibold">📜 ประวัติการแข่ง</option>
@@ -95,6 +97,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Tv className="w-3.5 h-3.5" />
               <span>กระดานคะแนน</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('keyboard-display')}
+              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs lg:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'keyboard-display'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
+            >
+              <Keyboard className="w-3.5 h-3.5" />
+              <span>จอคีย์บอร์ด / TV</span>
             </button>
 
             <button
