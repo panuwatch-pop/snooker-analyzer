@@ -656,33 +656,33 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
         </div>
 
         {/* Emergency Touch / Mouse Action Buttons */}
-        <div className="flex items-center space-x-1 flex-shrink-0">
+        <div className="flex items-center space-x-1 sm:space-x-1.5 flex-shrink-0">
+          {onEndTurn && (
+            <button
+              type="button"
+              onClick={() => onEndTurn('miss')}
+              className="flex items-center space-x-0.5 px-2 py-0.5 sm:py-1 rounded-lg font-black text-[8px] xs:text-[10px] sm:text-xs bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-600 shadow-sm transition cursor-pointer active:scale-95"
+              title="เปลี่ยนเทิร์นสลับคนแทง (คีย์ลัด: Enter)"
+            >
+              <RotateCcw className="w-2.5 h-2.5 xs:w-3 xs:h-3 text-emerald-400" />
+              <span>เปลี่ยนเทิร์น [Enter]</span>
+            </button>
+          )}
+
           {onUndo && (
             <button
               type="button"
               onClick={onUndo}
               disabled={!canUndo}
-              className={`flex items-center space-x-0.5 px-1.5 xs:px-2 py-0.5 rounded font-bold text-[8px] xs:text-[10px] sm:text-xs border transition cursor-pointer ${
+              className={`flex items-center space-x-0.5 px-2 py-0.5 sm:py-1 rounded-lg font-black text-[8px] xs:text-[10px] sm:text-xs border shadow-sm transition cursor-pointer ${
                 canUndo
-                  ? 'bg-amber-950/90 hover:bg-amber-900 text-amber-200 border-amber-600'
+                  ? 'bg-amber-950/90 hover:bg-amber-900 text-amber-200 border-amber-600 active:scale-95'
                   : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-50'
               }`}
               title="ย้อนกลับแต้มก่อนหน้า (คีย์ลัด: Backspace ⌫ หรือ *)"
             >
-              <Undo2 className="w-2.5 h-2.5 xs:w-3 xs:h-3" />
+              <Undo2 className="w-2.5 h-2.5 xs:w-3 xs:h-3 text-amber-400" />
               <span>ย้อนกลับ [⌫]</span>
-            </button>
-          )}
-
-          {onEndTurn && (
-            <button
-              type="button"
-              onClick={() => onEndTurn('miss')}
-              className="flex items-center space-x-0.5 px-1.5 xs:px-2 py-0.5 rounded font-bold text-[8px] xs:text-[10px] sm:text-xs bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-600 transition cursor-pointer"
-              title="เปลี่ยนเทิร์นสลับคนแทง (คีย์ลัด: Enter)"
-            >
-              <RotateCcw className="w-2.5 h-2.5 xs:w-3 xs:h-3" />
-              <span>เปลี่ยนเทิร์น [Enter]</span>
             </button>
           )}
 
@@ -690,12 +690,27 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
             <button
               type="button"
               onClick={onEndFrame}
-              className="flex items-center space-x-0.5 px-1.5 xs:px-2 py-0.5 rounded font-bold text-[8px] xs:text-[10px] sm:text-xs bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-600 transition cursor-pointer"
+              className="flex items-center space-x-0.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg font-black text-[8px] xs:text-[10px] sm:text-xs bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 hover:from-purple-500 hover:to-fuchsia-500 text-white border-2 border-fuchsia-300 shadow-md shadow-purple-950 transition cursor-pointer active:scale-95"
               title="จบเฟรมปัจจุบัน (คีย์ลัด: / หรือ =)"
             >
-              <Flag className="w-2.5 h-2.5 xs:w-3 xs:h-3" />
+              <Flag className="w-2.5 h-2.5 xs:w-3 xs:h-3 text-yellow-300" />
               <span>จบเฟรม [/]</span>
             </button>
+          )}
+
+          {onNewMatch && (
+            <>
+              <div className="w-px bg-slate-800 self-stretch my-0.5 hidden xs:block mx-0.5" />
+              <button
+                type="button"
+                onClick={onNewMatch}
+                className="flex items-center space-x-0.5 ml-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg font-black text-[8px] xs:text-[10px] sm:text-xs bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 hover:from-emerald-400 hover:to-cyan-300 text-slate-950 border-2 border-emerald-200 ring-1 ring-teal-400/50 shadow-md shadow-teal-950 transition cursor-pointer active:scale-95"
+                title="เริ่มแมตช์ใหม่"
+              >
+                <Sparkles className="w-2.5 h-2.5 xs:w-3 xs:h-3 text-slate-950" />
+                <span>เริ่มใหม่</span>
+              </button>
+            </>
           )}
         </div>
 

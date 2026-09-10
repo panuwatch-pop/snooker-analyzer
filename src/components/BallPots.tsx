@@ -233,12 +233,12 @@ export const BallPots: React.FC<BallPotsProps> = ({
         )}
       </div>
 
-      {/* Main Action Controls: Foul Button Large & Dominant, Other Buttons Compact */}
+      {/* Main Action Controls */}
       <div className="flex items-stretch gap-0.5 xs:gap-1 sm:gap-1.5">
         {/* Foul Button */}
         <button
           onClick={onToggleFoulMode}
-          className={`w-16 xs:w-20 sm:w-28 md:w-36 flex-shrink-0 flex items-center justify-center space-x-0.5 xs:space-x-1 font-extrabold py-1 xs:py-1.5 md:py-2 px-0.5 xs:px-1 rounded-md xs:rounded-lg md:rounded-xl border transition-all cursor-pointer active:scale-98 shadow ${
+          className={`w-16 xs:w-20 sm:w-28 md:w-32 flex-shrink-0 flex items-center justify-center space-x-0.5 xs:space-x-1 font-extrabold py-1 xs:py-1.5 md:py-2 px-0.5 xs:px-1 rounded-md xs:rounded-lg md:rounded-xl border transition-all cursor-pointer active:scale-98 shadow ${
             isFoulMode
               ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 ring-2 ring-rose-500/50 animate-pulse'
               : 'bg-gradient-to-r from-rose-700 via-rose-800 to-red-900 hover:from-rose-600 hover:to-red-800 text-white border-rose-600'
@@ -247,7 +247,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
           <AlertTriangle className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 text-amber-300 flex-shrink-0 animate-bounce" />
           <div className="text-left min-w-0">
             <div className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm leading-none font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
-            <div className="text-[5px] xs:text-[6px] sm:text-[8px] text-rose-200 font-normal hidden xs:block mt-0.5">[-] / [F]</div>
+            <div className="text-[5px] xs:text-[6px] sm:text-[8px] text-rose-200 font-normal hidden xs:block mt-0.5">[-] / [+]</div>
           </div>
         </button>
 
@@ -263,63 +263,56 @@ export const BallPots: React.FC<BallPotsProps> = ({
           </button>
         )}
 
-        {/* Miss Button */}
+        {/* Miss / End Turn Button */}
         <button
           onClick={() => onEndTurn('miss')}
-          className="flex-1 flex flex-col items-center justify-center bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-emerald-300 font-bold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-emerald-700/60 shadow-sm cursor-pointer active:scale-98 transition-all"
           title="เปลี่ยนเทิร์น / สลับคนแทง (คีย์ลัด: Enter)"
         >
-          <RotateCcw className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-amber-400 flex-shrink-0" />
-          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">เปลี่ยนเทิร์น</span>
-          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-slate-400 font-mono hidden xs:block">[Enter]</span>
+          <RotateCcw className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
+          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-black truncate mt-0.5">เปลี่ยนเทิร์น</span>
+          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-emerald-400/80 font-mono hidden xs:block">[Enter]</span>
         </button>
 
-        {/* Safety Button */}
-        <button
-          onClick={() => onEndTurn('safety')}
-          className="flex-1 flex flex-col items-center justify-center bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
-          title="แทงกัน (คีย์ลัด: 8 หรือ S)"
-        >
-          <Shield className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-sky-400 flex-shrink-0" />
-          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">แทงกัน</span>
-          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-slate-400 font-mono hidden xs:block">[8]</span>
-        </button>
-
-        {/* Undo Button */}
+        {/* Undo Button (Moved next to เปลี่ยนเทิร์น) */}
         <button
           onClick={onUndo}
           disabled={!canUndo}
           className={`flex-1 flex flex-col items-center justify-center font-bold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border transition-all cursor-pointer ${
             canUndo
-              ? 'bg-amber-600/90 hover:bg-amber-500 text-white border-amber-500 shadow-sm active:scale-98'
-              : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed'
+              ? 'bg-gradient-to-b from-amber-950 to-slate-900 hover:from-amber-900 hover:to-slate-800 text-amber-300 border-amber-600/80 shadow-sm active:scale-98'
+              : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-50'
           }`}
           title="ย้อนกลับแต้ม (คีย์ลัด: Backspace ⌫ หรือ *)"
         >
-          <Undo2 className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
-          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">ย้อนกลับ</span>
-          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-amber-200 font-mono hidden xs:block">[⌫]</span>
+          <Undo2 className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 flex-shrink-0 text-amber-400" />
+          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-black truncate mt-0.5">ย้อนกลับ</span>
+          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-amber-400/80 font-mono hidden xs:block">[⌫]</span>
         </button>
 
-        {/* End Frame Button */}
+        {/* End Frame Button (Prominent & bright vibrant purple/fuchsia) */}
         <button
           onClick={onEndFrame}
-          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-amber-400 shadow-sm cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border-2 border-fuchsia-300 shadow-lg shadow-purple-950 cursor-pointer active:scale-98 transition-all"
           title="จบเฟรมปัจจุบัน (คีย์ลัด: / หรือ =)"
         >
-          <Flag className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-slate-950 flex-shrink-0" />
+          <Flag className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 text-yellow-300 flex-shrink-0" />
           <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs font-black leading-tight truncate mt-0.5">จบเฟรม</span>
-          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-slate-900 font-mono hidden xs:block font-bold">[/]</span>
+          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-fuchsia-200 font-mono hidden xs:block font-bold">[/]</span>
         </button>
 
-        {/* New Match Button */}
+        {/* Spacing / Divider between จบเฟรม & เริ่มใหม่ */}
+        <div className="w-px bg-slate-700/80 self-stretch my-0.5 hidden xs:block mx-0.5" />
+
+        {/* New Match Button (Vibrant & prominent with extra margin spacing) */}
         <button
           onClick={onNewMatch}
-          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-black py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border-2 border-cyan-300 ring-1 ring-cyan-400/50 shadow-sm cursor-pointer active:scale-98 transition-all"
+          className="flex-1 ml-1 xs:ml-2 flex flex-col items-center justify-center bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 hover:from-emerald-400 hover:to-cyan-300 text-slate-950 font-black py-0.5 xs:py-1 md:py-1.5 px-1 rounded-md xs:rounded-lg border-2 border-emerald-200 ring-2 ring-teal-400/50 shadow-lg shadow-teal-950 cursor-pointer active:scale-98 transition-all"
           title="เริ่มแมตช์ใหม่"
         >
-          <Sparkles className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-slate-950 flex-shrink-0 animate-pulse" />
-          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs font-black leading-tight truncate mt-0.5">เริ่มใหม่</span>
+          <Sparkles className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 text-slate-950 flex-shrink-0" />
+          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs font-black leading-tight truncate mt-0.5 text-slate-950">เริ่มใหม่</span>
+          <span className="text-[5px] xs:text-[6px] sm:text-[7px] text-slate-900 font-bold hidden xs:block">New Match</span>
         </button>
       </div>
 
