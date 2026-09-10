@@ -149,9 +149,10 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
             <>
               <button
                 onClick={onNextFrame}
-                className="flex-1 py-2 xs:py-2.5 sm:py-3 px-4 rounded-lg xs:rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs xs:text-sm shadow-md shadow-emerald-600/30 flex items-center justify-center space-x-1.5 cursor-pointer transition-all active:scale-98"
+                className="flex-1 py-2 xs:py-2.5 sm:py-3 px-3 xs:px-4 rounded-lg xs:rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs xs:text-sm shadow-md shadow-emerald-600/30 flex items-center justify-center space-x-1.5 cursor-pointer transition-all active:scale-98"
               >
                 <span>{isElectric ? 'เริ่มเกมถัดไป' : 'เริ่มเฟรมต่อไป'}</span>
+                <span className="text-[10px] bg-black/30 border border-emerald-400/40 px-1.5 py-0.5 rounded text-emerald-100 font-mono font-normal">Enter ↵</span>
                 <ArrowRight className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
               </button>
 
@@ -167,9 +168,10 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
             <>
               <button
                 onClick={onNextFrame}
-                className="flex-1 py-2 xs:py-2.5 sm:py-3 px-4 rounded-lg xs:rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs xs:text-sm shadow-md shadow-emerald-600/30 flex items-center justify-center space-x-1.5 cursor-pointer transition-all active:scale-98"
+                className="flex-1 py-2 xs:py-2.5 sm:py-3 px-3 xs:px-4 rounded-lg xs:rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs xs:text-sm shadow-md shadow-emerald-600/30 flex items-center justify-center space-x-1.5 cursor-pointer transition-all active:scale-98"
               >
                 <span>{isElectric ? 'เริ่มเกมถัดไป' : 'เริ่มเฟรมถัดไป'}</span>
+                <span className="text-[10px] bg-black/30 border border-emerald-400/40 px-1.5 py-0.5 rounded text-emerald-100 font-mono font-normal">Enter ↵</span>
                 <ArrowRight className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
               </button>
 
@@ -187,6 +189,7 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
               className="w-full py-2.5 xs:py-3 px-6 rounded-lg xs:rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-xs xs:text-sm shadow-lg shadow-amber-600/30 flex items-center justify-center space-x-2 cursor-pointer transition-all active:scale-98"
             >
               <span>บันทึกผลและปิดแมตช์</span>
+              <span className="text-[10px] bg-black/20 border border-slate-950/30 px-1.5 py-0.5 rounded text-slate-950 font-mono font-bold">Enter ↵</span>
               <Trophy className="w-4 h-4" />
             </button>
           )}

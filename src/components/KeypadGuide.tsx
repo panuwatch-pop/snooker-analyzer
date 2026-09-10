@@ -160,11 +160,11 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
                 <span className="block text-[8px] sm:text-[9px] text-emerald-400 font-bold">🟢 เขียว (3 แต้ม)</span>
               </div>
 
-              {/* Enter key (Spans 2 rows vertically) = เปลี่ยนเทิร์น */}
+              {/* Enter key (Spans 2 rows vertically) = เปลี่ยนเทิร์น / เริ่มเฟรมใหม่ */}
               <div className="row-span-2 bg-gradient-to-b from-emerald-800 to-teal-900 border-2 border-emerald-400 rounded-lg p-1.5 flex flex-col justify-center items-center text-center shadow">
                 <span className="text-xs sm:text-sm font-mono font-black text-emerald-200">Enter</span>
                 <span className="text-[8px] sm:text-[9px] text-emerald-200 font-black mt-0.5">เปลี่ยนเทิร์น</span>
-                <span className="text-[7px] text-emerald-400">(จบไม้)</span>
+                <span className="text-[7px] text-emerald-300 font-bold">เริ่มเฟรมใหม่</span>
               </div>
 
               {/* Row 6: 0 (Spans 2 cols horizontally) & . */}
@@ -176,7 +176,7 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
               {/* . (Del) = ยกเลิก */}
               <div className="bg-slate-800 border-2 border-slate-600 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-xs sm:text-sm font-mono font-black text-amber-300">. (Del)</span>
-                <span className="block text-[8px] sm:text-[9px] text-amber-300 font-black">ยกเลิก</span>
+                <span className="block text-[8px] sm:text-[9px] text-amber-300 font-black">ยกเลิก / ปิด</span>
               </div>
 
             </div>
