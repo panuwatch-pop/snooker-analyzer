@@ -726,25 +726,19 @@ export function App() {
         return;
       }
 
-      // 7. Key 0 / Insert -> Quick White Ball Foul (+4 pts)
-      if (key === '0' || code === 'Digit0' || code === 'Numpad0' || key === 'Insert') {
-        handleSubmitFoul(4, { switchStriker: true, note: 'ขาวเปลี่ยน / ฟาวล์ +4 แต้ม' });
-        return;
-      }
-
-      // 8. Key 8 / 'S' -> Safety shot (แทงกัน)
+      // 7. Key 8 / 'S' -> Safety shot (แทงกัน)
       if (key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ArrowUp' || key === 's' || key === 'S' || code === 'KeyS' || key === 'ห') {
         handleEndTurn('safety');
         return;
       }
 
-      // 9. Key 9 / PageUp -> Multi-red pot (ตบแดงซ้อน +1)
+      // 8. Key 9 / PageUp -> Multi-red pot (ตบแดงซ้อน +1)
       if (key === '9' || code === 'Digit9' || code === 'Numpad9' || key === 'PageUp') {
         handleMultiRedPot(1);
         return;
       }
 
-      // 10. NumLock or H / ? -> Open Keypad Guide
+      // 9. NumLock or H / ? -> Open Keypad Guide
       if (code === 'NumLock' || key === 'NumLock' || key === '?' || key === 'h' || key === 'H') {
         setIsKeypadGuideOpen(prev => !prev);
         return;

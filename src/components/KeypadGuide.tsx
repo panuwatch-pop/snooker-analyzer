@@ -169,8 +169,8 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
 
               {/* Row 6: 0 (Spans 2 cols horizontally) & . */}
               <div className="col-span-2 bg-slate-900 border border-slate-700 rounded-lg p-1.5 flex items-center justify-between px-3 shadow">
-                <span className="text-xs sm:text-sm font-mono font-black text-slate-200">0 (Ins)</span>
-                <span className="text-[8px] sm:text-[9px] text-slate-300 font-bold">⚪ ขาวเปลี่ยน (+4)</span>
+                <span className="text-xs sm:text-sm font-mono font-black text-slate-400">0 (Ins)</span>
+                <span className="text-[8px] sm:text-[9px] text-slate-500 font-bold">-</span>
               </div>
 
               {/* . (Del) = ยกเลิก */}
