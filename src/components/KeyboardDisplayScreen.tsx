@@ -16,7 +16,7 @@ import {
   Maximize2,
   Minimize2
 } from 'lucide-react';
-import { Frame, ElectricConfig, Shot, BallColor } from '../types/snooker';
+import { Frame, ElectricConfig, Shot, BallColor, GameMode } from '../types/snooker';
 import { calculateRemainingPoints, calculateSnookersRequired, BALL_MAP } from '../utils/snookerRules';
 
 interface KeyboardDisplayScreenProps {
@@ -28,6 +28,7 @@ interface KeyboardDisplayScreenProps {
   frame?: Frame;
   frameDurationFormatted: string;
   shotDurationSec: number;
+  gameMode?: GameMode;
   isGaMode?: boolean;
   isElectricMode?: boolean;
   electricConfig?: ElectricConfig;
@@ -57,6 +58,7 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
   frame,
   frameDurationFormatted = '00:00',
   shotDurationSec = 0,
+  gameMode = '15-reds',
   isGaMode = false,
   isElectricMode = false,
   electricConfig,
@@ -96,7 +98,7 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
   const p2Frames = frame?.player2FramesWon ?? 0;
   const p1Ga = frame?.player1Ga ?? 0;
   const p2Ga = frame?.player2Ga ?? 0;
-  const redsRemaining = frame?.redsRemaining ?? 15;
+  const redsRemaining = frame?.redsRemaining ?? (gameMode === '6-reds' ? 6 : 15);
   const p1HighBreak = frame?.stats?.[0]?.highestBreak ?? 0;
   const p2HighBreak = frame?.stats?.[1]?.highestBreak ?? 0;
 
@@ -104,10 +106,11 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
   const hasHandicap = isElectricMode && currentConfig?.handicapEnabled;
 
   const diff = Math.abs(p1Score - p2Score);
+  const effectiveMode = isElectricMode ? 'electric-count' : (isGaMode ? 'snooker-ga' : gameMode);
   const remaining = calculateRemainingPoints(
     redsRemaining,
     frame?.shots || [],
-    isElectricMode ? 'electric-count' : (isGaMode ? 'snooker-ga' : '15-reds'),
+    effectiveMode,
     currentConfig
   );
   const isSafeLead = diff > remaining;
@@ -142,11 +145,19 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
           </button>
 
           <div className={`px-1.5 xs:px-2 py-0.5 rounded-md border font-bold text-[9px] xs:text-[10px] sm:text-xs flex-shrink-0 ${
-            isElectricMode
+            effectiveMode === 'electric-count'
               ? 'bg-cyan-950/90 text-cyan-300 border-cyan-500'
-              : (isGaMode ? 'bg-amber-950/90 text-amber-300 border-amber-500' : 'bg-emerald-950/90 text-emerald-300 border-emerald-600')
+              : (effectiveMode === 'snooker-ga'
+                  ? 'bg-amber-950/90 text-amber-300 border-amber-500'
+                  : (effectiveMode === '6-reds'
+                      ? 'bg-rose-950/90 text-rose-300 border-rose-500 font-extrabold'
+                      : 'bg-emerald-950/90 text-emerald-300 border-emerald-600'))
           }`}>
-            {isElectricMode ? '⚡ ไฟฟ้า' : (isGaMode ? '🎯 กา' : (frame?.gameMode === '6-reds' ? '6 แดง' : '15 แดง'))}
+            {effectiveMode === 'electric-count'
+              ? '⚡ ไฟฟ้า'
+              : (effectiveMode === 'snooker-ga'
+                  ? '🎯 กา'
+                  : (effectiveMode === '6-reds' ? '🔴 6 แดง' : '🔴 15 แดง'))}
           </div>
 
           <div className="bg-slate-800/90 border border-slate-700 text-amber-300 px-1.5 xs:px-2 py-0.5 rounded-md font-bold text-[9px] xs:text-[10px] sm:text-xs flex items-center space-x-0.5 flex-shrink-0">

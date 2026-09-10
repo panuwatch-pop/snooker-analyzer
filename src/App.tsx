@@ -981,6 +981,7 @@ export function App() {
             frame={currentFrame}
             frameDurationFormatted={formatTime(frameDurationSec)}
             shotDurationSec={shotDurationSec}
+            gameMode={match.gameMode}
             isGaMode={match.gameMode === 'snooker-ga'}
             isElectricMode={match.gameMode === 'electric-count'}
             electricConfig={match.electricConfig || currentFrame.electricConfig}
