@@ -646,12 +646,12 @@ export function App() {
           setIsFoulMode(false);
           return;
         }
-        if (key === 'Enter' || code === 'NumpadEnter' || key === '0' || code === 'Numpad0' || key === '-' || key === '+') {
+        if (key === '0' || code === 'Numpad0' || key === '-' || key === '+') {
           handleSubmitFoul(4, { switchStriker: true, note: 'ฟาวล์ +4 แต้ม' });
           setIsFoulMode(false);
           return;
         }
-        if (key === 'Escape' || key === 'Clear') {
+        if (key === 'Escape' || key === 'Clear' || key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete') {
           setIsFoulMode(false);
           return;
         }
@@ -687,30 +687,35 @@ export function App() {
         return;
       }
 
-      // 2. NumLock or H / ? -> Open Keypad Guide
-      if (code === 'NumLock' || key === 'NumLock' || key === '?' || key === 'h' || key === 'H') {
-        setIsKeypadGuideOpen(prev => !prev);
-        return;
-      }
-
-      // 3. Calculator / Equal key (=) or 'e'/'E' -> Open End Frame Modal
-      if (key === '=' || code === 'NumpadEqual' || code === 'Equal' || key === 'LaunchApplication2' || key === 'Calculator' || key === 'e' || key === 'E' || code === 'KeyE' || key === 'ำ') {
-        e.preventDefault();
-        setIsFrameEndModalOpen(true);
-        return;
-      }
-
-      // 4. Backspace or Asterisk (*) or Ctrl+Z -> Undo
+      // 2. Backspace (⌫) or Asterisk (*) or Ctrl+Z -> ย้อนกลับ Undo
       if (key === 'Backspace' || code === 'Backspace' || key === '*' || code === 'NumpadMultiply' || (e.ctrlKey && (key.toLowerCase() === 'z' || code === 'KeyZ'))) {
         e.preventDefault();
         handleUndo();
         return;
       }
 
-      // 5. Tab -> Switch Striker
-      if (key === 'Tab' || code === 'Tab') {
+      // 3. Slash (/) or Equal (=) or 'E' -> จบเฟรม (End Frame Modal)
+      if (key === '/' || code === 'NumpadDivide' || code === 'Slash' || key === '=' || code === 'NumpadEqual' || code === 'Equal' || key === 'LaunchApplication2' || key === 'Calculator' || key === 'e' || key === 'E' || code === 'KeyE' || key === 'ำ') {
+        e.preventDefault();
+        setIsFrameEndModalOpen(true);
+        return;
+      }
+
+      // 4. Enter / Space / Tab -> เปลี่ยนเทิร์น (Switch Striker / End Turn)
+      if (key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === ' ' || code === 'Space' || key === 'Tab' || code === 'Tab' || key === 'ใ') {
         e.preventDefault();
         handleEndTurn('miss');
+        return;
+      }
+
+      // 5. Period (.) / Del / Clear / Escape -> ยกเลิก (Cancel / Reset)
+      if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete' || key === 'Escape' || key === 'Clear') {
+        if (isFoulMode) {
+          setIsFoulMode(false);
+          return;
+        }
+        setIsFrameEndModalOpen(false);
+        setIsKeypadGuideOpen(false);
         return;
       }
 
@@ -727,28 +732,22 @@ export function App() {
         return;
       }
 
-      // 7. Key 8 / Slash (/) / 'S' -> Safety shot (แทงกัน)
-      if (key === '/' || code === 'NumpadDivide' || code === 'Slash' || key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ArrowUp' || key === 's' || key === 'S' || code === 'KeyS' || key === 'ห') {
+      // 8. Key 8 / 'S' -> Safety shot (แทงกัน)
+      if (key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ArrowUp' || key === 's' || key === 'S' || code === 'KeyS' || key === 'ห') {
         handleEndTurn('safety');
         return;
       }
 
-      // 8. Key 9 / PageUp -> Multi-red pot (ตบแดงซ้อน +1)
+      // 9. Key 9 / PageUp -> Multi-red pot (ตบแดงซ้อน +1)
       if (key === '9' || code === 'Digit9' || code === 'Numpad9' || key === 'PageUp') {
         handleMultiRedPot(1);
         return;
       }
 
-      // 9. End Turn (., Delete, Space, Enter)
-      if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === ' ' || code === 'Space' || key === 'Delete' || key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === 'ใ') {
-        handleEndTurn('miss');
+      // 10. NumLock or H / ? -> Open Keypad Guide
+      if (code === 'NumLock' || key === 'NumLock' || key === '?' || key === 'h' || key === 'H') {
+        setIsKeypadGuideOpen(prev => !prev);
         return;
-      }
-
-      // 10. Clear / Escape -> Cancel / Close modal
-      if (key === 'Escape' || key === 'Clear') {
-        setIsFrameEndModalOpen(false);
-        setIsKeypadGuideOpen(false);
       }
     };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Keyboard, X, Sparkles, Zap, Shield, RotateCcw, Undo2, Flag } from 'lucide-react';
+import { Keyboard, X, Sparkles } from 'lucide-react';
 
 interface KeypadGuideProps {
   isOpen: boolean;
@@ -53,7 +53,7 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
           )}
         </div>
 
-        {/* Visual 22-Keypad Grid (Exact layout from the wireless numpad) */}
+        {/* Visual 22-Keypad Grid */}
         <div className="flex-1 min-h-0 overflow-y-auto pr-1">
           <div className="bg-slate-950 border-2 border-slate-800 rounded-2xl p-2.5 sm:p-4 max-w-md mx-auto shadow-inner">
             
@@ -64,19 +64,19 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
                 <span className="block text-[8px] sm:text-[9px] text-amber-300 font-bold">คู่มือ</span>
               </div>
 
-              <div className="bg-slate-800/90 border border-slate-700 rounded-lg p-1 text-center shadow">
+              <div className="bg-purple-950/80 border border-purple-700/80 rounded-lg p-1 text-center shadow">
                 <span className="block text-[10px] sm:text-xs font-mono font-black text-purple-300">=</span>
                 <span className="block text-[8px] sm:text-[9px] text-purple-400 font-bold">จบเฟรม</span>
               </div>
 
               <div className="bg-slate-800/90 border border-slate-700 rounded-lg p-1 text-center shadow">
                 <span className="block text-[10px] sm:text-xs font-mono font-black text-slate-300">Clear</span>
-                <span className="block text-[8px] sm:text-[9px] text-slate-400 font-bold">ล้าง/ออก</span>
+                <span className="block text-[8px] sm:text-[9px] text-slate-400 font-bold">ยกเลิก</span>
               </div>
 
-              <div className="bg-amber-950/80 border border-amber-700/80 rounded-lg p-1 text-center shadow">
+              <div className="bg-amber-950/90 border-2 border-amber-500 rounded-lg p-1 text-center shadow">
                 <span className="block text-[10px] sm:text-xs font-mono font-black text-amber-300">⌫ (BS)</span>
-                <span className="block text-[8px] sm:text-[9px] text-amber-300 font-bold">ยกเลิก</span>
+                <span className="block text-[8px] sm:text-[9px] text-amber-200 font-black">ย้อนกลับ Undo</span>
               </div>
             </div>
 
@@ -89,25 +89,26 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
                 <span className="block text-[8px] sm:text-[9px] text-teal-400 font-bold">สลับคน</span>
               </div>
 
-              <div className="bg-teal-950/80 border border-teal-700/80 rounded-lg p-1.5 text-center shadow">
-                <span className="block text-[10px] sm:text-xs font-mono font-black text-teal-300">/</span>
-                <span className="block text-[8px] sm:text-[9px] text-teal-300 font-bold">แทงกัน</span>
+              {/* Slash (/) = จบเฟรม */}
+              <div className="bg-purple-950/90 border-2 border-purple-500 rounded-lg p-1.5 text-center shadow">
+                <span className="block text-[10px] sm:text-xs font-mono font-black text-purple-200">/</span>
+                <span className="block text-[8px] sm:text-[9px] text-purple-300 font-black">จบเฟรม</span>
               </div>
 
               <div className="bg-amber-950/80 border border-amber-700/80 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-[10px] sm:text-xs font-mono font-black text-amber-300">*</span>
-                <span className="block text-[8px] sm:text-[9px] text-amber-300 font-bold">ยกเลิก</span>
+                <span className="block text-[8px] sm:text-[9px] text-amber-300 font-bold">ย้อนกลับ Undo</span>
               </div>
 
               <div className="bg-rose-950/90 border border-rose-600 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-[10px] sm:text-xs font-mono font-black text-rose-300">-</span>
-                <span className="block text-[8px] sm:text-[9px] text-rose-300 font-bold">ฟาวล์</span>
+                <span className="block text-[8px] sm:text-[9px] text-rose-300 font-bold">โหมดฟาวล์</span>
               </div>
 
               {/* Row 3 */}
               <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-xs sm:text-sm font-mono font-black text-white">7</span>
-                <span className="block text-[8px] sm:text-[9px] text-zinc-300 font-bold">⚫ ดำ (7)</span>
+                <span className="block text-[8px] sm:text-[9px] text-zinc-300 font-bold">⚫ ดำ (7 แต้ม)</span>
               </div>
 
               <div className="bg-teal-950/60 border border-teal-800 rounded-lg p-1.5 text-center shadow">
@@ -123,44 +124,44 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
               {/* + key (Spans 2 rows vertically) */}
               <div className="row-span-2 bg-rose-950/90 border-2 border-rose-500 rounded-lg p-1.5 flex flex-col justify-center items-center text-center shadow">
                 <span className="text-base sm:text-lg font-mono font-black text-rose-300">+</span>
-                <span className="text-[8px] sm:text-[9px] text-rose-200 font-black">ฟาวล์</span>
+                <span className="text-[8px] sm:text-[9px] text-rose-200 font-black">โหมดฟาวล์</span>
                 <span className="text-[7px] text-rose-400">(4-7 แต้ม)</span>
               </div>
 
               {/* Row 4 */}
               <div className="bg-amber-950/60 border border-amber-800 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-xs sm:text-sm font-mono font-black text-amber-500">4</span>
-                <span className="block text-[8px] sm:text-[9px] text-amber-500 font-bold">🟤 นต. (4)</span>
+                <span className="block text-[8px] sm:text-[9px] text-amber-500 font-bold">🟤 นต. (4 แต้ม)</span>
               </div>
 
               <div className="bg-blue-950/80 border border-blue-700 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-xs sm:text-sm font-mono font-black text-blue-400">5</span>
-                <span className="block text-[8px] sm:text-[9px] text-blue-400 font-bold">🔵 น้ำเงิน (5)</span>
+                <span className="block text-[8px] sm:text-[9px] text-blue-400 font-bold">🔵 น้ำเงิน (5 แต้ม)</span>
               </div>
 
               <div className="bg-pink-950/80 border border-pink-700 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-xs sm:text-sm font-mono font-black text-pink-400">6</span>
-                <span className="block text-[8px] sm:text-[9px] text-pink-400 font-bold">🌸 ชมพู (6)</span>
+                <span className="block text-[8px] sm:text-[9px] text-pink-400 font-bold">🌸 ชมพู (6 แต้ม)</span>
               </div>
 
               {/* Row 5 */}
               <div className="bg-red-950/80 border border-red-700 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-xs sm:text-sm font-mono font-black text-red-400">1</span>
-                <span className="block text-[8px] sm:text-[9px] text-red-400 font-bold">🔴 แดง (1)</span>
+                <span className="block text-[8px] sm:text-[9px] text-red-400 font-bold">🔴 แดง (1 แต้ม)</span>
               </div>
 
               <div className="bg-yellow-950/80 border border-yellow-700 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-xs sm:text-sm font-mono font-black text-yellow-300">2</span>
-                <span className="block text-[8px] sm:text-[9px] text-yellow-300 font-bold">🟡 เหลือง (2)</span>
+                <span className="block text-[8px] sm:text-[9px] text-yellow-300 font-bold">🟡 เหลือง (2 แต้ม)</span>
               </div>
 
               <div className="bg-emerald-950/80 border border-emerald-700 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-xs sm:text-sm font-mono font-black text-emerald-400">3</span>
-                <span className="block text-[8px] sm:text-[9px] text-emerald-400 font-bold">🟢 เขียว (3)</span>
+                <span className="block text-[8px] sm:text-[9px] text-emerald-400 font-bold">🟢 เขียว (3 แต้ม)</span>
               </div>
 
-              {/* Enter key (Spans 2 rows vertically) */}
-              <div className="row-span-2 bg-emerald-900/90 border-2 border-emerald-400 rounded-lg p-1.5 flex flex-col justify-center items-center text-center shadow">
+              {/* Enter key (Spans 2 rows vertically) = เปลี่ยนเทิร์น */}
+              <div className="row-span-2 bg-gradient-to-b from-emerald-800 to-teal-900 border-2 border-emerald-400 rounded-lg p-1.5 flex flex-col justify-center items-center text-center shadow">
                 <span className="text-xs sm:text-sm font-mono font-black text-emerald-200">Enter</span>
                 <span className="text-[8px] sm:text-[9px] text-emerald-200 font-black mt-0.5">เปลี่ยนเทิร์น</span>
                 <span className="text-[7px] text-emerald-400">(จบไม้)</span>
@@ -172,9 +173,10 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
                 <span className="text-[8px] sm:text-[9px] text-slate-300 font-bold">⚪ ขาวเปลี่ยน (+4)</span>
               </div>
 
-              <div className="bg-amber-950/80 border border-amber-600 rounded-lg p-1.5 text-center shadow">
+              {/* . (Del) = ยกเลิก */}
+              <div className="bg-slate-800 border-2 border-slate-600 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-xs sm:text-sm font-mono font-black text-amber-300">. (Del)</span>
-                <span className="block text-[8px] sm:text-[9px] text-amber-300 font-bold">จบเทิร์น</span>
+                <span className="block text-[8px] sm:text-[9px] text-amber-300 font-black">ยกเลิก</span>
               </div>
 
             </div>

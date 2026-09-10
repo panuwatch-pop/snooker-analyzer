@@ -630,17 +630,17 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
           
           {/* Desktop full badges */}
           <div className="hidden md:flex items-center space-x-1">
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-slate-300 font-mono font-bold">[1-7] ลูกสี</span>
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-slate-300 font-mono font-bold">[Space/.] เทิร์น</span>
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-slate-300 font-mono font-bold">[S] กัน</span>
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-rose-300 border-rose-900 font-mono font-bold">[F/-] ฟาวล์</span>
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-amber-300 border-amber-900 font-mono font-bold">[Z/*] ยกเลิก</span>
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-purple-300 border-purple-900 font-mono font-bold">[E] จบเฟรม</span>
+            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-slate-300 font-mono font-bold">[1-7] ลูกสี (1-7)</span>
+            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-emerald-300 border-emerald-800 font-mono font-bold">[Enter] เปลี่ยนเทิร์น</span>
+            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-amber-300 border-amber-800 font-mono font-bold">[.] ยกเลิก</span>
+            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-amber-300 border-amber-800 font-mono font-bold">[⌫/*] Undo</span>
+            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-purple-300 border-purple-800 font-mono font-bold">[/] จบเฟรม</span>
+            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-rose-300 border-rose-900 font-mono font-bold">[-/+] ฟาวล์</span>
           </div>
 
           {/* Mobile compact single-line reminder */}
           <span className="md:hidden text-[8px] xs:text-[9px] text-slate-400 truncate">
-            คีย์บอร์ด [1-7] ลูกสี | [Space] เทิร์น | [F] ฟาวล์
+            [1-7] แต้ม | [Enter] เทิร์น | [.] ยกเลิก | [⌫] Undo | [/] จบเฟรม
           </span>
         </div>
 
