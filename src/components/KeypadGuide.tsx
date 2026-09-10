@@ -182,6 +182,24 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
             </div>
 
           </div>
+
+          {/* Quick Summary Table */}
+          <div className="mt-3 bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 max-w-md mx-auto text-[11px] space-y-1.5">
+            <div className="text-amber-400 font-bold text-xs border-b border-slate-800 pb-1 flex items-center justify-between">
+              <span>📋 สรุปหน้าที่ของปุ่มกด Wireless Keypad</span>
+              <span className="text-[10px] text-emerald-400">v3.8.8</span>
+            </div>
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-300">
+              <div><strong className="text-white font-mono bg-slate-800 px-1 py-0.2 rounded mr-1">1 - 7</strong> แต้มตบลูกสี (1-7)</div>
+              <div><strong className="text-emerald-300 font-mono bg-emerald-950 border border-emerald-800 px-1 py-0.2 rounded mr-1">Enter</strong> เปลี่ยนเทิร์น / เริ่มเฟรมใหม่</div>
+              <div><strong className="text-amber-300 font-mono bg-slate-800 px-1 py-0.2 rounded mr-1">. (Del)</strong> ยกเลิก / ปิดหน้าต่าง</div>
+              <div><strong className="text-amber-300 font-mono bg-amber-950 border border-amber-800 px-1 py-0.2 rounded mr-1">⌫ (BS)</strong> ย้อนกลับ (Undo)</div>
+              <div><strong className="text-purple-300 font-mono bg-purple-950 border border-purple-800 px-1 py-0.2 rounded mr-1">/ หรือ =</strong> จบเฟรม</div>
+              <div><strong className="text-rose-300 font-mono bg-rose-950 border border-rose-800 px-1 py-0.2 rounded mr-1">- หรือ +</strong> โหมดฟาวล์ (เลือก 4-7)</div>
+              <div><strong className="text-teal-300 font-mono bg-teal-950 border border-teal-800 px-1 py-0.2 rounded mr-1">8</strong> แทงกัน (Safety)</div>
+              <div><strong className="text-red-400 font-mono bg-slate-800 px-1 py-0.2 rounded mr-1">9</strong> ตบแดงซ้อน (+1)</div>
+            </div>
+          </div>
         </div>
 
         {/* Close Button */}

@@ -267,18 +267,22 @@ export const BallPots: React.FC<BallPotsProps> = ({
         <button
           onClick={() => onEndTurn('miss')}
           className="flex-1 flex flex-col items-center justify-center bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
+          title="เปลี่ยนเทิร์น / สลับคนแทง (คีย์ลัด: Enter)"
         >
           <RotateCcw className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-amber-400 flex-shrink-0" />
-          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">พลาด</span>
+          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">เปลี่ยนเทิร์น</span>
+          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-slate-400 font-mono hidden xs:block">[Enter]</span>
         </button>
 
         {/* Safety Button */}
         <button
           onClick={() => onEndTurn('safety')}
           className="flex-1 flex flex-col items-center justify-center bg-slate-800/95 hover:bg-slate-700 text-slate-100 font-bold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-slate-700 shadow-sm cursor-pointer active:scale-98 transition-all"
+          title="แทงกัน (คีย์ลัด: 8 หรือ S)"
         >
           <Shield className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-sky-400 flex-shrink-0" />
-          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">กัน/เซฟ</span>
+          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">แทงกัน</span>
+          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-slate-400 font-mono hidden xs:block">[8]</span>
         </button>
 
         {/* Undo Button */}
@@ -290,18 +294,22 @@ export const BallPots: React.FC<BallPotsProps> = ({
               ? 'bg-amber-600/90 hover:bg-amber-500 text-white border-amber-500 shadow-sm active:scale-98'
               : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed'
           }`}
+          title="ย้อนกลับแต้ม (คีย์ลัด: Backspace ⌫ หรือ *)"
         >
           <Undo2 className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
           <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-bold truncate mt-0.5">ย้อนกลับ</span>
+          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-amber-200 font-mono hidden xs:block">[⌫]</span>
         </button>
 
         {/* End Frame Button */}
         <button
           onClick={onEndFrame}
           className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-amber-400 shadow-sm cursor-pointer active:scale-98 transition-all"
+          title="จบเฟรมปัจจุบัน (คีย์ลัด: / หรือ =)"
         >
           <Flag className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-slate-950 flex-shrink-0" />
           <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs font-black leading-tight truncate mt-0.5">จบเฟรม</span>
+          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-slate-900 font-mono hidden xs:block font-bold">[/]</span>
         </button>
 
         {/* New Match Button */}

@@ -625,22 +625,22 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
         <div className="flex items-center flex-wrap gap-1 min-w-0">
           <span className="font-bold text-slate-300 flex items-center space-x-0.5 flex-shrink-0">
             <Keyboard className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-            <span className="hidden sm:inline">คีย์ลัด:</span>
+            <span className="hidden sm:inline font-black text-amber-300">ปุ่มคีย์ลัด:</span>
           </span>
           
           {/* Desktop full badges */}
-          <div className="hidden md:flex items-center space-x-1">
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-slate-300 font-mono font-bold">[1-7] ลูกสี (1-7)</span>
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-emerald-300 border-emerald-800 font-mono font-bold">[Enter] เปลี่ยนเทิร์น</span>
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-amber-300 border-amber-800 font-mono font-bold">[.] ยกเลิก</span>
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-amber-300 border-amber-800 font-mono font-bold">[⌫/*] Undo</span>
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-purple-300 border-purple-800 font-mono font-bold">[/] จบเฟรม</span>
-            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-rose-300 border-rose-900 font-mono font-bold">[-/+] ฟาวล์</span>
+          <div className="hidden md:flex items-center space-x-1 flex-wrap gap-y-1">
+            <span className="bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded text-slate-300 font-mono font-bold">[1-7] แต้มตบสี</span>
+            <span className="bg-emerald-950/80 border border-emerald-600 px-1.5 py-0.5 rounded text-emerald-300 font-mono font-bold">[Enter] เปลี่ยนเทิร์น / เริ่มเฟรมใหม่</span>
+            <span className="bg-slate-900 border border-slate-600 px-1.5 py-0.5 rounded text-amber-300 font-mono font-bold">[.] ยกเลิก/ปิด</span>
+            <span className="bg-amber-950/80 border border-amber-600 px-1.5 py-0.5 rounded text-amber-200 font-mono font-bold">[⌫/*] ย้อนกลับ (Undo)</span>
+            <span className="bg-purple-950/80 border border-purple-600 px-1.5 py-0.5 rounded text-purple-200 font-mono font-bold">[/] จบเฟรม</span>
+            <span className="bg-rose-950/80 border border-rose-600 px-1.5 py-0.5 rounded text-rose-300 font-mono font-bold">[-/+] โหมดฟาวล์ (4-7)</span>
           </div>
 
           {/* Mobile compact single-line reminder */}
-          <span className="md:hidden text-[8px] xs:text-[9px] text-slate-400 truncate">
-            [1-7] แต้ม | [Enter] เทิร์น | [.] ยกเลิก | [⌫] Undo | [/] จบเฟรม
+          <span className="md:hidden text-[8px] xs:text-[9px] text-slate-300 truncate font-mono">
+            [1-7] แต้ม | [Enter] เทิร์น/เริ่มเฟรม | [.] ยกเลิก | [⌫] ย้อนกลับ | [/] จบเฟรม | [-/+] ฟาวล์
           </span>
         </div>
 
@@ -653,12 +653,13 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
               disabled={!canUndo}
               className={`flex items-center space-x-0.5 px-1.5 xs:px-2 py-0.5 rounded font-bold text-[8px] xs:text-[10px] sm:text-xs border transition cursor-pointer ${
                 canUndo
-                  ? 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-slate-700'
+                  ? 'bg-amber-950/90 hover:bg-amber-900 text-amber-200 border-amber-600'
                   : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-50'
               }`}
+              title="ย้อนกลับแต้มก่อนหน้า (คีย์ลัด: Backspace ⌫ หรือ *)"
             >
               <Undo2 className="w-2.5 h-2.5 xs:w-3 xs:h-3" />
-              <span>ยกเลิก</span>
+              <span>ย้อนกลับ [⌫]</span>
             </button>
           )}
 
@@ -666,10 +667,11 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
             <button
               type="button"
               onClick={() => onEndTurn('miss')}
-              className="flex items-center space-x-0.5 px-1.5 xs:px-2 py-0.5 rounded font-bold text-[8px] xs:text-[10px] sm:text-xs bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700 transition cursor-pointer"
+              className="flex items-center space-x-0.5 px-1.5 xs:px-2 py-0.5 rounded font-bold text-[8px] xs:text-[10px] sm:text-xs bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-600 transition cursor-pointer"
+              title="เปลี่ยนเทิร์นสลับคนแทง (คีย์ลัด: Enter)"
             >
               <RotateCcw className="w-2.5 h-2.5 xs:w-3 xs:h-3" />
-              <span>เทิร์น</span>
+              <span>เปลี่ยนเทิร์น [Enter]</span>
             </button>
           )}
 
@@ -677,10 +679,11 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
             <button
               type="button"
               onClick={onEndFrame}
-              className="flex items-center space-x-0.5 px-1.5 xs:px-2 py-0.5 rounded font-bold text-[8px] xs:text-[10px] sm:text-xs bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-700 transition cursor-pointer"
+              className="flex items-center space-x-0.5 px-1.5 xs:px-2 py-0.5 rounded font-bold text-[8px] xs:text-[10px] sm:text-xs bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-600 transition cursor-pointer"
+              title="จบเฟรมปัจจุบัน (คีย์ลัด: / หรือ =)"
             >
               <Flag className="w-2.5 h-2.5 xs:w-3 xs:h-3" />
-              <span>จบเฟรม</span>
+              <span>จบเฟรม [/]</span>
             </button>
           )}
         </div>
