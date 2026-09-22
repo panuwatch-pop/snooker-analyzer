@@ -23,6 +23,29 @@ export function App() {
   const [isFrameEndModalOpen, setIsFrameEndModalOpen] = useState<boolean>(false);
   const [isFoulMode, setIsFoulMode] = useState<boolean>(false);
   const [announcedDeficitFrameId, setAnnouncedDeficitFrameId] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   // Active match state
   const [match, setMatch] = useState<Match>(() => {
@@ -869,26 +892,33 @@ export function App() {
         return;
       }
 
-      // 7. Minus (-) or Plus (+) -> Open Foul Mode (ให้เลือกฟาวล์ 4, 5, 6, 7)
-      if (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === '+' || code === 'NumpadAdd' || (code === 'Equal' && e.shiftKey) || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') {
+      // 7. Plus (+) or F11 -> ขยายหน้าจอ / ย่อหน้าจอกลับ (Toggle Fullscreen)
+      if (key === '+' || code === 'NumpadAdd' || (code === 'Equal' && e.shiftKey) || key === 'F11' || code === 'F11') {
+        e.preventDefault();
+        toggleFullscreen();
+        return;
+      }
+
+      // 8. Minus (-) -> Open Foul Mode (ให้เลือกฟาวล์ 4, 5, 6, 7)
+      if (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') {
         e.preventDefault();
         setIsFoulMode(true);
         return;
       }
 
-      // 8. Key 8 / 'S' -> Safety shot (แทงกัน)
+      // 9. Key 8 / 'S' -> Safety shot (แทงกัน)
       if (key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ArrowUp' || key === 's' || key === 'S' || code === 'KeyS' || key === 'ห') {
         handleEndTurn('safety');
         return;
       }
 
-      // 9. Key 9 / PageUp -> Multi-red pot (ตบแดงซ้อน +1)
+      // 10. Key 9 / PageUp -> Multi-red pot (ตบแดงซ้อน +1)
       if (key === '9' || code === 'Digit9' || code === 'Numpad9' || key === 'PageUp') {
         handleMultiRedPot(1);
         return;
       }
 
-      // 10. NumLock or H / ? -> Open Keypad Guide
+      // 11. NumLock or H / ? -> Open Keypad Guide
       if (code === 'NumLock' || key === 'NumLock' || key === '?' || key === 'h' || key === 'H') {
         setIsKeypadGuideOpen(prev => !prev);
         return;
@@ -911,6 +941,7 @@ export function App() {
     handleMultiRedPot,
     handleNextFrame,
     handleFinishMatch,
+    toggleFullscreen,
   ]);
 
   const handleStartNewMatch = (config: {
@@ -976,6 +1007,8 @@ export function App() {
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
         onNewMatch={() => setIsNewMatchModalOpen(true)}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={toggleFullscreen}
       />
 
       <main className="flex-1 min-h-0 p-0.5 xs:p-1 sm:p-2 md:p-3 max-w-7xl w-full mx-auto flex flex-col overflow-hidden">

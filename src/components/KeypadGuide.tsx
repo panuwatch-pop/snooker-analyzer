@@ -121,11 +121,11 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
                 <span className="block text-[8px] sm:text-[9px] text-red-400 font-bold">แดงซ้อน</span>
               </div>
 
-              {/* + key (Spans 2 rows vertically) */}
-              <div className="row-span-2 bg-rose-950/90 border-2 border-rose-500 rounded-lg p-1.5 flex flex-col justify-center items-center text-center shadow">
-                <span className="text-base sm:text-lg font-mono font-black text-rose-300">+</span>
-                <span className="text-[8px] sm:text-[9px] text-rose-200 font-black">โหมดฟาวล์</span>
-                <span className="text-[7px] text-rose-400">(4-7 แต้ม)</span>
+              {/* + key (Spans 2 rows vertically) = Toggle Fullscreen */}
+              <div className="row-span-2 bg-gradient-to-b from-indigo-900 to-blue-950 border-2 border-indigo-400 rounded-lg p-1.5 flex flex-col justify-center items-center text-center shadow">
+                <span className="text-base sm:text-lg font-mono font-black text-indigo-200">+</span>
+                <span className="text-[8px] sm:text-[9px] text-indigo-100 font-black">ขยายจอ</span>
+                <span className="text-[7px] text-blue-300">ย่อจอกลับ</span>
               </div>
 
               {/* Row 4 */}
@@ -178,7 +178,6 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
                 <span className="block text-xs sm:text-sm font-mono font-black text-amber-300">. (Del)</span>
                 <span className="block text-[8px] sm:text-[9px] text-amber-300 font-black">ยกเลิก / ปิด</span>
               </div>
-
             </div>
 
           </div>
@@ -187,7 +186,7 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
           <div className="mt-3 bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 max-w-md mx-auto text-[11px] space-y-1.5">
             <div className="text-amber-400 font-bold text-xs border-b border-slate-800 pb-1 flex items-center justify-between">
               <span>📋 สรุปหน้าที่ของปุ่มกด Wireless Keypad</span>
-              <span className="text-[10px] text-emerald-400">v3.9.0</span>
+              <span className="text-[10px] text-emerald-400">{APP_VERSION}</span>
             </div>
             <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-300">
               <div><strong className="text-white font-mono bg-slate-800 px-1 py-0.2 rounded mr-1">1 - 7</strong> แต้มตบลูกสี (1-7)</div>
@@ -195,7 +194,8 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
               <div><strong className="text-amber-300 font-mono bg-slate-800 px-1 py-0.2 rounded mr-1">. (Del)</strong> ยกเลิก / ปิดหน้าต่าง</div>
               <div><strong className="text-amber-300 font-mono bg-amber-950 border border-amber-800 px-1 py-0.2 rounded mr-1">⌫ (BS)</strong> ย้อนกลับ (Undo)</div>
               <div><strong className="text-purple-300 font-mono bg-purple-950 border border-purple-800 px-1 py-0.2 rounded mr-1">/ หรือ =</strong> จบเฟรม</div>
-              <div><strong className="text-rose-300 font-mono bg-rose-950 border border-rose-800 px-1 py-0.2 rounded mr-1">- หรือ +</strong> โหมดฟาวล์ (เลือก 4-7)</div>
+              <div><strong className="text-indigo-300 font-mono bg-indigo-950 border border-indigo-700 px-1 py-0.2 rounded mr-1">+</strong> ขยายจอ / ย่อจอกลับ</div>
+              <div><strong className="text-rose-300 font-mono bg-rose-950 border border-rose-800 px-1 py-0.2 rounded mr-1">-</strong> โหมดฟาวล์ (เลือก 4-7)</div>
               <div><strong className="text-red-400 font-mono bg-slate-800 px-1 py-0.2 rounded mr-1">9</strong> ตบแดงซ้อน (+1)</div>
             </div>
           </div>

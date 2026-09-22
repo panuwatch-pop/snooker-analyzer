@@ -647,12 +647,13 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
             <span className="bg-slate-900 border border-slate-600 px-1.5 py-0.5 rounded text-amber-300 font-mono font-bold">[.] ยกเลิก/ปิด</span>
             <span className="bg-amber-950/80 border border-amber-600 px-1.5 py-0.5 rounded text-amber-200 font-mono font-bold">[⌫/*] ย้อนกลับ (Undo)</span>
             <span className="bg-purple-950/80 border border-purple-600 px-1.5 py-0.5 rounded text-purple-200 font-mono font-bold">[/] จบเฟรม</span>
-            <span className="bg-rose-950/80 border border-rose-600 px-1.5 py-0.5 rounded text-rose-300 font-mono font-bold">[-/+] โหมดฟาวล์ (4-7)</span>
+            <span className="bg-indigo-950/80 border border-indigo-600 px-1.5 py-0.5 rounded text-indigo-300 font-mono font-bold">[+] ขยาย/ย่อจอ</span>
+            <span className="bg-rose-950/80 border border-rose-600 px-1.5 py-0.5 rounded text-rose-300 font-mono font-bold">[-] โหมดฟาวล์</span>
           </div>
 
           {/* Mobile compact single-line reminder */}
           <span className="md:hidden text-[8px] xs:text-[9px] text-slate-300 truncate font-mono">
-            [1-7] แต้ม | [Enter] เทิร์น/เริ่มเฟรม | [.] ยกเลิก | [⌫] ย้อนกลับ | [/] จบเฟรม | [-/+] ฟาวล์
+            [1-7] แต้ม | [Enter] เทิร์น | [⌫] ย้อนกลับ | [/] จบเฟรม | [+] ขยายจอ | [-] ฟาวล์
           </span>
         </div>
 

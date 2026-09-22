@@ -8,7 +8,9 @@ import {
   History, 
   Tv,
   Keyboard,
-  ChevronDown 
+  ChevronDown,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import { GameMode } from '../types/snooker';
 import { APP_VERSION } from '../version';
@@ -24,6 +26,8 @@ interface NavbarProps {
   isMuted: boolean;
   onToggleMute: () => void;
   onNewMatch: () => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -35,6 +39,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentFrameNumber,
   isMuted,
   onToggleMute,
+  isFullscreen = false,
+  onToggleFullscreen,
 }) => {
   const isUnlimited = matchLengthType === 'unlimited' || bestOfFrames === 0;
   const { isMobile } = useDevice();
@@ -42,13 +48,41 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-1.5 sm:px-3 py-0.5 sm:py-1.5 shadow-md flex-shrink-0">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-1 sm:gap-2">
-        {/* Left Section: Logo & Version */}
+        {/* Left Section: Logo, Version & Prominent Fullscreen Toggle Button */}
         <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
           <div className="flex items-center space-x-1 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg shadow-sm">
             <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 animate-pulse flex-shrink-0" />
             <span className="text-[11px] sm:text-sm tracking-wide font-black uppercase whitespace-nowrap">SNOOKER PRO</span>
             <span className="text-[8px] sm:text-[9px] bg-amber-400 text-slate-950 font-black px-1 py-0.2 rounded shadow">{APP_VERSION}</span>
           </div>
+
+          {/* Prominent Fullscreen Toggle Button next to SNOOKER PRO */}
+          {onToggleFullscreen && (
+            <button
+              type="button"
+              onClick={onToggleFullscreen}
+              title={isFullscreen ? "ย่อหน้าจอกลับ (คีย์ลัด: + หรือ F11)" : "ขยายเต็มจอ (คีย์ลัด: + หรือ F11)"}
+              className={`flex items-center space-x-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg transition-all border font-black text-[10px] sm:text-xs cursor-pointer shadow-md flex-shrink-0 active:scale-95 ${
+                isFullscreen
+                  ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 border-amber-300 shadow-amber-500/30 ring-1 ring-amber-300'
+                  : 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white border-indigo-400 shadow-indigo-600/30'
+              }`}
+            >
+              {isFullscreen ? (
+                <>
+                  <Minimize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-950 flex-shrink-0" />
+                  <span className="hidden xs:inline font-bold">ย่อจอ</span>
+                  <span className="bg-slate-900/30 text-slate-950 px-1 py-0.2 rounded text-[9px] font-mono font-bold">[+]</span>
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white flex-shrink-0" />
+                  <span className="hidden xs:inline font-bold">ขยายจอ</span>
+                  <span className="bg-black/30 text-indigo-100 px-1 py-0.2 rounded text-[9px] font-mono font-bold">[+]</span>
+                </>
+              )}
+            </button>
+          )}
 
           <div className="hidden xs:flex items-center space-x-1 text-[9px] sm:text-xs font-semibold flex-shrink-0">
             <span className={`px-1.5 py-0.5 rounded-full border ${
