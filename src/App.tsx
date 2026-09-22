@@ -663,6 +663,11 @@ export function App() {
     const newP1Frames = p1Won ? match.player1FramesWon + 1 : match.player1FramesWon;
     const newP2Frames = !p1Won ? match.player2FramesWon + 1 : match.player2FramesWon;
 
+    const rawWinnerName = newP1Frames > newP2Frames ? match.player1Name : match.player2Name;
+    const winnerName = rawWinnerName === 'Player 1' ? 'ผู้เล่น 1' : (rawWinnerName === 'Player 2' ? 'ผู้เล่น 2' : (rawWinnerName || (newP1Frames > newP2Frames ? 'ผู้เล่น 1' : 'ผู้เล่น 2')));
+    soundManager.speak(`${winnerName} ชนะการแข่งขัน`);
+    soundManager.playApplause();
+
     const updatedMatch: Match = {
       ...match,
       player1FramesWon: newP1Frames,

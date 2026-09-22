@@ -199,6 +199,11 @@ class SoundManager {
     this.speakNumber(score);
   }
 
+  public speakWinner(winnerName: string): void {
+    const text = winnerName.includes('ชนะ') ? winnerName : `${winnerName} ชนะ`;
+    this.speak(text);
+  }
+
   // Pot sound (kept quiet to prioritize crystal clear Thai voice)
   public playPotSound(_points: number = 1): void {
     // Triangle beep removed so that only clear Thai speech is heard

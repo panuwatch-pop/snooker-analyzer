@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Trophy, ArrowRight, CheckCircle2, Percent, Zap } from 'lucide-react';
 import { Frame, Match } from '../types/snooker';
 import { calculateHandicapScore } from '../utils/snookerRules';
+import { soundManager } from '../utils/audio';
 
 interface FrameEndModalProps {
   isOpen: boolean;
@@ -18,14 +19,21 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
   onNextFrame,
   onFinishMatch,
 }) => {
-  if (!isOpen) return null;
-
-  const isElectric = match.gameMode === 'electric-count';
-  const electricConfig = match.electricConfig || frame.electricConfig;
-  const hasHandicap = isElectric && electricConfig?.handicapEnabled;
-
   const winnerIndex = frame.player1Score > frame.player2Score ? 0 : 1;
-  const winnerName = winnerIndex === 0 ? match.player1Name : match.player2Name;
+  const rawWinnerName = winnerIndex === 0 ? match.player1Name : match.player2Name;
+  const winnerName = rawWinnerName === 'Player 1' ? 'ผู้เล่น 1' : (rawWinnerName === 'Player 2' ? 'ผู้เล่น 2' : (rawWinnerName || (winnerIndex === 0 ? 'ผู้เล่น 1' : 'ผู้เล่น 2')));
+
+  useEffect(() => {
+    if (isOpen) {
+      if (frame.player1Score === frame.player2Score) {
+        soundManager.speak('แต้มเสมอกัน');
+      } else {
+        soundManager.speakWinner(winnerName);
+      }
+    }
+  }, [isOpen, frame.player1Score, frame.player2Score, winnerName]);
+
+  if (!isOpen) return null;
 
   const isUnlimited = match.matchLengthType === 'unlimited' || match.bestOfFrames === 0;
   const framesNeeded = isUnlimited ? Infinity : Math.ceil(match.bestOfFrames / 2);
