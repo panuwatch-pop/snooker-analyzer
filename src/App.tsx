@@ -81,6 +81,9 @@ export function App() {
 
   const handleEndTurn = useCallback((reason: 'miss' | 'safety' | 'end-turn' = 'miss') => {
     soundManager.playTurnSound();
+    const currentTotalScore = activeStrikerIndex === 0 ? currentFrame.player1Score : currentFrame.player2Score;
+    soundManager.speakScore(currentTotalScore);
+
     const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
     const shotNumber = (currentFrame.shots?.length || 0) + 1;
 
@@ -195,6 +198,7 @@ export function App() {
     }
 
     soundManager.playPotSound(Math.round(points));
+    soundManager.speakNumber(points);
 
     const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
     const newBreak = Math.round((currentBreak + points) * 10) / 10;
@@ -295,6 +299,7 @@ export function App() {
   // Add Direct Custom Points
   const handleAddCustomPoints = (points: number, label: string) => {
     soundManager.playPotSound(points);
+    soundManager.speakNumber(points);
 
     const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
     const newBreak = currentBreak + points;
