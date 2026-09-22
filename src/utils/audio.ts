@@ -70,12 +70,11 @@ export function numberToThaiWords(num: number): string {
   return result;
 }
 
-// Web Audio API & Multi-Engine Speech Synthesis Manager
+// Web Audio API & Native Thai Speech Synthesis Manager
 class SoundManager {
   private ctx: AudioContext | null = null;
   private muted: boolean = false;
-  private currentAudio: HTMLAudioElement | null = null;
-  private audioCache: Map<string, string> = new Map();
+  private voices: SpeechSynthesisVoice[] = [];
 
   constructor() {
     // Load mute preference
@@ -85,34 +84,45 @@ class SoundManager {
     }
 
     if (typeof window !== 'undefined') {
-      // Preload 1 to 7 audio for instant 0ms latency playback
-      try {
-        [0, 1, 2, 3, 4, 5, 6, 7].forEach(n => {
-          const text = numberToThaiWords(n);
-          this.getAudioUrl(text);
-        });
-      } catch {
-        // ignore
-      }
-
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.onvoiceschanged = () => {
-          try {
-            window.speechSynthesis.getVoices();
-          } catch {
-            // ignore
-          }
-        };
-      }
+      this.initVoices();
     }
   }
 
-  private getAudioUrl(text: string): string {
-    if (!this.audioCache.has(text)) {
-      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=th&client=tw-ob&q=${encodeURIComponent(text)}`;
-      this.audioCache.set(text, url);
+  private initVoices(): void {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+    const loadVoices = () => {
+      try {
+        this.voices = window.speechSynthesis.getVoices() || [];
+      } catch {
+        this.voices = [];
+      }
+    };
+
+    loadVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
     }
-    return this.audioCache.get(text)!;
+
+    // Proactively unlock speech synthesis on first user interaction
+    const unlock = () => {
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.resume();
+        }
+      } catch {
+        // ignore
+      }
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('keydown', unlock);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('pointerdown', unlock);
+    };
+
+    window.addEventListener('click', unlock);
+    window.addEventListener('keydown', unlock);
+    window.addEventListener('touchstart', unlock);
+    window.addEventListener('pointerdown', unlock);
   }
 
   private getContext(): AudioContext | null {
@@ -137,9 +147,6 @@ class SoundManager {
     this.muted = !this.muted;
     localStorage.setItem('snooker_sound_muted', JSON.stringify(this.muted));
     if (this.muted) {
-      if (this.currentAudio) {
-        this.currentAudio.pause();
-      }
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
@@ -147,49 +154,30 @@ class SoundManager {
     return this.muted;
   }
 
-  // Voice speech synthesis with audio element primary & speech synthesis fallback
+  // Voice speech synthesis for natural Thai numbers
   public speak(text: string): void {
     if (this.muted || !text) return;
-    if (typeof window === 'undefined') return;
-
-    try {
-      if (this.currentAudio) {
-        this.currentAudio.pause();
-        this.currentAudio.currentTime = 0;
-      }
-
-      const audioUrl = this.getAudioUrl(text);
-      const audio = new Audio(audioUrl);
-      audio.volume = 1.0;
-      this.currentAudio = audio;
-
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // If HTML5 Audio fails, fallback to SpeechSynthesis
-          this.fallbackSpeechSynthesis(text);
-        });
-      }
-    } catch {
-      this.fallbackSpeechSynthesis(text);
-    }
-  }
-
-  private fallbackSpeechSynthesis(text: string): void {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
     try {
+      // Clear any previous queued speech for instant responsiveness
+      window.speechSynthesis.cancel();
       window.speechSynthesis.resume();
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'th-TH';
       utterance.rate = 1.05;
       utterance.pitch = 1.0;
+      utterance.volume = 1.0;
 
-      const voices = window.speechSynthesis.getVoices();
+      // Find best available Thai voice
+      const voices = this.voices.length > 0 ? this.voices : window.speechSynthesis.getVoices();
       const thaiVoice = voices.find(v => {
-        const l = v.lang.replace('_', '-').toLowerCase();
-        return l === 'th-th' || l.startsWith('th');
+        const l = (v.lang || '').replace('_', '-').toLowerCase();
+        const n = (v.name || '').toLowerCase();
+        return l.startsWith('th') || n.includes('thai') || n.includes('ไทย');
       });
+
       if (thaiVoice) {
         utterance.voice = thaiVoice;
       }
@@ -211,50 +199,9 @@ class SoundManager {
     this.speakNumber(score);
   }
 
-  // Crisp snooker ball contact click
-  public playPotSound(points: number = 1): void {
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    try {
-      const now = ctx.currentTime;
-      // High wooden click
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      
-      // Frequency slightly rises with ball value for satisfying acoustic feel
-      const baseFreq = 800 + points * 120;
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(baseFreq, now);
-      osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.4, now + 0.08);
-
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.09);
-
-      // Add a slight pocket thud
-      const thud = ctx.createOscillator();
-      const thudGain = ctx.createGain();
-      thud.type = 'sine';
-      thud.frequency.setValueAtTime(140, now + 0.04);
-      thud.frequency.exponentialRampToValueAtTime(40, now + 0.16);
-
-      thudGain.gain.setValueAtTime(0.25, now + 0.04);
-      thudGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
-
-      thud.connect(thudGain);
-      thudGain.connect(ctx.destination);
-
-      thud.start(now + 0.04);
-      thud.stop(now + 0.17);
-    } catch {
-      // Audio context might be restricted before user interaction
-    }
+  // Pot sound (kept quiet to prioritize crystal clear Thai voice)
+  public playPotSound(_points: number = 1): void {
+    // Triangle beep removed so that only clear Thai speech is heard
   }
 
   // Foul buzzer tone
@@ -286,29 +233,7 @@ class SoundManager {
 
   // Turn switch / end break subtle cue
   public playTurnSound(): void {
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    try {
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(520, now);
-      osc.frequency.setValueAtTime(659, now + 0.06);
-
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.15);
-    } catch {
-      // ignore
-    }
+    // Subtle cue muted to prioritize spoken total score
   }
 
   // 50+ or Century break applause
@@ -346,4 +271,5 @@ class SoundManager {
 }
 
 export const soundManager = new SoundManager();
+
 
