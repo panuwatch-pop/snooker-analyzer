@@ -204,36 +204,19 @@ class SoundManager {
     this.speak(text);
   }
 
+  public speakFoul(points: number): void {
+    const pointsText = numberToThaiWords(points);
+    this.speak(`ฟาวล์ ${pointsText} แต้ม`);
+  }
+
   // Pot sound (kept quiet to prioritize crystal clear Thai voice)
   public playPotSound(_points: number = 1): void {
     // Triangle beep removed so that only clear Thai speech is heard
   }
 
-  // Foul buzzer tone
+  // Foul buzzer tone (subtle to not mask spoken voice)
   public playFoulSound(): void {
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    try {
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(180, now);
-      osc.frequency.setValueAtTime(140, now + 0.15);
-
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.42);
-    } catch {
-      // ignore
-    }
+    // Kept quiet to prioritize crystal clear Thai voice
   }
 
   // Turn switch / end break subtle cue

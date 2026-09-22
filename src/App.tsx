@@ -465,6 +465,7 @@ export function App() {
 
   const handleSubmitFoul = useCallback((points: number, options?: { isFreeBall?: boolean; switchStriker?: boolean; note?: string; recipientPlayerIndex?: 0 | 1; gaPenalty?: number }) => {
     soundManager.playFoulSound();
+    soundManager.speakFoul(points);
     const duration = Math.max(1, Math.floor((Date.now() - shotStartTime) / 1000));
     const shotNumber = (currentFrame.shots?.length || 0) + 1;
 
