@@ -184,9 +184,10 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
           </div>
 
           {isSafeLead ? (
-            <div className="bg-rose-950/90 border border-rose-600 text-rose-200 px-1.5 py-0.5 rounded flex items-center space-x-0.5 animate-pulse font-extrabold shadow text-[8px] xs:text-[9px] sm:text-xs">
-              <ShieldAlert className="w-2.5 h-2.5 text-rose-400 flex-shrink-0" />
-              <span>แต้มขาด!</span>
+            <div className="bg-red-600 border-2 border-red-300 text-white px-2 py-0.5 rounded-md flex items-center space-x-1 animate-pulse font-black shadow-lg shadow-red-600/50 text-[9px] xs:text-[10px] sm:text-xs">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+              <span>แต้มขาด {diff - remaining} แต้ม!</span>
+              {remaining > 0 && <span className="text-yellow-200 text-[8px] xs:text-[9px] hidden sm:inline">(สนุ๊ก: {snookersNeeded})</span>}
             </div>
           ) : (
             <div className="hidden md:flex bg-emerald-950/60 border border-emerald-700/80 text-emerald-300 px-1.5 py-0.5 rounded items-center space-x-0.5 font-bold">

@@ -275,10 +275,10 @@ export const ScoreboardClassic: React.FC<ScoreboardProps> = ({
           </div>
 
           {isSafeLead ? (
-            <div className="bg-rose-950/90 border border-rose-600 text-rose-200 px-1 xs:px-1.5 md:px-2 py-0.2 md:py-0.5 rounded md:rounded-lg flex items-center space-x-0.5 md:space-x-1 animate-pulse shadow-sm md:shadow-md font-bold text-[8px] xs:text-[9px] md:text-xs">
-              <ShieldAlert className="w-2.5 h-2.5 md:w-3 md:h-3 text-rose-400 flex-shrink-0" />
+            <div className="bg-red-600 border-2 border-red-300 text-white px-1.5 xs:px-2 md:px-2.5 py-0.2 md:py-0.5 rounded md:rounded-lg flex items-center space-x-1 md:space-x-1.5 animate-pulse shadow-md md:shadow-lg font-black text-[8px] xs:text-[9px] md:text-xs">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping" />
               <span>
-                แต้มขาด! {remaining > 0 ? `สนุ๊ก: ${snookersNeeded}` : `(${leaderName} ชนะ)`}
+                แต้มขาด {diff - remaining} แต้ม! {remaining > 0 ? `(สนุ๊ก: ${snookersNeeded})` : `(${leaderName} ชนะ)`}
               </span>
             </div>
           ) : (

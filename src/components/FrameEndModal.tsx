@@ -19,16 +19,19 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
   onNextFrame,
   onFinishMatch,
 }) => {
+  const isElectric = match.gameMode === 'electric-count';
+  const electricConfig = match.electricConfig || frame.electricConfig;
+  const hasHandicap = isElectric && electricConfig?.handicapEnabled;
+
   const winnerIndex = frame.player1Score > frame.player2Score ? 0 : 1;
-  const rawWinnerName = winnerIndex === 0 ? match.player1Name : match.player2Name;
-  const winnerName = rawWinnerName === 'Player 1' ? 'ผู้เล่น 1' : (rawWinnerName === 'Player 2' ? 'ผู้เล่น 2' : (rawWinnerName || (winnerIndex === 0 ? 'ผู้เล่น 1' : 'ผู้เล่น 2')));
+  const winnerName = winnerIndex === 0 ? 'ผู้เล่น 1' : 'ผู้เล่น 2';
 
   useEffect(() => {
     if (isOpen) {
       if (frame.player1Score === frame.player2Score) {
         soundManager.speak('แต้มเสมอกัน');
       } else {
-        soundManager.speakWinner(winnerName);
+        soundManager.speak(`${winnerName} ชนะ`);
       }
     }
   }, [isOpen, frame.player1Score, frame.player2Score, winnerName]);
@@ -47,8 +50,8 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
     : (!isUnlimited && (p1Frames >= framesNeeded || p2Frames >= framesNeeded));
 
   const matchWinnerName = isElectric
-    ? (p1Frames > p2Frames ? match.player1Name : (p2Frames > p1Frames ? match.player2Name : 'เสมอ'))
-    : (p1Frames >= framesNeeded ? match.player1Name : match.player2Name);
+    ? (p1Frames > p2Frames ? 'ผู้เล่น 1' : (p2Frames > p1Frames ? 'ผู้เล่น 2' : 'เสมอ'))
+    : (p1Frames >= framesNeeded ? 'ผู้เล่น 1' : 'ผู้เล่น 2');
 
   // Cumulative score calculations for electric mode
   const completedFrames = match.frames.filter(f => f.id !== frame.id);

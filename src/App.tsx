@@ -11,8 +11,8 @@ import { NewMatchModal } from './components/NewMatchModal';
 import { FrameEndModal } from './components/FrameEndModal';
 import { KeyboardDisplayScreen } from './components/KeyboardDisplayScreen';
 import { Match, Frame, Shot, Visit, BallColor, GameMode, PocketLocation, ElectricConfig } from './types/snooker';
-import { BALL_MAP, createInitialFrame, calculatePlayerStats, calculateGaForPot, calculateElectricPotPoints } from './utils/snookerRules';
-import { soundManager } from './utils/audio';
+import { BALL_MAP, createInitialFrame, calculatePlayerStats, calculateGaForPot, calculateElectricPotPoints, calculateRemainingPoints } from './utils/snookerRules';
+import { soundManager, numberToThaiWords } from './utils/audio';
 import { saveActiveMatch, loadActiveMatch, saveMatchToHistory } from './utils/storage';
 
 export function App() {
@@ -22,6 +22,7 @@ export function App() {
   const [isNewMatchModalOpen, setIsNewMatchModalOpen] = useState<boolean>(false);
   const [isFrameEndModalOpen, setIsFrameEndModalOpen] = useState<boolean>(false);
   const [isFoulMode, setIsFoulMode] = useState<boolean>(false);
+  const [announcedDeficitFrameId, setAnnouncedDeficitFrameId] = useState<string | null>(null);
 
   // Active match state
   const [match, setMatch] = useState<Match>(() => {
@@ -174,6 +175,35 @@ export function App() {
     shotStartTime,
   ]);
 
+  const checkAndAnnounceDeficit = useCallback((
+    p1Score: number,
+    p2Score: number,
+    redsRemaining: number,
+    shots: Shot[],
+    frameId: string
+  ) => {
+    const isElectric = match.gameMode === 'electric-count';
+    const effectiveMode = isElectric ? 'electric-count' : (match.gameMode === 'snooker-ga' ? 'snooker-ga' : match.gameMode);
+    const remaining = calculateRemainingPoints(
+      redsRemaining,
+      shots,
+      effectiveMode,
+      match.electricConfig
+    );
+    const diff = Math.abs(p1Score - p2Score);
+
+    if (diff > remaining && remaining >= 0) {
+      const deficit = diff - remaining;
+      if (deficit > 0 && announcedDeficitFrameId !== frameId) {
+        setAnnouncedDeficitFrameId(frameId);
+        setTimeout(() => {
+          const deficitThai = numberToThaiWords(deficit);
+          soundManager.speak(`แต้มขาดแล้ว ขาด${deficitThai}แต้ม`);
+        }, 750);
+      }
+    }
+  }, [match.gameMode, match.electricConfig, announcedDeficitFrameId]);
+
   // Unconstrained Ball Potting with Ga Pocket Calculation & Electric Snooker
   const handlePotBall = useCallback((ball: BallColor, pocket?: PocketLocation) => {
     const isElectric = match.gameMode === 'electric-count';
@@ -285,9 +315,11 @@ export function App() {
     setCurrentBreak(newBreak);
     setBallsInCurrentVisit(newBallsCount);
     setShotStartTime(Date.now());
+    checkAndAnnounceDeficit(newP1Score, newP2Score, nextReds, updatedShots, currentFrame.id);
   }, [
     activeStrikerIndex,
     ballsInCurrentVisit,
+    checkAndAnnounceDeficit,
     currentBreak,
     currentFrame,
     currentVisitNumber,
@@ -350,6 +382,7 @@ export function App() {
     setCurrentBreak(newBreak);
     setBallsInCurrentVisit(newBallsCount);
     setShotStartTime(Date.now());
+    checkAndAnnounceDeficit(newP1Score, newP2Score, currentFrame.redsRemaining, updatedShots, currentFrame.id);
   };
 
   const handleMultiRedPot = (count: number) => {
@@ -514,9 +547,11 @@ export function App() {
     setCurrentVisitNumber(prev => prev + 1);
     setCurrentVisitShots([]);
     setShotStartTime(Date.now());
+    checkAndAnnounceDeficit(newP1Score, newP2Score, currentFrame.redsRemaining, updatedShots, currentFrame.id);
   }, [
     activeStrikerIndex,
     ballsInCurrentVisit,
+    checkAndAnnounceDeficit,
     currentBreak,
     currentFrame,
     currentVisitNumber,
@@ -611,9 +646,18 @@ export function App() {
 
     setCurrentBreak(restoredBreak);
     setBallsInCurrentVisit(restoredBalls);
+
+    // If score gap is no longer safe lead after undo, reset deficit announced state
+    const diffAfterUndo = Math.abs(newP1Score - newP2Score);
+    const effectiveMode = match.gameMode === 'electric-count' ? 'electric-count' : (match.gameMode === 'snooker-ga' ? 'snooker-ga' : match.gameMode);
+    const remainingAfterUndo = calculateRemainingPoints(newReds, newShots, effectiveMode, match.electricConfig);
+    if (diffAfterUndo <= remainingAfterUndo) {
+      setAnnouncedDeficitFrameId(null);
+    }
   }, [currentFrame, currentVisitShots, match]);
 
   const handleNextFrame = useCallback(() => {
+    setAnnouncedDeficitFrameId(null);
     const p1Won = currentFrame.player1Score > currentFrame.player2Score;
     const newP1Frames = p1Won ? match.player1FramesWon + 1 : match.player1FramesWon;
     const newP2Frames = !p1Won ? match.player2FramesWon + 1 : match.player2FramesWon;
@@ -906,6 +950,7 @@ export function App() {
     setCurrentVisitNumber(1);
     setCurrentVisitShots([]);
     setShotStartTime(Date.now());
+    setAnnouncedDeficitFrameId(null);
     setActiveTab('scoreboard');
   };
 
