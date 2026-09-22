@@ -80,7 +80,6 @@ export function App() {
   };
 
   const handleEndTurn = useCallback((reason: 'miss' | 'safety' | 'end-turn' = 'miss') => {
-    soundManager.playTurnSound();
     const currentTotalScore = activeStrikerIndex === 0 ? currentFrame.player1Score : currentFrame.player2Score;
     soundManager.speakScore(currentTotalScore);
 

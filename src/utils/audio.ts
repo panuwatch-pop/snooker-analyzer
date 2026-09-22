@@ -70,10 +70,12 @@ export function numberToThaiWords(num: number): string {
   return result;
 }
 
-// Web Audio API & Speech Synthesis Manager
+// Web Audio API & Multi-Engine Speech Synthesis Manager
 class SoundManager {
   private ctx: AudioContext | null = null;
   private muted: boolean = false;
+  private currentAudio: HTMLAudioElement | null = null;
+  private audioCache: Map<string, string> = new Map();
 
   constructor() {
     // Load mute preference
@@ -82,11 +84,35 @@ class SoundManager {
       this.muted = JSON.parse(saved);
     }
 
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
+    if (typeof window !== 'undefined') {
+      // Preload 1 to 7 audio for instant 0ms latency playback
+      try {
+        [0, 1, 2, 3, 4, 5, 6, 7].forEach(n => {
+          const text = numberToThaiWords(n);
+          this.getAudioUrl(text);
+        });
+      } catch {
+        // ignore
+      }
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          try {
+            window.speechSynthesis.getVoices();
+          } catch {
+            // ignore
+          }
+        };
+      }
     }
+  }
+
+  private getAudioUrl(text: string): string {
+    if (!this.audioCache.has(text)) {
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=th&client=tw-ob&q=${encodeURIComponent(text)}`;
+      this.audioCache.set(text, url);
+    }
+    return this.audioCache.get(text)!;
   }
 
   private getContext(): AudioContext | null {
@@ -110,19 +136,50 @@ class SoundManager {
   public toggleMute(): boolean {
     this.muted = !this.muted;
     localStorage.setItem('snooker_sound_muted', JSON.stringify(this.muted));
-    if (this.muted && typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+    if (this.muted) {
+      if (this.currentAudio) {
+        this.currentAudio.pause();
+      }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
     }
     return this.muted;
   }
 
-  // Voice speech synthesis
+  // Voice speech synthesis with audio element primary & speech synthesis fallback
   public speak(text: string): void {
-    if (this.muted) return;
+    if (this.muted || !text) return;
+    if (typeof window === 'undefined') return;
+
+    try {
+      if (this.currentAudio) {
+        this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
+      }
+
+      const audioUrl = this.getAudioUrl(text);
+      const audio = new Audio(audioUrl);
+      audio.volume = 1.0;
+      this.currentAudio = audio;
+
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // If HTML5 Audio fails, fallback to SpeechSynthesis
+          this.fallbackSpeechSynthesis(text);
+        });
+      }
+    } catch {
+      this.fallbackSpeechSynthesis(text);
+    }
+  }
+
+  private fallbackSpeechSynthesis(text: string): void {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
     try {
-      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'th-TH';
       utterance.rate = 1.05;
