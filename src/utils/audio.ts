@@ -70,10 +70,12 @@ export function numberToThaiWords(num: number): string {
   return result;
 }
 
-// Web Audio API & Native Thai Speech Synthesis Manager
+// Web Audio API & Real Sweet Female Thai Voice Manager
 class SoundManager {
   private ctx: AudioContext | null = null;
   private muted: boolean = false;
+  private currentAudio: HTMLAudioElement | null = null;
+  private audioCache: Map<string, HTMLAudioElement> = new Map();
   private voices: SpeechSynthesisVoice[] = [];
 
   constructor() {
@@ -85,6 +87,26 @@ class SoundManager {
 
     if (typeof window !== 'undefined') {
       this.initVoices();
+      this.preloadCommonAudios();
+    }
+  }
+
+  // Preload single-digit balls (1-7), fouls, and common phrases for instant 0ms latency
+  private preloadCommonAudios(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const commonFiles = [
+        'num_0.mp3', 'num_1.mp3', 'num_2.mp3', 'num_3.mp3', 'num_4.mp3', 'num_5.mp3', 'num_6.mp3', 'num_7.mp3',
+        'foul_4.mp3', 'foul_5.mp3', 'foul_6.mp3', 'foul_7.mp3',
+        'p1_win.mp3', 'p2_win.mp3', 'tie.mp3'
+      ];
+      commonFiles.forEach(file => {
+        const audio = new Audio(`/sounds/${file}`);
+        audio.preload = 'auto';
+        this.audioCache.set(file, audio);
+      });
+    } catch {
+      // ignore
     }
   }
 
@@ -104,11 +126,14 @@ class SoundManager {
       window.speechSynthesis.onvoiceschanged = loadVoices;
     }
 
-    // Proactively unlock speech synthesis on first user interaction
+    // Proactively unlock speech/audio on first user interaction
     const unlock = () => {
       try {
         if ('speechSynthesis' in window) {
           window.speechSynthesis.resume();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
         }
       } catch {
         // ignore
@@ -147,6 +172,10 @@ class SoundManager {
     this.muted = !this.muted;
     localStorage.setItem('snooker_sound_muted', JSON.stringify(this.muted));
     if (this.muted) {
+      if (this.currentAudio) {
+        this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
+      }
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
@@ -154,23 +183,61 @@ class SoundManager {
     return this.muted;
   }
 
-  // Voice speech synthesis for natural Thai numbers with maximum volume and clarity
-  public speak(text: string): void {
+  // Play real sweet female voice audio clip with 0ms latency
+  private playAudioFile(fileName: string, fallbackText?: string): void {
+    if (this.muted) return;
+    if (typeof window === 'undefined') return;
+
+    try {
+      if (this.currentAudio) {
+        this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      let audio = this.audioCache.get(fileName);
+      if (!audio) {
+        audio = new Audio(`/sounds/${fileName}`);
+        audio.preload = 'auto';
+        this.audioCache.set(fileName, audio);
+      } else {
+        audio.currentTime = 0;
+      }
+
+      audio.volume = 1.0;
+      this.currentAudio = audio;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          if (fallbackText) {
+            this.speakWithTTS(fallbackText);
+          }
+        });
+      }
+    } catch {
+      if (fallbackText) {
+        this.speakWithTTS(fallbackText);
+      }
+    }
+  }
+
+  // Fallback Web Speech Synthesis
+  public speakWithTTS(text: string): void {
     if (this.muted || !text) return;
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
     try {
-      // Clear any previous queued speech for instant responsiveness
       window.speechSynthesis.cancel();
       window.speechSynthesis.resume();
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'th-TH';
-      utterance.rate = 0.98; // Slightly more articulated pace for high clarity in loud rooms
-      utterance.pitch = 1.05; // Slightly enhanced presence/brightness for maximum cut-through
-      utterance.volume = 1.0; // Maximum output level
+      utterance.rate = 0.98;
+      utterance.pitch = 1.05;
+      utterance.volume = 1.0;
 
-      // Find best available Thai voice, prioritizing High-Definition Natural / Online / Google voices
       const voices = this.voices.length > 0 ? this.voices : window.speechSynthesis.getVoices();
       const thaiVoices = voices.filter(v => {
         const l = (v.lang || '').replace('_', '-').toLowerCase();
@@ -178,7 +245,6 @@ class SoundManager {
         return l.startsWith('th') || n.includes('thai') || n.includes('ไทย');
       });
 
-      // Prefer Natural / Online / Google / Premium voices first for maximum clarity and loudness
       const bestVoice = thaiVoices.find(v => {
         const n = v.name.toLowerCase();
         return n.includes('natural') || n.includes('online') || n.includes('google') || n.includes('premwadee') || n.includes('niwat') || n.includes('kanya');
@@ -190,29 +256,72 @@ class SoundManager {
 
       window.speechSynthesis.speak(utterance);
     } catch {
-      // Audio/TTS context might be restricted before user interaction
+      // ignore
     }
   }
 
+  // General speech
+  public speak(text: string): void {
+    this.speakWithTTS(text);
+  }
+
+  // Sweet female voice for potting points (1 - 7, 0 - 147)
   public speakNumber(num: number): void {
-    const thaiWords = numberToThaiWords(num);
-    if (thaiWords) {
-      this.speak(thaiWords);
+    const rounded = Math.round(num);
+    if (rounded >= 0 && rounded <= 147 && Number.isInteger(num)) {
+      this.playAudioFile(`num_${rounded}.mp3`, numberToThaiWords(num));
+    } else {
+      this.speakWithTTS(numberToThaiWords(num));
     }
   }
 
+  // Speak visit score
   public speakScore(score: number): void {
     this.speakNumber(score);
   }
 
+  // Speak winner (ผู้เล่น 1 ชนะ / ผู้เล่น 2 ชนะ / แต้มเสมอกัน)
   public speakWinner(winnerName: string): void {
-    const text = winnerName.includes('ชนะ') ? winnerName : `${winnerName} ชนะ`;
-    this.speak(text);
+    if (winnerName.includes('1') || winnerName.includes('หนึ่ง')) {
+      this.playAudioFile('p1_win.mp3', 'ผู้เล่นหนึ่งชนะ');
+    } else if (winnerName.includes('2') || winnerName.includes('สอง')) {
+      this.playAudioFile('p2_win.mp3', 'ผู้เล่นสองชนะ');
+    } else if (winnerName.includes('เสมอ')) {
+      this.playAudioFile('tie.mp3', 'แต้มเสมอกัน');
+    } else {
+      this.speakWithTTS(`${winnerName} ชนะ`);
+    }
   }
 
+  // Speak match winner
+  public speakMatchWinner(winnerName: string): void {
+    if (winnerName.includes('1') || winnerName.includes('หนึ่ง')) {
+      this.playAudioFile('p1_match_win.mp3', 'ผู้เล่นหนึ่งชนะการแข่งขัน');
+    } else if (winnerName.includes('2') || winnerName.includes('สอง')) {
+      this.playAudioFile('p2_match_win.mp3', 'ผู้เล่นสองชนะการแข่งขัน');
+    } else {
+      this.speakWithTTS(`${winnerName} ชนะการแข่งขัน`);
+    }
+  }
+
+  // Speak foul points ("ฟาวล์ สี่ แต้ม" ฯลฯ)
   public speakFoul(points: number): void {
-    const pointsText = numberToThaiWords(points);
-    this.speak(`ฟาวล์ ${pointsText} แต้ม`);
+    const pts = Math.round(points);
+    if (pts >= 4 && pts <= 7) {
+      this.playAudioFile(`foul_${pts}.mp3`, `ฟาวล์ ${numberToThaiWords(pts)} แต้ม`);
+    } else {
+      this.speakWithTTS(`ฟาวล์ ${numberToThaiWords(points)} แต้ม`);
+    }
+  }
+
+  // Speak deficit ("แต้มขาดแล้ว ขาด...แต้ม")
+  public speakDeficit(deficit: number): void {
+    const def = Math.round(deficit);
+    if (def >= 1 && def <= 60) {
+      this.playAudioFile(`deficit_${def}.mp3`, `แต้มขาดแล้ว ขาด ${numberToThaiWords(def)} แต้ม`);
+    } else {
+      this.speakWithTTS(`แต้มขาดแล้ว ขาด ${numberToThaiWords(deficit)} แต้ม`);
+    }
   }
 
   // Pot sound (kept quiet to prioritize crystal clear Thai voice)
