@@ -154,7 +154,7 @@ class SoundManager {
     return this.muted;
   }
 
-  // Voice speech synthesis for natural Thai numbers
+  // Voice speech synthesis for natural Thai numbers with maximum volume and clarity
   public speak(text: string): void {
     if (this.muted || !text) return;
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
@@ -166,20 +166,26 @@ class SoundManager {
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'th-TH';
-      utterance.rate = 1.05;
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
+      utterance.rate = 0.98; // Slightly more articulated pace for high clarity in loud rooms
+      utterance.pitch = 1.05; // Slightly enhanced presence/brightness for maximum cut-through
+      utterance.volume = 1.0; // Maximum output level
 
-      // Find best available Thai voice
+      // Find best available Thai voice, prioritizing High-Definition Natural / Online / Google voices
       const voices = this.voices.length > 0 ? this.voices : window.speechSynthesis.getVoices();
-      const thaiVoice = voices.find(v => {
+      const thaiVoices = voices.filter(v => {
         const l = (v.lang || '').replace('_', '-').toLowerCase();
         const n = (v.name || '').toLowerCase();
         return l.startsWith('th') || n.includes('thai') || n.includes('ไทย');
       });
 
-      if (thaiVoice) {
-        utterance.voice = thaiVoice;
+      // Prefer Natural / Online / Google / Premium voices first for maximum clarity and loudness
+      const bestVoice = thaiVoices.find(v => {
+        const n = v.name.toLowerCase();
+        return n.includes('natural') || n.includes('online') || n.includes('google') || n.includes('premwadee') || n.includes('niwat') || n.includes('kanya');
+      }) || thaiVoices[0];
+
+      if (bestVoice) {
+        utterance.voice = bestVoice;
       }
 
       window.speechSynthesis.speak(utterance);
