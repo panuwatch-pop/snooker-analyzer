@@ -2,6 +2,27 @@ import { Match } from '../types/snooker';
 
 const STORAGE_ACTIVE_MATCH = 'snooker_active_match_v2';
 const STORAGE_HISTORY = 'snooker_match_history_v2';
+const STORAGE_THEME = 'snooker_app_theme';
+
+export type AppTheme = 'dark' | 'light';
+
+export function loadAppTheme(): AppTheme {
+  try {
+    const raw = localStorage.getItem(STORAGE_THEME);
+    if (raw === 'light' || raw === 'dark') return raw;
+  } catch (err) {
+    console.error('Failed to load theme:', err);
+  }
+  return 'dark';
+}
+
+export function saveAppTheme(theme: AppTheme): void {
+  try {
+    localStorage.setItem(STORAGE_THEME, theme);
+  } catch (err) {
+    console.error('Failed to save theme:', err);
+  }
+}
 
 export function saveActiveMatch(match: Match): void {
   try {

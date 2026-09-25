@@ -13,17 +13,33 @@ import { KeyboardDisplayScreen } from './components/KeyboardDisplayScreen';
 import { Match, Frame, Shot, Visit, BallColor, GameMode, PocketLocation, ElectricConfig } from './types/snooker';
 import { BALL_MAP, createInitialFrame, calculatePlayerStats, calculateGaForPot, calculateElectricPotPoints, calculateRemainingPoints } from './utils/snookerRules';
 import { soundManager, numberToThaiWords } from './utils/audio';
-import { saveActiveMatch, loadActiveMatch, saveMatchToHistory } from './utils/storage';
+import { saveActiveMatch, loadActiveMatch, saveMatchToHistory, loadAppTheme, saveAppTheme, AppTheme } from './utils/storage';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'scoreboard' | 'keyboard-display' | 'raw-data' | 'analytics' | 'history'>('scoreboard');
   const [isMuted, setIsMuted] = useState<boolean>(soundManager.isMuted());
+  const [theme, setTheme] = useState<AppTheme>(loadAppTheme);
   const [isKeypadGuideOpen, setIsKeypadGuideOpen] = useState<boolean>(false);
   const [isNewMatchModalOpen, setIsNewMatchModalOpen] = useState<boolean>(false);
   const [isFrameEndModalOpen, setIsFrameEndModalOpen] = useState<boolean>(false);
   const [isFoulMode, setIsFoulMode] = useState<boolean>(false);
   const [announcedDeficitFrameId, setAnnouncedDeficitFrameId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
+  useEffect(() => {
+    saveAppTheme(theme);
+    if (theme === 'light') {
+      document.documentElement.classList.add('theme-light');
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      document.documentElement.classList.remove('theme-light');
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  }, []);
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -924,6 +940,12 @@ export function App() {
         setIsKeypadGuideOpen(prev => !prev);
         return;
       }
+
+      // 12. Key 'T' -> Toggle Theme (โทนมืด / โทนสว่าง)
+      if (key === 't' || key === 'T' || code === 'KeyT' || key === 'ะ') {
+        toggleTheme();
+        return;
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -943,6 +965,7 @@ export function App() {
     handleNextFrame,
     handleFinishMatch,
     toggleFullscreen,
+    toggleTheme,
   ]);
 
   const handleStartNewMatch = (config: {
@@ -997,7 +1020,7 @@ export function App() {
   const p2CumulativeScore = previousFrames.reduce((sum, f) => sum + f.player2Score, 0) + currentFrame.player2Score;
 
   return (
-    <div className="h-[100dvh] max-h-[100dvh] w-full bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white overflow-hidden">
+    <div className={`h-[100dvh] max-h-[100dvh] w-full bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white overflow-hidden ${theme === 'light' ? 'theme-light' : 'theme-dark'}`} data-theme={theme}>
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -1010,6 +1033,8 @@ export function App() {
         onNewMatch={() => setIsNewMatchModalOpen(true)}
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       <main className="flex-1 min-h-0 p-0.5 xs:p-1 sm:p-2 md:p-3 max-w-7xl w-full mx-auto flex flex-col overflow-hidden">
@@ -1091,6 +1116,8 @@ export function App() {
             onNewMatch={() => setIsNewMatchModalOpen(true)}
             onOpenKeypadGuide={() => setIsKeypadGuideOpen(true)}
             canUndo={currentFrame.shots && currentFrame.shots.length > 0}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         )}
 

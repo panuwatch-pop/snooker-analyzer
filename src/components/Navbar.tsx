@@ -10,7 +10,9 @@ import {
   Keyboard,
   ChevronDown,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { GameMode } from '../types/snooker';
 import { APP_VERSION } from '../version';
@@ -28,6 +30,8 @@ interface NavbarProps {
   onNewMatch: () => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
+  theme?: 'dark' | 'light';
+  onToggleTheme?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -41,6 +45,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleMute,
   isFullscreen = false,
   onToggleFullscreen,
+  theme = 'dark',
+  onToggleTheme,
 }) => {
   const isUnlimited = matchLengthType === 'unlimited' || bestOfFrames === 0;
   const { isMobile } = useDevice();
@@ -182,6 +188,31 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </nav>
         )}
+
+          {/* Theme Toggle Button: Dark / Light */}
+          {onToggleTheme && (
+            <button
+              onClick={onToggleTheme}
+              title={theme === 'light' ? 'เปลี่ยนเป็นธีมมืด (Dark Theme)' : 'เปลี่ยนเป็นธีมสว่าง (Light Theme)'}
+              className={`flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-lg transition-all border font-bold text-[10px] sm:text-xs cursor-pointer shadow-sm flex-shrink-0 active:scale-95 ${
+                theme === 'light'
+                  ? 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300 shadow-amber-200/50'
+                  : 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-slate-700 shadow-slate-900/50'
+              }`}
+            >
+              {theme === 'light' ? (
+                <>
+                  <Moon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-800" />
+                  <span className="hidden xs:inline">ธีมมืด</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />
+                  <span className="hidden xs:inline">ธีมสว่าง</span>
+                </>
+              )}
+            </button>
+          )}
 
           {/* Mute / Unmute Button: Top Right */}
           <button

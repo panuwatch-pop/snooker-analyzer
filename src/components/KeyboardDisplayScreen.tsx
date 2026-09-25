@@ -14,7 +14,9 @@ import {
   RotateCcw, 
   Flag, 
   Maximize2,
-  Minimize2
+  Minimize2,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { Frame, ElectricConfig, Shot, BallColor, GameMode } from '../types/snooker';
 import { calculateRemainingPoints, calculateSnookersRequired, BALL_MAP } from '../utils/snookerRules';
@@ -47,6 +49,8 @@ interface KeyboardDisplayScreenProps {
   onNewMatch?: () => void;
   onOpenKeypadGuide?: () => void;
   canUndo?: boolean;
+  theme?: 'dark' | 'light';
+  onToggleTheme?: () => void;
 }
 
 export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
@@ -77,6 +81,8 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
   onNewMatch,
   onOpenKeypadGuide,
   canUndo = false,
+  theme = 'dark',
+  onToggleTheme,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -197,12 +203,27 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
           )}
         </div>
 
-        {/* Right: Timer & Fullscreen Toggle */}
+        {/* Right: Timer, Theme Toggle & Fullscreen Toggle */}
         <div className="flex items-center space-x-1 sm:space-x-1.5 flex-shrink-0">
           <div className="bg-slate-950 border border-slate-700 px-1.5 py-0.5 rounded font-mono font-bold text-[9px] xs:text-[10px] sm:text-xs text-slate-200 flex items-center space-x-0.5">
             <Clock className="w-2.5 h-2.5 xs:w-3 xs:h-3 text-slate-400 flex-shrink-0" />
             <span>{frameDurationFormatted}</span>
           </div>
+
+          {onToggleTheme && (
+            <button
+              type="button"
+              onClick={onToggleTheme}
+              className={`p-1 rounded border transition cursor-pointer active:scale-95 ${
+                theme === 'light'
+                  ? 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300'
+                  : 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-slate-700'
+              }`}
+              title={theme === 'light' ? 'เปลี่ยนเป็นธีมมืด (Dark Theme)' : 'เปลี่ยนเป็นธีมสว่าง (Light Theme)'}
+            >
+              {theme === 'light' ? <Moon className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-slate-800" /> : <Sun className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-amber-400" />}
+            </button>
+          )}
 
           <button
             type="button"

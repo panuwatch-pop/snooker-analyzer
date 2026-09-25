@@ -2,16 +2,106 @@
 
 @layer base {
   body {
-    background-color: #0c1317;
-    color: #f1f5f9;
+    background-color: var(--app-bg, #020617);
+    color: var(--app-text, #f1f5f9);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
 
-/* Solid Vivid Flat Snooker Ball Colors (No Shadows, Bright Solid Tone) */
+/* Default Dark Theme Tokens */
+:root,
+[data-theme="dark"] {
+  --app-bg: #020617;
+  --app-text: #f1f5f9;
+}
+
+/* Light Theme Variables & Token Remapping */
+:root[data-theme="light"],
+[data-theme="light"],
+.theme-light {
+  --app-bg: #f8fafc;
+  --app-text: #0f172a;
+
+  /* Remap Tailwind Slate scale so dark utilities become light, and light utilities become dark */
+  --color-slate-950: #f1f5f9;  /* Canvas background */
+  --color-slate-900: #ffffff;  /* Primary Card background */
+  --color-slate-800: #e2e8f0;  /* Card borders, button backgrounds */
+  --color-slate-700: #cbd5e1;  /* Secondary borders */
+  --color-slate-600: #94a3b8;  /* Muted elements */
+  --color-slate-500: #64748b;  /* Inactive text */
+  --color-slate-400: #475569;  /* Readable muted text */
+  --color-slate-300: #334155;  /* Secondary body text */
+  --color-slate-200: #1e293b;  /* Primary bold text */
+  --color-slate-100: #0f172a;  /* Headings & primary dark text */
+  --color-slate-50:  #020617;  /* High contrast text */
+
+  /* Soft tone accents for badges and backgrounds in light mode */
+  --color-emerald-950: #ecfdf5;
+  --color-emerald-900: #d1fae5;
+  --color-cyan-950: #ecfeff;
+  --color-cyan-900: #cffafe;
+  --color-amber-950: #fffbeb;
+  --color-amber-900: #fef3c7;
+  --color-rose-950: #fff1f2;
+  --color-rose-900: #ffe4e6;
+  --color-purple-950: #faf5ff;
+  --color-purple-900: #f3e8ff;
+}
+
+/* Light mode specific shadows and text styling for cards */
+.theme-light .bg-slate-900 {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+.theme-light header {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+}
+
+.theme-light nav button.text-slate-400 {
+  color: #64748b !important;
+}
+
+.theme-light nav button.text-slate-400:hover {
+  color: #0f172a !important;
+  background-color: #e2e8f0 !important;
+}
+
+/* Light mode scrollbars */
+.theme-light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.theme-light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.theme-light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Titles that used text-white on neutral card backgrounds */
+.theme-light h1.text-white,
+.theme-light h2.text-white,
+.theme-light h3.text-white,
+.theme-light h4.text-white {
+  color: #0f172a !important;
+}
+
+.theme-light strong.text-white:not(button *, .badge *, [class*="bg-emerald"] *, [class*="bg-indigo"] *, [class*="bg-blue"] *) {
+  color: #0f172a !important;
+}
+
+/* Modal overlays in light mode */
+.theme-light .bg-slate-950\/85 {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+/* Solid Vivid Flat Snooker Ball Colors (Preserve authentic snooker colors in both themes) */
 .ball-red {
   background: #ef4444;
   color: #ffffff;
@@ -64,7 +154,7 @@
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
-/* Custom scrollbars */
+/* Custom scrollbars (dark default) */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -79,4 +169,3 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #35536b;
 }
-
