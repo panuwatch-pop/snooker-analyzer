@@ -24,7 +24,7 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
   const hasHandicap = isElectric && electricConfig?.handicapEnabled;
 
   const winnerIndex = frame.player1Score > frame.player2Score ? 0 : 1;
-  const winnerName = winnerIndex === 0 ? 'ผู้เล่น 1' : 'ผู้เล่น 2';
+  const winnerName = winnerIndex === 0 ? (match.player1Name || 'ผู้เล่น 1') : (match.player2Name || 'ผู้เล่น 2');
 
   useEffect(() => {
     if (isOpen) {
@@ -50,8 +50,8 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
     : (!isUnlimited && (p1Frames >= framesNeeded || p2Frames >= framesNeeded));
 
   const matchWinnerName = isElectric
-    ? (p1Frames > p2Frames ? 'ผู้เล่น 1' : (p2Frames > p1Frames ? 'ผู้เล่น 2' : 'เสมอ'))
-    : (p1Frames >= framesNeeded ? 'ผู้เล่น 1' : 'ผู้เล่น 2');
+    ? (p1Frames > p2Frames ? (match.player1Name || 'ผู้เล่น 1') : (p2Frames > p1Frames ? (match.player2Name || 'ผู้เล่น 2') : 'เสมอ'))
+    : (p1Frames >= framesNeeded ? (match.player1Name || 'ผู้เล่น 1') : (match.player2Name || 'ผู้เล่น 2'));
 
   // Cumulative score calculations for electric mode
   const completedFrames = match.frames.filter(f => f.id !== frame.id);
@@ -107,6 +107,11 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
           <div className="text-[11px] xs:text-xs text-slate-400 font-sans">
             {match.player1Name} vs {match.player2Name}
           </div>
+          {frame.netHandicapPoints && frame.netHandicapPoints > 0 ? (
+            <div className="text-[10px] xs:text-[11px] font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded px-2 py-0.5 inline-block">
+              ⚖️ แต้มต่อ: {frame.handicapGiverIndex === 0 ? match.player1Name : match.player2Name} ต่อให้ {frame.handicapGiverIndex === 0 ? match.player2Name : match.player1Name} {frame.netHandicapPoints} แต้ม (เริ่มเฟรม {frame.handicapGiverIndex === 0 ? `0 - ${frame.netHandicapPoints}` : `${frame.netHandicapPoints} - 0`})
+            </div>
+          ) : null}
 
           {/* Handicap Detailed Breakdown (If Handicap is enabled in Electric mode) */}
           {hasHandicap && (

@@ -136,6 +136,10 @@ export interface Frame {
   winnerIndex?: 0 | 1;
   stats: [PlayerStats, PlayerStats];
   electricConfig?: ElectricConfig;
+  player1HandicapPoints?: number;
+  player2HandicapPoints?: number;
+  handicapGiverIndex?: 0 | 1 | -1;
+  netHandicapPoints?: number;
 }
 
 export type MatchLengthType = 'best-of' | 'unlimited';
@@ -160,4 +164,8 @@ export interface Match {
   totalDurationSec: number;
   shotClockSeconds?: number;
   electricConfig?: ElectricConfig;
+  player1HandicapPoints?: number;
+  player2HandicapPoints?: number;
+  handicapGiverIndex?: 0 | 1 | -1;
+  netHandicapPoints?: number;
 }

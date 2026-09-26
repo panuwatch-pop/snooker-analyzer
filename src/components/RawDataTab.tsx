@@ -135,6 +135,17 @@ export const RawDataTab: React.FC<RawDataTabProps> = ({ currentMatch, currentFra
             <span className="font-mono font-bold text-base text-red-400">{activeFrame.redsRemaining} ลูก</span>
           </div>
         </div>
+
+        {activeFrame.netHandicapPoints && activeFrame.netHandicapPoints > 0 ? (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl px-3 py-2 flex flex-wrap items-center justify-between gap-1 text-xs text-amber-300">
+            <span className="font-bold flex items-center space-x-1">
+              <span>⚖️ แต้มต่อเวท (Handicap):</span>
+            </span>
+            <span className="text-slate-200">
+              <strong className="text-amber-300">{activeFrame.handicapGiverIndex === 0 ? currentMatch.player1Name : currentMatch.player2Name}</strong> ต่อให้ <strong className="text-emerald-400">{activeFrame.handicapGiverIndex === 0 ? currentMatch.player2Name : currentMatch.player1Name}</strong> จำนวน <strong className="font-mono text-amber-200 text-sm">{activeFrame.netHandicapPoints}</strong> แต้ม (เริ่มเฟรม {activeFrame.handicapGiverIndex === 0 ? `0 - ${activeFrame.netHandicapPoints}` : `${activeFrame.netHandicapPoints} - 0`})
+            </span>
+          </div>
+        ) : null}
       </div>
 
       {/* Raw Event Table */}

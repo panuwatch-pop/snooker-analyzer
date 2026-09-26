@@ -98,6 +98,18 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
                 <h3 className="text-[11px] xs:text-xs sm:text-sm md:text-lg font-black text-slate-100 tracking-tight truncate leading-tight">
                   {player1Name}
                 </h3>
+                {frame?.netHandicapPoints && frame.netHandicapPoints > 0 ? (
+                  <span className={`text-[6px] xs:text-[7px] font-black px-1 py-0.2 rounded leading-none inline-flex items-center gap-0.5 ${
+                    frame.handicapGiverIndex === 0
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50'
+                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
+                  }`}>
+                    <span>{frame.handicapGiverIndex === 0 ? `ต่อ ${frame.netHandicapPoints}` : `ได้ต่อ +${frame.netHandicapPoints}`}</span>
+                    {frame.player1HandicapPoints !== undefined && frame.player1HandicapPoints > 0 && (
+                      <span className="opacity-75 font-mono text-[5px] xs:text-[6px]">({frame.player1HandicapPoints})</span>
+                    )}
+                  </span>
+                ) : null}
                 {hasHandicap && (
                   <span className={`text-[6px] xs:text-[7px] font-black px-1 py-0.2 rounded leading-none ${
                     currentConfig?.handicapGiverIndex === 0
@@ -261,6 +273,18 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
           <div className="flex items-center justify-end space-x-1 xs:space-x-1.5 min-w-0 mb-0.5">
             <div className="min-w-0 flex-1 text-right">
               <div className="flex items-center justify-end space-x-1">
+                {frame?.netHandicapPoints && frame.netHandicapPoints > 0 ? (
+                  <span className={`text-[6px] xs:text-[7px] font-black px-1 py-0.2 rounded leading-none inline-flex items-center gap-0.5 ${
+                    frame.handicapGiverIndex === 1
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50'
+                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
+                  }`}>
+                    <span>{frame.handicapGiverIndex === 1 ? `ต่อ ${frame.netHandicapPoints}` : `ได้ต่อ +${frame.netHandicapPoints}`}</span>
+                    {frame.player2HandicapPoints !== undefined && frame.player2HandicapPoints > 0 && (
+                      <span className="opacity-75 font-mono text-[5px] xs:text-[6px]">({frame.player2HandicapPoints})</span>
+                    )}
+                  </span>
+                ) : null}
                 {hasHandicap && (
                   <span className={`text-[6px] xs:text-[7px] font-black px-1 py-0.2 rounded leading-none ${
                     currentConfig?.handicapGiverIndex === 1

@@ -708,7 +708,9 @@ export function App() {
       match.gameMode,
       newP1Frames,
       newP2Frames,
-      match.electricConfig
+      match.electricConfig,
+      match.player1HandicapPoints || 0,
+      match.player2HandicapPoints || 0
     );
 
     const updatedCurrentFrame: Frame = {
@@ -977,8 +979,20 @@ export function App() {
     title: string;
     date: string;
     electricConfig?: ElectricConfig;
+    player1HandicapPoints?: number;
+    player2HandicapPoints?: number;
   }) => {
-    const initialFrame = createInitialFrame(1, config.gameMode, 0, 0, config.electricConfig);
+    const p1Handicap = Math.max(0, config.player1HandicapPoints || 0);
+    const p2Handicap = Math.max(0, config.player2HandicapPoints || 0);
+    const initialFrame = createInitialFrame(
+      1,
+      config.gameMode,
+      0,
+      0,
+      config.electricConfig,
+      p1Handicap,
+      p2Handicap
+    );
     const newMatch: Match = {
       id: 'match-' + Date.now(),
       date: config.date,
@@ -995,6 +1009,10 @@ export function App() {
       isCompleted: false,
       totalDurationSec: 0,
       electricConfig: config.electricConfig,
+      player1HandicapPoints: p1Handicap,
+      player2HandicapPoints: p2Handicap,
+      handicapGiverIndex: initialFrame.handicapGiverIndex,
+      netHandicapPoints: initialFrame.netHandicapPoints,
     };
 
     setMatch(newMatch);

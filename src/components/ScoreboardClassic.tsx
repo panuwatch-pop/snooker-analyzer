@@ -70,9 +70,23 @@ export const ScoreboardClassic: React.FC<ScoreboardProps> = ({
               <div className={`p-0.5 xs:p-1 md:p-1.5 rounded-md md:rounded-lg ${activeStrikerIndex === 0 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400'}`}>
                 <User className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-4 md:h-4" />
               </div>
-              <h3 className="text-xs xs:text-sm sm:text-base md:text-xl lg:text-2xl font-black text-slate-100 tracking-tight truncate">
-                {player1Name}
-              </h3>
+              <div className="flex items-center space-x-1.5 min-w-0">
+                <h3 className="text-xs xs:text-sm sm:text-base md:text-xl lg:text-2xl font-black text-slate-100 tracking-tight truncate">
+                  {player1Name}
+                </h3>
+                {frame?.netHandicapPoints && frame.netHandicapPoints > 0 ? (
+                  <span className={`text-[7px] xs:text-[8px] md:text-[10px] font-black px-1.5 py-0.5 rounded leading-none inline-flex items-center gap-1 ${
+                    frame.handicapGiverIndex === 0
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50'
+                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
+                  }`}>
+                    <span>{frame.handicapGiverIndex === 0 ? `ต่อ ${frame.netHandicapPoints}` : `ได้ต่อ +${frame.netHandicapPoints}`}</span>
+                    {frame.player1HandicapPoints !== undefined && frame.player1HandicapPoints > 0 && (
+                      <span className="opacity-75 font-mono text-[6px] xs:text-[7px]">({frame.player1HandicapPoints})</span>
+                    )}
+                  </span>
+                ) : null}
+              </div>
             </div>
 
             <div className="flex items-center space-x-1 md:space-x-2 flex-shrink-0">
@@ -179,9 +193,23 @@ export const ScoreboardClassic: React.FC<ScoreboardProps> = ({
             </div>
 
             <div className="flex items-center space-x-1 xs:space-x-1.5 md:space-x-2 min-w-0">
-              <h3 className="text-xs xs:text-sm sm:text-base md:text-xl lg:text-2xl font-black text-slate-100 tracking-tight truncate">
-                {player2Name}
-              </h3>
+              <div className="flex items-center space-x-1.5 min-w-0">
+                {frame?.netHandicapPoints && frame.netHandicapPoints > 0 ? (
+                  <span className={`text-[7px] xs:text-[8px] md:text-[10px] font-black px-1.5 py-0.5 rounded leading-none inline-flex items-center gap-1 ${
+                    frame.handicapGiverIndex === 1
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50'
+                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
+                  }`}>
+                    <span>{frame.handicapGiverIndex === 1 ? `ต่อ ${frame.netHandicapPoints}` : `ได้ต่อ +${frame.netHandicapPoints}`}</span>
+                    {frame.player2HandicapPoints !== undefined && frame.player2HandicapPoints > 0 && (
+                      <span className="opacity-75 font-mono text-[6px] xs:text-[7px]">({frame.player2HandicapPoints})</span>
+                    )}
+                  </span>
+                ) : null}
+                <h3 className="text-xs xs:text-sm sm:text-base md:text-xl lg:text-2xl font-black text-slate-100 tracking-tight truncate">
+                  {player2Name}
+                </h3>
+              </div>
               <div className={`p-0.5 xs:p-1 md:p-1.5 rounded-md md:rounded-lg ${activeStrikerIndex === 1 ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-400'}`}>
                 <User className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-4 md:h-4" />
               </div>

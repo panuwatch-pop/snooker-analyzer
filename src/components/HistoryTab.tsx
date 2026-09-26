@@ -139,10 +139,18 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ onLoadMatch }) => {
                       <span className="text-xs text-slate-400 font-mono">({m.date})</span>
                     </div>
 
-                    <div className="text-xs text-slate-300 flex items-center space-x-2">
+                    <div className="text-xs text-slate-300 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                       <span>ผู้ชนะ: <strong className="text-amber-400 font-bold">{winnerName}</strong></span>
                       <span>•</span>
-                      <span>Best of {m.bestOfFrames}</span>
+                      <span>{m.matchLengthType === 'unlimited' ? 'ไม่จำกัดเฟรม' : `Best of ${m.bestOfFrames}`}</span>
+                      {m.netHandicapPoints && m.netHandicapPoints > 0 ? (
+                        <>
+                          <span>•</span>
+                          <span className="text-amber-300 font-semibold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/30">
+                            ⚖️ ต่อ {m.netHandicapPoints} แต้ม ({m.handicapGiverIndex === 0 ? m.player1Name : m.player2Name} ต่อ)
+                          </span>
+                        </>
+                      ) : null}
                     </div>
                   </div>
 

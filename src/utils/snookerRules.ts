@@ -430,7 +430,9 @@ export function createInitialFrame(
   gameMode: GameMode,
   p1FramesWon: number = 0,
   p2FramesWon: number = 0,
-  electricConfig?: ElectricConfig
+  electricConfig?: ElectricConfig,
+  p1HandicapPoints: number = 0,
+  p2HandicapPoints: number = 0
 ): Frame {
   const redsRemaining = gameMode === '15-reds' ? 15 : 6;
   const emptyStats: PlayerStats = {
@@ -453,13 +455,31 @@ export function createInitialFrame(
     totalGa: 0,
   };
 
+  const diff = (p1HandicapPoints || 0) - (p2HandicapPoints || 0);
+  const netHandicapPoints = Math.abs(diff);
+  let handicapGiverIndex: 0 | 1 | -1 = -1;
+  let p1InitialScore = 0;
+  let p2InitialScore = 0;
+
+  if (diff > 0) {
+    // Player 1 has higher base points (e.g. 18 vs 16) -> Player 2 gives handicap to Player 1!
+    handicapGiverIndex = 1;
+    p1InitialScore = netHandicapPoints;
+    p2InitialScore = 0;
+  } else if (diff < 0) {
+    // Player 2 has higher base points -> Player 1 gives handicap to Player 2!
+    handicapGiverIndex = 0;
+    p1InitialScore = 0;
+    p2InitialScore = netHandicapPoints;
+  }
+
   return {
     id: 'frame-' + Date.now(),
     frameNumber,
     startTime: Date.now(),
     durationSec: 0,
-    player1Score: 0,
-    player2Score: 0,
+    player1Score: p1InitialScore,
+    player2Score: p2InitialScore,
     player1FramesWon: p1FramesWon,
     player2FramesWon: p2FramesWon,
     player1Ga: 0,
@@ -472,5 +492,9 @@ export function createInitialFrame(
     isCompleted: false,
     stats: [emptyStats, { ...emptyStats }],
     electricConfig: electricConfig ? { ...electricConfig } : undefined,
+    player1HandicapPoints: p1HandicapPoints || 0,
+    player2HandicapPoints: p2HandicapPoints || 0,
+    handicapGiverIndex,
+    netHandicapPoints,
   };
 }

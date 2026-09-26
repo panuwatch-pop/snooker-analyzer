@@ -323,6 +323,20 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
                     เบรกสูง: <strong className="text-emerald-400 font-bold font-mono">{p1HighBreak}</strong>
                   </div>
                 )}
+                {frame?.netHandicapPoints && frame.netHandicapPoints > 0 ? (
+                  <div className="text-[7px] xs:text-[8px] font-semibold mt-0.5">
+                    <span className={`px-1.5 py-0.5 rounded font-black inline-flex items-center gap-1 ${
+                      frame.handicapGiverIndex === 0
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50'
+                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
+                    }`}>
+                      <span>{frame.handicapGiverIndex === 0 ? `ต่อ ${frame.netHandicapPoints} แต้ม` : `ได้ต่อ +${frame.netHandicapPoints}`}</span>
+                      {frame.player1HandicapPoints !== undefined && frame.player1HandicapPoints > 0 && (
+                        <span className="opacity-75 font-mono text-[6px] xs:text-[7px]">(เวท {frame.player1HandicapPoints})</span>
+                      )}
+                    </span>
+                  </div>
+                ) : null}
                 {hasHandicap && (
                   <div className="text-[7px] xs:text-[8px] font-semibold mt-0.5">
                     <span className={`px-1 py-0.2 rounded font-bold ${
@@ -483,6 +497,20 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
                     เบรกสูง: <strong className="text-emerald-400 font-bold font-mono">{p2HighBreak}</strong>
                   </div>
                 )}
+                {frame?.netHandicapPoints && frame.netHandicapPoints > 0 ? (
+                  <div className="text-[7px] xs:text-[8px] font-semibold mt-0.5">
+                    <span className={`px-1.5 py-0.5 rounded font-black inline-flex items-center gap-1 ${
+                      frame.handicapGiverIndex === 1
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50'
+                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
+                    }`}>
+                      <span>{frame.handicapGiverIndex === 1 ? `ต่อ ${frame.netHandicapPoints} แต้ม` : `ได้ต่อ +${frame.netHandicapPoints}`}</span>
+                      {frame.player2HandicapPoints !== undefined && frame.player2HandicapPoints > 0 && (
+                        <span className="opacity-75 font-mono text-[6px] xs:text-[7px]">(เวท {frame.player2HandicapPoints})</span>
+                      )}
+                    </span>
+                  </div>
+                ) : null}
                 {hasHandicap && (
                   <div className="text-[7px] xs:text-[8px] font-semibold mt-0.5">
                     <span className={`px-1 py-0.2 rounded font-bold ${

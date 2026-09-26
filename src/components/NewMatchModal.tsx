@@ -15,6 +15,8 @@ interface NewMatchModalProps {
     title: string;
     date: string;
     electricConfig?: ElectricConfig;
+    player1HandicapPoints?: number;
+    player2HandicapPoints?: number;
   }) => void;
 }
 
@@ -25,6 +27,8 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
 }) => {
   const [player1Name, setPlayer1Name] = useState<string>('ผู้เล่น 1');
   const [player2Name, setPlayer2Name] = useState<string>('ผู้เล่น 2');
+  const [player1HandicapPoints, setPlayer1HandicapPoints] = useState<number>(0);
+  const [player2HandicapPoints, setPlayer2HandicapPoints] = useState<number>(0);
   const [gameMode, setGameMode] = useState<GameMode>('15-reds');
   const [matchLengthType, setMatchLengthType] = useState<MatchLengthType>('best-of');
   const [bestOfFrames, setBestOfFrames] = useState<number>(5);
@@ -90,6 +94,8 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
       title: title.trim() || (matchLengthType === 'unlimited' ? 'เล่นซ้อม/ไปเรื่อยๆ' : `Best of ${finalBestOf}`),
       date,
       electricConfig,
+      player1HandicapPoints: Math.max(0, player1HandicapPoints || 0),
+      player2HandicapPoints: Math.max(0, player2HandicapPoints || 0),
     });
     onClose();
   };
@@ -554,24 +560,138 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
             )}
           </div>
 
-          {/* Players Names */}
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-300">3. รายชื่อผู้เล่น</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input
-                type="text"
-                value={player1Name}
-                onChange={(e) => setPlayer1Name(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 outline-none focus:border-emerald-500 font-semibold"
-                placeholder="ผู้เล่น 1"
-              />
-              <input
-                type="text"
-                value={player2Name}
-                onChange={(e) => setPlayer2Name(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 outline-none focus:border-emerald-500 font-semibold"
-                placeholder="ผู้เล่น 2"
-              />
+          {/* Players Names & Handicap Points */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-300">3. รายชื่อผู้เล่น & แต้มเวท (Handicap Points)</label>
+              <span className="text-[10px] text-amber-400 font-medium">ค่าเริ่มต้น 0 (เสมอ)</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* Player 1 Box */}
+              <div className="bg-slate-950/80 border border-slate-700/80 rounded-xl p-2.5 space-y-2">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-emerald-400 flex items-center space-x-1">
+                    <span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+                    <span>ผู้เล่นที่ 1</span>
+                  </span>
+                  <span className="text-slate-400 text-[10px]">แต้มเวท</span>
+                </div>
+                <input
+                  type="text"
+                  value={player1Name}
+                  onChange={(e) => setPlayer1Name(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 outline-none focus:border-emerald-500 font-semibold"
+                  placeholder="ผู้เล่น 1"
+                />
+                <div>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <label className="text-[10px] text-amber-300 font-semibold">แต้มเวท:</label>
+                    <span className="text-[9px] text-slate-500 font-mono">เริ่มต้น 0</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      type="button"
+                      onClick={() => setPlayer1HandicapPoints(prev => Math.max(0, prev - 1))}
+                      className="w-7 h-7 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-black text-sm flex items-center justify-center cursor-pointer active:scale-95"
+                    >-</button>
+                    <input
+                      type="number"
+                      min={0}
+                      max={147}
+                      value={player1HandicapPoints}
+                      onChange={(e) => setPlayer1HandicapPoints(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                      className="flex-1 bg-slate-900 border border-amber-500/70 focus:border-amber-400 text-amber-300 font-mono font-black rounded px-1.5 py-0.5 text-sm text-center outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setPlayer1HandicapPoints(prev => Math.min(147, prev + 1))}
+                      className="w-7 h-7 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-black text-sm flex items-center justify-center cursor-pointer active:scale-95"
+                    >+</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Player 2 Box */}
+              <div className="bg-slate-950/80 border border-slate-700/80 rounded-xl p-2.5 space-y-2">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-cyan-400 flex items-center space-x-1">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 inline-block"></span>
+                    <span>ผู้เล่นที่ 2</span>
+                  </span>
+                  <span className="text-slate-400 text-[10px]">แต้มเวท</span>
+                </div>
+                <input
+                  type="text"
+                  value={player2Name}
+                  onChange={(e) => setPlayer2Name(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 outline-none focus:border-cyan-500 font-semibold"
+                  placeholder="ผู้เล่น 2"
+                />
+                <div>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <label className="text-[10px] text-amber-300 font-semibold">แต้มเวท:</label>
+                    <span className="text-[9px] text-slate-500 font-mono">เริ่มต้น 0</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      type="button"
+                      onClick={() => setPlayer2HandicapPoints(prev => Math.max(0, prev - 1))}
+                      className="w-7 h-7 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-black text-sm flex items-center justify-center cursor-pointer active:scale-95"
+                    >-</button>
+                    <input
+                      type="number"
+                      min={0}
+                      max={147}
+                      value={player2HandicapPoints}
+                      onChange={(e) => setPlayer2HandicapPoints(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                      className="flex-1 bg-slate-900 border border-amber-500/70 focus:border-amber-400 text-amber-300 font-mono font-black rounded px-1.5 py-0.5 text-sm text-center outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setPlayer2HandicapPoints(prev => Math.min(147, prev + 1))}
+                      className="w-7 h-7 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-black text-sm flex items-center justify-center cursor-pointer active:scale-95"
+                    >+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Real-time Clash Result Banner */}
+            <div className="bg-gradient-to-r from-amber-950/60 via-slate-950 to-amber-950/60 border border-amber-500/50 rounded-lg p-2.5 text-xs">
+              {player1HandicapPoints === player2HandicapPoints ? (
+                <div className="flex items-center justify-between text-slate-400">
+                  <span className="flex items-center space-x-1.5">
+                    <span>⚖️</span>
+                    <span>แต้มเวทเท่ากัน ({player1HandicapPoints} แต้ม) : <strong>แข่งแบบเสมอ (ไม่มีแต้มต่อ)</strong></span>
+                  </span>
+                  <span className="text-[10px] text-slate-500">เริ่มที่ 0 - 0</span>
+                </div>
+              ) : (player1HandicapPoints - player2HandicapPoints) > 0 ? (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-amber-400 font-bold">⚡ การชนเวท:</span>
+                    <span className="text-slate-200">
+                      <strong>{player2Name.trim() || 'ผู้เล่น 2'}</strong> ต่อให้ <strong>{player1Name.trim() || 'ผู้เล่น 1'}</strong> : <strong className="text-amber-400 font-mono text-sm">{Math.abs(player1HandicapPoints - player2HandicapPoints)}</strong> แต้ม
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400 bg-emerald-950/80 border border-emerald-700/60 px-2 py-0.5 rounded font-bold">
+                    {player1Name.trim() || 'ผู้เล่น 1'} ได้แต้มตั้งต้น {Math.abs(player1HandicapPoints - player2HandicapPoints)} แต้ม
+                  </span>
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-amber-400 font-bold">⚡ การชนเวท:</span>
+                    <span className="text-slate-200">
+                      <strong>{player1Name.trim() || 'ผู้เล่น 1'}</strong> ต่อให้ <strong>{player2Name.trim() || 'ผู้เล่น 2'}</strong> : <strong className="text-amber-400 font-mono text-sm">{Math.abs(player1HandicapPoints - player2HandicapPoints)}</strong> แต้ม
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400 bg-emerald-950/80 border border-emerald-700/60 px-2 py-0.5 rounded font-bold">
+                    {player2Name.trim() || 'ผู้เล่น 2'} ได้แต้มตั้งต้น {Math.abs(player1HandicapPoints - player2HandicapPoints)} แต้ม
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
