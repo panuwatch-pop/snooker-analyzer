@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Keyboard, X, Sparkles } from 'lucide-react';
+import { Keyboard, X, Sparkles, Timer } from 'lucide-react';
+import { APP_VERSION } from '../version';
 
 interface KeypadGuideProps {
   isOpen: boolean;
@@ -102,7 +103,7 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
 
               <div className="bg-rose-950/90 border border-rose-600 rounded-lg p-1.5 text-center shadow">
                 <span className="block text-[10px] sm:text-xs font-mono font-black text-rose-300">-</span>
-                <span className="block text-[8px] sm:text-[9px] text-rose-300 font-bold">โหมดฟาวล์</span>
+                <span className="block text-[8px] sm:text-[9px] text-rose-300 font-bold">ฟาวล์ (Shoot Out 5)</span>
               </div>
 
               {/* Row 3 */}
@@ -111,9 +112,9 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
                 <span className="block text-[8px] sm:text-[9px] text-zinc-300 font-bold">⚫ ดำ (7 แต้ม)</span>
               </div>
 
-              <div className="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-center shadow">
-                <span className="block text-xs sm:text-sm font-mono font-black text-slate-400">8</span>
-                <span className="block text-[8px] sm:text-[9px] text-slate-500 font-bold">-</span>
+              <div className="bg-amber-950/70 border border-amber-600/70 rounded-lg p-1.5 text-center shadow">
+                <span className="block text-xs sm:text-sm font-mono font-black text-amber-300">8</span>
+                <span className="block text-[8px] sm:text-[9px] text-amber-200 font-bold">รีเซ็ตช็อต / กัน</span>
               </div>
 
               <div className="bg-slate-800/90 border border-slate-700 rounded-lg p-1.5 text-center shadow">
@@ -168,9 +169,9 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
               </div>
 
               {/* Row 6: 0 (Spans 2 cols horizontally) & . */}
-              <div className="col-span-2 bg-slate-900 border border-slate-700 rounded-lg p-1.5 flex items-center justify-between px-3 shadow">
-                <span className="text-xs sm:text-sm font-mono font-black text-slate-400">0 (Ins)</span>
-                <span className="text-[8px] sm:text-[9px] text-slate-500 font-bold">-</span>
+              <div className="col-span-2 bg-emerald-950/80 border-2 border-emerald-500 rounded-lg p-1.5 flex items-center justify-between px-3 shadow">
+                <span className="text-xs sm:text-sm font-mono font-black text-emerald-300">0 (Ins) / Space</span>
+                <span className="text-[8px] sm:text-[9px] text-emerald-200 font-black">⏸️ หยุด/เดินเวลา (Shoot Out)</span>
               </div>
 
               {/* . (Del) = ยกเลิก */}
@@ -190,12 +191,14 @@ export const KeypadGuide: React.FC<KeypadGuideProps> = ({ isOpen, onClose }) => 
             </div>
             <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-300">
               <div><strong className="text-white font-mono bg-slate-800 px-1 py-0.2 rounded mr-1">1 - 7</strong> แต้มตบลูกสี (1-7)</div>
-              <div><strong className="text-emerald-300 font-mono bg-emerald-950 border border-emerald-800 px-1 py-0.2 rounded mr-1">Enter</strong> เปลี่ยนเทิร์น / เริ่มเฟรมใหม่</div>
+              <div><strong className="text-emerald-300 font-mono bg-emerald-950 border border-emerald-800 px-1 py-0.2 rounded mr-1">Enter</strong> เปลี่ยนเทิร์น (รีเซ็ตช็อต)</div>
               <div><strong className="text-amber-300 font-mono bg-slate-800 px-1 py-0.2 rounded mr-1">. (Del)</strong> ยกเลิก / ปิดหน้าต่าง</div>
               <div><strong className="text-amber-300 font-mono bg-amber-950 border border-amber-800 px-1 py-0.2 rounded mr-1">⌫ (BS)</strong> ย้อนกลับ (Undo)</div>
               <div><strong className="text-purple-300 font-mono bg-purple-950 border border-purple-800 px-1 py-0.2 rounded mr-1">/ หรือ =</strong> จบเฟรม</div>
               <div><strong className="text-indigo-300 font-mono bg-indigo-950 border border-indigo-700 px-1 py-0.2 rounded mr-1">+</strong> ขยายจอ / ย่อจอกลับ</div>
-              <div><strong className="text-rose-300 font-mono bg-rose-950 border border-rose-800 px-1 py-0.2 rounded mr-1">-</strong> โหมดฟาวล์ (เลือก 4-7)</div>
+              <div><strong className="text-rose-300 font-mono bg-rose-950 border border-rose-800 px-1 py-0.2 rounded mr-1">-</strong> ฟาวล์ (Shoot Out: +5 และบอลอินแฮนด์)</div>
+              <div><strong className="text-emerald-300 font-mono bg-emerald-950 border border-emerald-800 px-1 py-0.2 rounded mr-1">0 (Ins)</strong> ⏸️ หยุด/เดินเวลาช็อตคล็อก</div>
+              <div><strong className="text-amber-300 font-mono bg-amber-950 border border-amber-800 px-1 py-0.2 rounded mr-1">8</strong> ⏱️ รีเซ็ตเวลาช็อตคล็อกทันที</div>
               <div><strong className="text-red-400 font-mono bg-slate-800 px-1 py-0.2 rounded mr-1">9</strong> ตบแดงซ้อน (+1)</div>
             </div>
           </div>

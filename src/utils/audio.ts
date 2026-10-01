@@ -371,6 +371,59 @@ class SoundManager {
       // ignore
     }
   }
+
+  // Shoot Out Horn / Buzzer (match end or shot clock expired)
+  public playShootOutBuzzer(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      if (ctx.state === 'suspended') ctx.resume();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(160, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 1.2);
+      gain.gain.setValueAtTime(0.4, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 1.2);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 1.2);
+    } catch {
+      // ignore
+    }
+  }
+
+  // Shoot Out warning tick (5s countdown)
+  public playShotClockWarning(isUrgent: boolean = false): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      if (ctx.state === 'suspended') ctx.resume();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(isUrgent ? 880 : 550, ctx.currentTime);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.1);
+    } catch {
+      // ignore
+    }
+  }
+
+  public speakBallInHand(): void {
+    this.speak('บอลอินแฮนด์');
+  }
+
+  public speakShootOutPeriod(seconds: number): void {
+    this.speak(`ปรับเวลาเป็น ${seconds} วินาที`);
+  }
 }
 
 export const soundManager = new SoundManager();

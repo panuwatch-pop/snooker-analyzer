@@ -16,7 +16,9 @@ import {
   Maximize2,
   Minimize2,
   Sun,
-  Moon
+  Moon,
+  Play,
+  Pause
 } from 'lucide-react';
 import { Frame, ElectricConfig, Shot, BallColor, GameMode } from '../types/snooker';
 import { calculateRemainingPoints, calculateSnookersRequired, BALL_MAP } from '../utils/snookerRules';
@@ -51,6 +53,13 @@ interface KeyboardDisplayScreenProps {
   canUndo?: boolean;
   theme?: 'dark' | 'light';
   onToggleTheme?: () => void;
+  isShootOutMode?: boolean;
+  shootOutRemainingSec?: number;
+  shootOutShotSec?: number;
+  isShootOutPaused?: boolean;
+  ballInHandActive?: boolean;
+  onResetShotClock?: () => void;
+  onTogglePauseShootOut?: () => void;
 }
 
 export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
@@ -83,6 +92,13 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
   canUndo = false,
   theme = 'dark',
   onToggleTheme,
+  isShootOutMode = false,
+  shootOutRemainingSec = 600,
+  shootOutShotSec = 15,
+  isShootOutPaused = false,
+  ballInHandActive = false,
+  onResetShotClock,
+  onTogglePauseShootOut,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -155,15 +171,19 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
               ? 'bg-cyan-950/90 text-cyan-300 border-cyan-500'
               : (effectiveMode === 'snooker-ga'
                   ? 'bg-amber-950/90 text-amber-300 border-amber-500'
-                  : (effectiveMode === '6-reds'
-                      ? 'bg-rose-950/90 text-rose-300 border-rose-500 font-extrabold'
-                      : 'bg-emerald-950/90 text-emerald-300 border-emerald-600'))
+                  : (effectiveMode === 'shoot-out'
+                      ? 'bg-red-950/90 text-red-300 border-red-500 font-extrabold shadow-sm shadow-red-900/50'
+                      : (effectiveMode === '6-reds'
+                          ? 'bg-rose-950/90 text-rose-300 border-rose-500 font-extrabold'
+                          : 'bg-emerald-950/90 text-emerald-300 border-emerald-600')))
           }`}>
             {effectiveMode === 'electric-count'
               ? '⚡ ไฟฟ้า'
               : (effectiveMode === 'snooker-ga'
                   ? '🎯 กา'
-                  : (effectiveMode === '6-reds' ? '🔴 6 แดง' : '🔴 15 แดง'))}
+                  : (effectiveMode === 'shoot-out'
+                      ? '⏱️ ชู๊ตเอาท์'
+                      : (effectiveMode === '6-reds' ? '🔴 6 แดง' : '🔴 15 แดง')))}
           </div>
 
           <div className="bg-slate-800/90 border border-slate-700 text-amber-300 px-1.5 xs:px-2 py-0.5 rounded-md font-bold text-[9px] xs:text-[10px] sm:text-xs flex items-center space-x-0.5 flex-shrink-0">
@@ -280,6 +300,92 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
               [Clear] ยกเลิก
             </button>
           </div>
+        </div>
+      )}
+
+      {/* 1.6 SHOOT OUT DEDICATED TIMING & BALL IN HAND HUD */}
+      {isShootOutMode && (
+        <div className="bg-gradient-to-r from-red-950/95 via-slate-900 to-amber-950/95 border-2 border-red-500/80 rounded-xl p-1.5 xs:p-2 sm:p-2.5 shadow-2xl flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 flex-shrink-0">
+          {/* Match Countdown */}
+          <div className="flex items-center space-x-2">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-red-600/30 text-red-400 border border-red-500/40">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
+            </div>
+            <div>
+              <div className="text-[8px] xs:text-[9px] sm:text-[10px] text-red-300 font-black uppercase tracking-wider flex items-center gap-1">
+                <span>เวลาแมตช์</span>
+                <span className="text-slate-400 font-bold">
+                  ({(shootOutRemainingSec ?? 0) > 300 ? 'ครึ่งแรก 15 วิ' : 'ครึ่งหลัง 10 วิ'})
+                </span>
+              </div>
+              <div className={`text-xl xs:text-2xl sm:text-3xl md:text-4xl font-black font-mono leading-none ${
+                (shootOutRemainingSec ?? 0) <= 60 ? 'text-red-400 animate-pulse drop-shadow-[0_0_12px_rgba(239,68,68,0.9)]' : 'text-white'
+              }`}>
+                {Math.floor((shootOutRemainingSec ?? 0) / 60).toString().padStart(2, '0')}:
+                {((shootOutRemainingSec ?? 0) % 60).toString().padStart(2, '0')}
+              </div>
+            </div>
+          </div>
+
+          {/* Shot Clock */}
+          <div className="flex items-center space-x-2">
+            <div className={`px-3 sm:px-4 py-1 rounded-xl border-2 flex items-center space-x-2 shadow-inner transition-all ${
+              isShootOutPaused
+                ? 'bg-amber-950/90 border-amber-500/90 text-amber-300'
+                : (shootOutShotSec ?? 0) <= 2
+                  ? 'bg-red-950 border-red-500 text-red-300 animate-pulse ring-2 ring-red-500/70'
+                  : (shootOutShotSec ?? 0) <= 5
+                    ? 'bg-amber-950 border-amber-400 text-amber-300'
+                    : 'bg-emerald-950 border-emerald-500 text-emerald-300'
+            }`}>
+              <div className="text-right">
+                <div className="text-[7px] xs:text-[8px] sm:text-[9px] font-black uppercase tracking-wider opacity-80">
+                  {isShootOutPaused ? '⏸️ หยุดเวลา' : 'ช็อตคล็อก'}
+                </div>
+                <div className="text-2xl xs:text-3xl sm:text-4xl font-black font-mono leading-none">
+                  {(shootOutShotSec ?? 0).toString().padStart(2, '0')}s
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Referee Action Buttons */}
+            <div className="flex flex-col gap-1">
+              {onTogglePauseShootOut && (
+                <button
+                  type="button"
+                  onClick={onTogglePauseShootOut}
+                  className={`px-2 py-0.5 sm:py-1 rounded-lg text-[8px] xs:text-[9px] sm:text-[10px] font-black border transition cursor-pointer flex items-center space-x-1 ${
+                    isShootOutPaused
+                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400 animate-pulse'
+                      : 'bg-amber-600 hover:bg-amber-500 text-white border-amber-400'
+                  }`}
+                  title="กดปุ่ม 0 (Ins) หรือ Space เพื่อหยุด/เดินเวลา"
+                >
+                  {isShootOutPaused ? <Play className="w-2.5 h-2.5" /> : <Pause className="w-2.5 h-2.5" />}
+                  <span>{isShootOutPaused ? 'เดินเวลา [0]' : 'หยุดเวลา [0]'}</span>
+                </button>
+              )}
+              {onResetShotClock && (
+                <button
+                  type="button"
+                  onClick={onResetShotClock}
+                  className="px-2 py-0.5 sm:py-1 rounded-lg text-[8px] xs:text-[9px] sm:text-[10px] font-black bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition cursor-pointer flex items-center space-x-1"
+                  title="กดปุ่ม 8 เพื่อรีเซ็ตเวลาช็อต"
+                >
+                  <RotateCcw className="w-2.5 h-2.5" />
+                  <span>รีเซ็ตช็อต [8]</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Ball in Hand Alert Badge */}
+          {ballInHandActive && (
+            <div className="w-full bg-rose-600 text-white text-[10px] xs:text-xs sm:text-sm font-black py-1 px-3 rounded-lg border-2 border-rose-300 flex items-center justify-center space-x-1.5 animate-bounce shadow-lg shadow-rose-950">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+              <span>🔴 บอลอินแฮนด์ (Ball in Hand) : วางลูกขาวได้ทุกจุดบนโต๊ะ</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -690,19 +796,32 @@ export const KeyboardDisplayScreen: React.FC<KeyboardDisplayScreenProps> = ({
           </span>
           
           {/* Desktop full badges */}
-          <div className="hidden md:flex items-center space-x-1 flex-wrap gap-y-1">
-            <span className="bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded text-slate-300 font-mono font-bold">[1-7] แต้มตบสี</span>
-            <span className="bg-emerald-950/80 border border-emerald-600 px-1.5 py-0.5 rounded text-emerald-300 font-mono font-bold">[Enter] เปลี่ยนเทิร์น / เริ่มเฟรมใหม่</span>
-            <span className="bg-slate-900 border border-slate-600 px-1.5 py-0.5 rounded text-amber-300 font-mono font-bold">[.] ยกเลิก/ปิด</span>
-            <span className="bg-amber-950/80 border border-amber-600 px-1.5 py-0.5 rounded text-amber-200 font-mono font-bold">[⌫/*] ย้อนกลับ (Undo)</span>
-            <span className="bg-purple-950/80 border border-purple-600 px-1.5 py-0.5 rounded text-purple-200 font-mono font-bold">[/] จบเฟรม</span>
-            <span className="bg-indigo-950/80 border border-indigo-600 px-1.5 py-0.5 rounded text-indigo-300 font-mono font-bold">[+] ขยาย/ย่อจอ</span>
-            <span className="bg-rose-950/80 border border-rose-600 px-1.5 py-0.5 rounded text-rose-300 font-mono font-bold">[-] โหมดฟาวล์</span>
-          </div>
+          {isShootOutMode ? (
+            <div className="hidden md:flex items-center space-x-1 flex-wrap gap-y-1">
+              <span className="bg-emerald-950/90 border border-emerald-500 px-1.5 py-0.5 rounded text-emerald-300 font-mono font-bold">[0/Space] ⏸️ หยุด/เดินเวลา</span>
+              <span className="bg-amber-950/90 border border-amber-500 px-1.5 py-0.5 rounded text-amber-300 font-mono font-bold">[8] ⏱️ รีเซ็ตช็อต</span>
+              <span className="bg-rose-950/90 border border-rose-500 px-1.5 py-0.5 rounded text-rose-300 font-mono font-bold">[-] 🚨 ฟาวล์ 5 แต้ม + บอลอินแฮนด์</span>
+              <span className="bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded text-slate-300 font-mono font-bold">[1-7] ตบแต้ม</span>
+              <span className="bg-teal-950/80 border border-teal-600 px-1.5 py-0.5 rounded text-teal-300 font-mono font-bold">[Enter] เปลี่ยนเทิร์น</span>
+              <span className="bg-amber-950/80 border border-amber-600 px-1.5 py-0.5 rounded text-amber-200 font-mono font-bold">[⌫/*] ย้อนกลับ</span>
+            </div>
+          ) : (
+            <div className="hidden md:flex items-center space-x-1 flex-wrap gap-y-1">
+              <span className="bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded text-slate-300 font-mono font-bold">[1-7] แต้มตบสี</span>
+              <span className="bg-emerald-950/80 border border-emerald-600 px-1.5 py-0.5 rounded text-emerald-300 font-mono font-bold">[Enter] เปลี่ยนเทิร์น / เริ่มเฟรมใหม่</span>
+              <span className="bg-slate-900 border border-slate-600 px-1.5 py-0.5 rounded text-amber-300 font-mono font-bold">[.] ยกเลิก/ปิด</span>
+              <span className="bg-amber-950/80 border border-amber-600 px-1.5 py-0.5 rounded text-amber-200 font-mono font-bold">[⌫/*] ย้อนกลับ (Undo)</span>
+              <span className="bg-purple-950/80 border border-purple-600 px-1.5 py-0.5 rounded text-purple-200 font-mono font-bold">[/] จบเฟรม</span>
+              <span className="bg-indigo-950/80 border border-indigo-600 px-1.5 py-0.5 rounded text-indigo-300 font-mono font-bold">[+] ขยาย/ย่อจอ</span>
+              <span className="bg-rose-950/80 border border-rose-600 px-1.5 py-0.5 rounded text-rose-300 font-mono font-bold">[-] โหมดฟาวล์</span>
+            </div>
+          )}
 
           {/* Mobile compact single-line reminder */}
           <span className="md:hidden text-[8px] xs:text-[9px] text-slate-300 truncate font-mono">
-            [1-7] แต้ม | [Enter] เทิร์น | [⌫] ย้อนกลับ | [/] จบเฟรม | [+] ขยายจอ | [-] ฟาวล์
+            {isShootOutMode 
+              ? '[0] หยุด/เดิน | [8] รีเซ็ตช็อต | [-] ฟาวล์ 5 แต้ม | [1-7] ตบ | [Enter] เทิร์น'
+              : '[1-7] แต้ม | [Enter] เทิร์น | [⌫] ย้อนกลับ | [/] จบเฟรม | [+] ขยายจอ | [-] ฟาวล์'}
           </span>
         </div>
 

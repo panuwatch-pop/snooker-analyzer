@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Flame, Clock, Sparkles, ShieldAlert, Trophy, Target, Zap, Percent } from 'lucide-react';
+import { User, Flame, Clock, Sparkles, ShieldAlert, Trophy, Target, Zap, Percent, Play, Pause, RotateCcw, AlertTriangle } from 'lucide-react';
 import { Frame, ElectricConfig } from '../types/snooker';
 import { calculateRemainingPoints, calculateSnookersRequired } from '../utils/snookerRules';
 
@@ -19,6 +19,13 @@ interface ScoreboardProps {
   p2CumulativeScore?: number;
   currentGameNumber?: number;
   totalGames?: number;
+  isShootOutMode?: boolean;
+  shootOutRemainingSec?: number;
+  shootOutShotSec?: number;
+  isShootOutPaused?: boolean;
+  ballInHandActive?: boolean;
+  onResetShotClock?: () => void;
+  onTogglePauseShootOut?: () => void;
   onSwitchStriker: () => void;
 }
 
@@ -38,6 +45,13 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
   p2CumulativeScore,
   currentGameNumber = 1,
   totalGames = 0,
+  isShootOutMode = false,
+  shootOutRemainingSec = 600,
+  shootOutShotSec = 15,
+  isShootOutPaused = false,
+  ballInHandActive = false,
+  onResetShotClock,
+  onTogglePauseShootOut,
   onSwitchStriker,
 }) => {
   const p1Score = frame?.player1Score ?? 0;
@@ -72,6 +86,92 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-0.5 xs:space-y-0.5 sm:space-y-1 flex-shrink-0">
+      {/* Shoot Out Dedicated Timing & Ball in Hand HUD */}
+      {isShootOutMode && (
+        <div className="bg-gradient-to-r from-red-950/90 via-slate-900/95 to-amber-950/90 border-2 border-red-500/80 rounded-xl p-1.5 xs:p-2 sm:p-2.5 shadow-xl flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
+          {/* Match Countdown */}
+          <div className="flex items-center space-x-1.5 sm:space-x-2">
+            <div className="p-1 sm:p-1.5 rounded-lg bg-red-600/30 text-red-400 border border-red-500/40">
+              <Clock className="w-3.5 h-3.5 sm:w-5 sm:h-5 animate-pulse" />
+            </div>
+            <div>
+              <div className="text-[8px] xs:text-[9px] sm:text-[10px] text-red-300 font-black uppercase tracking-wider flex items-center gap-1">
+                <span>เวลาแมตช์</span>
+                <span className="text-slate-400 font-bold">
+                  ({(shootOutRemainingSec ?? 0) > 300 ? 'ครึ่งแรก' : 'ครึ่งหลัง'})
+                </span>
+              </div>
+              <div className={`text-xl xs:text-2xl sm:text-3xl md:text-4xl font-black font-mono leading-none ${
+                (shootOutRemainingSec ?? 0) <= 60 ? 'text-red-400 animate-pulse drop-shadow-[0_0_12px_rgba(239,68,68,0.9)]' : 'text-white'
+              }`}>
+                {Math.floor((shootOutRemainingSec ?? 0) / 60).toString().padStart(2, '0')}:
+                {((shootOutRemainingSec ?? 0) % 60).toString().padStart(2, '0')}
+              </div>
+            </div>
+          </div>
+
+          {/* Shot Clock & Status */}
+          <div className="flex items-center space-x-1.5 sm:space-x-2">
+            <div className={`px-2.5 sm:px-4 py-1 rounded-xl border-2 flex items-center space-x-2 shadow-inner transition-all ${
+              isShootOutPaused
+                ? 'bg-amber-950/90 border-amber-500/90 text-amber-300'
+                : (shootOutShotSec ?? 0) <= 2
+                  ? 'bg-red-950 border-red-500 text-red-300 animate-pulse ring-2 ring-red-500/70'
+                  : (shootOutShotSec ?? 0) <= 5
+                    ? 'bg-amber-950 border-amber-400 text-amber-300'
+                    : 'bg-emerald-950 border-emerald-500 text-emerald-300'
+            }`}>
+              <div className="text-right">
+                <div className="text-[7px] xs:text-[8px] sm:text-[9px] font-black uppercase tracking-wider opacity-80">
+                  {isShootOutPaused ? '⏸️ หยุดช็อต' : 'ช็อตคล็อก'}
+                </div>
+                <div className="text-2xl xs:text-3xl sm:text-4xl font-black font-mono leading-none">
+                  {(shootOutShotSec ?? 0).toString().padStart(2, '0')}s
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Referee Action Buttons */}
+            <div className="flex flex-col gap-1">
+              {onTogglePauseShootOut && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onTogglePauseShootOut(); }}
+                  className={`px-2 py-0.5 sm:py-1 rounded-lg text-[8px] xs:text-[9px] sm:text-[10px] font-black border transition cursor-pointer flex items-center space-x-1 ${
+                    isShootOutPaused
+                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400 animate-pulse'
+                      : 'bg-amber-600 hover:bg-amber-500 text-white border-amber-400'
+                  }`}
+                  title="กดปุ่ม 0 (Ins) หรือ Space เพื่อหยุด/เดินเวลา"
+                >
+                  {isShootOutPaused ? <Play className="w-2.5 h-2.5" /> : <Pause className="w-2.5 h-2.5" />}
+                  <span>{isShootOutPaused ? 'เดินเวลา [0]' : 'หยุดเวลา [0]'}</span>
+                </button>
+              )}
+              {onResetShotClock && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onResetShotClock(); }}
+                  className="px-2 py-0.5 sm:py-1 rounded-lg text-[8px] xs:text-[9px] sm:text-[10px] font-black bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition cursor-pointer flex items-center space-x-1"
+                  title="กดปุ่ม 8 เพื่อรีเซ็ตเวลาช็อต"
+                >
+                  <RotateCcw className="w-2.5 h-2.5" />
+                  <span>รีเซ็ตช็อต [8]</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Ball in Hand Alert Badge */}
+          {ballInHandActive && (
+            <div className="w-full bg-rose-600 text-white text-[10px] xs:text-xs sm:text-sm font-black py-1 px-3 rounded-lg border-2 border-rose-300 flex items-center justify-center space-x-1.5 animate-bounce shadow-lg shadow-rose-950">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+              <span>🔴 บอลอินแฮนด์ (Ball in Hand) : วางลูกขาวได้ทุกจุดบนโต๊ะ</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Main Scoreboard */}
       <div className="grid grid-cols-2 gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2">
         

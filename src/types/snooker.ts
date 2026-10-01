@@ -1,4 +1,4 @@
-export type GameMode = '15-reds' | '6-reds' | 'snooker-ga' | 'electric-count';
+export type GameMode = '15-reds' | '6-reds' | 'snooker-ga' | 'electric-count' | 'shoot-out';
 
 export type BallColor = 'red' | 'yellow' | 'green' | 'brown' | 'blue' | 'pink' | 'black';
 
@@ -47,6 +47,14 @@ export interface ElectricConfig {
   handicapGiverIndex: 0 | 1; // 0 = Player 1 gives handicap, 1 = Player 2 gives handicap
   handicapGiverRatio: number; // e.g. 80 means 100:80 (plays 100 pts -> counts 80 pts)
   handicapReceiverRatio: number; // 100
+}
+ 
+export interface ShootOutConfig {
+  matchDurationMinutes: number; // default 10 (or 5, 7, etc.)
+  firstHalfShotClockSec: number; // default 15
+  secondHalfRule: 'reduced' | 'same' | 'custom'; // 'reduced' (10s), 'same' (15s), 'custom'
+  secondHalfCustomSec?: number;
+  minFoulPenalty: number; // default 5
 }
 
 export interface Shot {
@@ -136,6 +144,7 @@ export interface Frame {
   winnerIndex?: 0 | 1;
   stats: [PlayerStats, PlayerStats];
   electricConfig?: ElectricConfig;
+  shootOutConfig?: ShootOutConfig;
   player1HandicapPoints?: number;
   player2HandicapPoints?: number;
   handicapGiverIndex?: 0 | 1 | -1;
@@ -164,6 +173,7 @@ export interface Match {
   totalDurationSec: number;
   shotClockSeconds?: number;
   electricConfig?: ElectricConfig;
+  shootOutConfig?: ShootOutConfig;
   player1HandicapPoints?: number;
   player2HandicapPoints?: number;
   handicapGiverIndex?: 0 | 1 | -1;

@@ -10,8 +10,8 @@ import { HistoryTab } from './components/HistoryTab';
 import { NewMatchModal } from './components/NewMatchModal';
 import { FrameEndModal } from './components/FrameEndModal';
 import { KeyboardDisplayScreen } from './components/KeyboardDisplayScreen';
-import { Match, Frame, Shot, Visit, BallColor, GameMode, PocketLocation, ElectricConfig } from './types/snooker';
-import { BALL_MAP, createInitialFrame, calculatePlayerStats, calculateGaForPot, calculateElectricPotPoints, calculateRemainingPoints } from './utils/snookerRules';
+import { Match, Frame, Shot, Visit, BallColor, GameMode, PocketLocation, ElectricConfig, ShootOutConfig } from './types/snooker';
+import { BALL_MAP, createInitialFrame, calculatePlayerStats, calculateGaForPot, calculateElectricPotPoints, calculateRemainingPoints, DEFAULT_SHOOT_OUT_CONFIG } from './utils/snookerRules';
 import { soundManager, numberToThaiWords } from './utils/audio';
 import { saveActiveMatch, loadActiveMatch, saveMatchToHistory, loadAppTheme, saveAppTheme, AppTheme } from './utils/storage';
 
@@ -96,6 +96,44 @@ export function App() {
   const [shotStartTime, setShotStartTime] = useState<number>(Date.now());
   const [shotDurationSec, setShotDurationSec] = useState<number>(0);
   const [frameDurationSec, setFrameDurationSec] = useState<number>(0);
+
+  // Shoot Out Timing & State
+  const [shootOutRemainingSec, setShootOutRemainingSec] = useState<number>(() => {
+    const cfg = match.shootOutConfig || DEFAULT_SHOOT_OUT_CONFIG;
+    return (cfg.matchDurationMinutes || 10) * 60;
+  });
+  const [shootOutShotSec, setShootOutShotSec] = useState<number>(() => {
+    const cfg = match.shootOutConfig || DEFAULT_SHOOT_OUT_CONFIG;
+    return cfg.firstHalfShotClockSec || 15;
+  });
+  const [isShootOutPaused, setIsShootOutPaused] = useState<boolean>(true);
+  const [isBlueBallActive, setIsBlueBallActive] = useState<boolean>(false);
+  const [ballInHandActive, setBallInHandActive] = useState<boolean>(false);
+
+  const getShootOutMaxShotSec = useCallback((matchSec: number) => {
+    const cfg = match.shootOutConfig || DEFAULT_SHOOT_OUT_CONFIG;
+    const splitTime = (cfg.matchDurationMinutes * 60) / 2;
+    if (matchSec > splitTime) {
+      return cfg.firstHalfShotClockSec || 15;
+    } else {
+      if (cfg.secondHalfRule === 'same') {
+        return cfg.firstHalfShotClockSec || 15;
+      } else if (cfg.secondHalfRule === 'custom') {
+        return cfg.secondHalfCustomSec || 10;
+      } else {
+        return 10;
+      }
+    }
+  }, [match.shootOutConfig]);
+
+  const resetShootOutShotClock = useCallback(() => {
+    const maxSec = getShootOutMaxShotSec(shootOutRemainingSec);
+    setShootOutShotSec(maxSec);
+  }, [getShootOutMaxShotSec, shootOutRemainingSec]);
+
+  const handleTogglePauseShootOut = useCallback(() => {
+    setIsShootOutPaused(prev => !prev);
+  }, []);
 
   useEffect(() => {
     saveActiveMatch(match);
@@ -203,6 +241,11 @@ export function App() {
     setCurrentVisitNumber(prev => prev + 1);
     setCurrentVisitShots([]);
     setShotStartTime(Date.now());
+
+    if (match.gameMode === 'shoot-out') {
+      setBallInHandActive(false);
+      resetShootOutShotClock();
+    }
   }, [
     activeStrikerIndex,
     ballsInCurrentVisit,
@@ -212,6 +255,7 @@ export function App() {
     currentVisitShots,
     match,
     shotStartTime,
+    resetShootOutShotClock,
   ]);
 
   const checkAndAnnounceDeficit = useCallback((
@@ -355,6 +399,11 @@ export function App() {
     setBallsInCurrentVisit(newBallsCount);
     setShotStartTime(Date.now());
     checkAndAnnounceDeficit(newP1Score, newP2Score, nextReds, updatedShots, currentFrame.id);
+
+    if (match.gameMode === 'shoot-out') {
+      setBallInHandActive(false);
+      resetShootOutShotClock();
+    }
   }, [
     activeStrikerIndex,
     ballsInCurrentVisit,
@@ -364,6 +413,7 @@ export function App() {
     currentVisitNumber,
     match,
     shotStartTime,
+    resetShootOutShotClock,
   ]);
 
   // Add Direct Custom Points
@@ -588,6 +638,12 @@ export function App() {
     setCurrentVisitShots([]);
     setShotStartTime(Date.now());
     checkAndAnnounceDeficit(newP1Score, newP2Score, currentFrame.redsRemaining, updatedShots, currentFrame.id);
+
+    if (match.gameMode === 'shoot-out') {
+      setBallInHandActive(true);
+      soundManager.speakBallInHand();
+      resetShootOutShotClock();
+    }
   }, [
     activeStrikerIndex,
     ballsInCurrentVisit,
@@ -598,11 +654,85 @@ export function App() {
     currentVisitShots,
     match,
     shotStartTime,
+    resetShootOutShotClock,
   ]);
 
   const handleDirectFoul = useCallback((points: number) => {
     handleSubmitFoul(points, { isFreeBall: false, switchStriker: true, note: `ฟาวล์ ${points} แต้ม` });
   }, [handleSubmitFoul]);
+
+  // Shoot Out Countdown Interval Effect
+  useEffect(() => {
+    if (match.gameMode !== 'shoot-out' || currentFrame.isCompleted || isShootOutPaused) {
+      return;
+    }
+
+    const cfg = match.shootOutConfig || DEFAULT_SHOOT_OUT_CONFIG;
+    const splitTime = (cfg.matchDurationMinutes * 60) / 2;
+
+    const timer = setInterval(() => {
+      // 1. Match timer countdown
+      setShootOutRemainingSec(prevMatch => {
+        if (prevMatch <= 1) {
+          soundManager.playShootOutBuzzer(true);
+          if (currentFrame.player1Score === currentFrame.player2Score) {
+            setIsBlueBallActive(true);
+            soundManager.speak('หมดเวลา แข่งขันเสมอกัน ดวลลูกน้ำเงินตัดสิน');
+            setIsShootOutPaused(true);
+          } else {
+            soundManager.speak('หมดเวลาการแข่งขัน ชู๊ตเอาท์');
+            setIsFrameEndModalOpen(true);
+            setIsShootOutPaused(true);
+          }
+          return 0;
+        }
+
+        const nextMatch = prevMatch - 1;
+        if (nextMatch === splitTime) {
+          const secondHalfSec = cfg.secondHalfRule === 'same'
+            ? cfg.firstHalfShotClockSec
+            : (cfg.secondHalfRule === 'custom' ? (cfg.secondHalfCustomSec || 10) : 10);
+          soundManager.speakShootOutPeriod(2, secondHalfSec);
+        }
+        return nextMatch;
+      });
+
+      // 2. Shot clock countdown
+      setShootOutShotSec(prevShot => {
+        if (prevShot <= 1) {
+          // Shot clock timeout foul!
+          soundManager.playShootOutBuzzer(false);
+          soundManager.speak('หมดเวลาช็อต ฟาวล์ 5 แต้ม บอลอินแฮนด์');
+          handleSubmitFoul(cfg.minFoulPenalty || 5, {
+            switchStriker: true,
+            note: 'หมดเวลาช็อต (Shot Clock Expired) +5 แต้ม (บอลอินแฮนด์)',
+          });
+          setBallInHandActive(true);
+          return getShootOutMaxShotSec(shootOutRemainingSec);
+        }
+
+        const nextShot = prevShot - 1;
+        if (nextShot <= 5 && nextShot > 1) {
+          soundManager.playShotClockWarning(false);
+        } else if (nextShot === 1) {
+          soundManager.playShotClockWarning(true);
+        }
+        return nextShot;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [
+    match.gameMode,
+    currentFrame.isCompleted,
+    currentFrame.player1Score,
+    currentFrame.player2Score,
+    isShootOutPaused,
+    match.shootOutConfig,
+    shootOutRemainingSec,
+    getShootOutMaxShotSec,
+    handleSubmitFoul,
+  ]);
 
   const handleUndo = useCallback(() => {
     if (!currentFrame.shots || currentFrame.shots.length === 0) return;
@@ -710,7 +840,8 @@ export function App() {
       newP2Frames,
       match.electricConfig,
       match.player1HandicapPoints || 0,
-      match.player2HandicapPoints || 0
+      match.player2HandicapPoints || 0,
+      match.shootOutConfig
     );
 
     const updatedCurrentFrame: Frame = {
@@ -742,6 +873,15 @@ export function App() {
     setCurrentVisitNumber(1);
     setCurrentVisitShots([]);
     setShotStartTime(Date.now());
+
+    if (match.gameMode === 'shoot-out') {
+      const cfg = match.shootOutConfig || DEFAULT_SHOOT_OUT_CONFIG;
+      setShootOutRemainingSec((cfg.matchDurationMinutes || 10) * 60);
+      setShootOutShotSec(cfg.firstHalfShotClockSec || 15);
+      setIsShootOutPaused(true);
+      setIsBlueBallActive(false);
+      setBallInHandActive(false);
+    }
   }, [currentFrame, match]);
 
   const handleFinishMatch = useCallback(() => {
@@ -893,8 +1033,35 @@ export function App() {
         return;
       }
 
+      // Shoot Out Controls: 0 (Ins) or Space -> Toggle Pause/Resume
+      if (match.gameMode === 'shoot-out' && (key === '0' || code === 'Numpad0' || code === 'Digit0' || key === ' ' || code === 'Space' || key === 'Insert')) {
+        e.preventDefault();
+        handleTogglePauseShootOut();
+        return;
+      }
+
+      // Shoot Out Controls: Key 8 -> Reset Shot Clock immediately
+      if (match.gameMode === 'shoot-out' && (key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ArrowUp')) {
+        e.preventDefault();
+        resetShootOutShotClock();
+        return;
+      }
+
+      // Shoot Out Controls: Key - -> Immediate 5-pt Foul + Ball in Hand
+      if (match.gameMode === 'shoot-out' && (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์')) {
+        e.preventDefault();
+        handleSubmitFoul(match.shootOutConfig?.minFoulPenalty || 5, {
+          switchStriker: true,
+          note: 'ฟาวล์ 5 แต้ม (บอลอินแฮนด์)',
+        });
+        setBallInHandActive(true);
+        soundManager.speakBallInHand();
+        resetShootOutShotClock();
+        return;
+      }
+
       // 5. Enter / Space / Tab -> เปลี่ยนเทิร์น (Switch Striker / End Turn)
-      if (key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === ' ' || code === 'Space' || key === 'Tab' || code === 'Tab' || key === 'ใ') {
+      if (key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === 'Tab' || code === 'Tab' || key === 'ใ' || (match.gameMode !== 'shoot-out' && (key === ' ' || code === 'Space'))) {
         e.preventDefault();
         handleEndTurn('miss');
         return;
@@ -966,6 +1133,8 @@ export function App() {
     handleMultiRedPot,
     handleNextFrame,
     handleFinishMatch,
+    handleTogglePauseShootOut,
+    resetShootOutShotClock,
     toggleFullscreen,
     toggleTheme,
   ]);
@@ -979,6 +1148,7 @@ export function App() {
     title: string;
     date: string;
     electricConfig?: ElectricConfig;
+    shootOutConfig?: ShootOutConfig;
     player1HandicapPoints?: number;
     player2HandicapPoints?: number;
   }) => {
@@ -991,7 +1161,8 @@ export function App() {
       0,
       config.electricConfig,
       p1Handicap,
-      p2Handicap
+      p2Handicap,
+      config.shootOutConfig
     );
     const newMatch: Match = {
       id: 'match-' + Date.now(),
@@ -1009,6 +1180,7 @@ export function App() {
       isCompleted: false,
       totalDurationSec: 0,
       electricConfig: config.electricConfig,
+      shootOutConfig: config.shootOutConfig,
       player1HandicapPoints: p1Handicap,
       player2HandicapPoints: p2Handicap,
       handicapGiverIndex: initialFrame.handicapGiverIndex,
@@ -1024,6 +1196,16 @@ export function App() {
     setCurrentVisitShots([]);
     setShotStartTime(Date.now());
     setAnnouncedDeficitFrameId(null);
+
+    if (config.gameMode === 'shoot-out') {
+      const cfg = config.shootOutConfig || DEFAULT_SHOOT_OUT_CONFIG;
+      setShootOutRemainingSec((cfg.matchDurationMinutes || 10) * 60);
+      setShootOutShotSec(cfg.firstHalfShotClockSec || 15);
+      setIsShootOutPaused(true);
+      setIsBlueBallActive(false);
+      setBallInHandActive(false);
+    }
+
     setActiveTab('scoreboard');
   };
 
@@ -1074,6 +1256,13 @@ export function App() {
               p2CumulativeScore={p2CumulativeScore}
               currentGameNumber={match.currentFrameIndex + 1}
               totalGames={match.bestOfFrames}
+              isShootOutMode={match.gameMode === 'shoot-out'}
+              shootOutRemainingSec={shootOutRemainingSec}
+              shootOutShotSec={shootOutShotSec}
+              isShootOutPaused={isShootOutPaused}
+              ballInHandActive={ballInHandActive}
+              onResetShotClock={resetShootOutShotClock}
+              onTogglePauseShootOut={handleTogglePauseShootOut}
               onSwitchStriker={() => handleEndTurn('miss')}
             />
 
@@ -1122,6 +1311,13 @@ export function App() {
             totalGames={match.bestOfFrames}
             currentVisitShots={currentVisitShots}
             isFoulMode={isFoulMode}
+            isShootOutMode={match.gameMode === 'shoot-out'}
+            shootOutRemainingSec={shootOutRemainingSec}
+            shootOutShotSec={shootOutShotSec}
+            isShootOutPaused={isShootOutPaused}
+            ballInHandActive={ballInHandActive}
+            onResetShotClock={resetShootOutShotClock}
+            onTogglePauseShootOut={handleTogglePauseShootOut}
             onFoulSelect={(pts) => {
               handleSubmitFoul(pts, { switchStriker: true, note: `ฟาวล์ +${pts} แต้ม` });
               setIsFoulMode(false);

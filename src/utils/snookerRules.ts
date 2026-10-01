@@ -1,4 +1,4 @@
-import { BallInfo, BallColor, LegalTarget, Shot, Visit, PlayerStats, GameMode, PocketLocation, ElectricConfig } from '../types/snooker';
+import { BallInfo, BallColor, LegalTarget, Shot, Visit, PlayerStats, GameMode, PocketLocation, ElectricConfig, ShootOutConfig } from '../types/snooker';
 
 export const BALLS: BallInfo[] = [
   { color: 'red', nameTh: 'ลูกแดง', nameEn: 'Red', points: 1, cssClass: 'ball-red', numpadKey: '1', regularKey: '1' },
@@ -35,6 +35,17 @@ export const DEFAULT_ELECTRIC_CONFIG: ElectricConfig = {
   handicapGiverIndex: 0,
   handicapGiverRatio: 80,
   handicapReceiverRatio: 100,
+};
+
+/**
+ * Default Snooker Shoot Out Configuration
+ */
+export const DEFAULT_SHOOT_OUT_CONFIG: ShootOutConfig = {
+  matchDurationMinutes: 10,
+  firstHalfShotClockSec: 15,
+  secondHalfRule: 'reduced',
+  secondHalfCustomSec: 10,
+  minFoulPenalty: 5,
 };
 
 /**
@@ -432,9 +443,10 @@ export function createInitialFrame(
   p2FramesWon: number = 0,
   electricConfig?: ElectricConfig,
   p1HandicapPoints: number = 0,
-  p2HandicapPoints: number = 0
+  p2HandicapPoints: number = 0,
+  shootOutConfig?: ShootOutConfig
 ): Frame {
-  const redsRemaining = gameMode === '15-reds' ? 15 : 6;
+  const redsRemaining = (gameMode === '15-reds' || gameMode === 'shoot-out') ? 15 : 6;
   const emptyStats: PlayerStats = {
     totalPoints: 0,
     potsAttempted: 0,
@@ -492,6 +504,7 @@ export function createInitialFrame(
     isCompleted: false,
     stats: [emptyStats, { ...emptyStats }],
     electricConfig: electricConfig ? { ...electricConfig } : undefined,
+    shootOutConfig: shootOutConfig ? { ...shootOutConfig } : undefined,
     player1HandicapPoints: p1HandicapPoints || 0,
     player2HandicapPoints: p2HandicapPoints || 0,
     handicapGiverIndex,

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { GameMode, MatchLengthType, ElectricConfig } from '../types/snooker';
-import { Trophy, X, Play, Infinity as InfinityIcon, Sparkles, Zap, Percent } from 'lucide-react';
-import { DEFAULT_ELECTRIC_CONFIG } from '../utils/snookerRules';
+import { GameMode, MatchLengthType, ElectricConfig, ShootOutConfig } from '../types/snooker';
+import { Trophy, X, Play, Infinity as InfinityIcon, Sparkles, Zap, Percent, Timer } from 'lucide-react';
+import { DEFAULT_ELECTRIC_CONFIG, DEFAULT_SHOOT_OUT_CONFIG } from '../utils/snookerRules';
 
 interface NewMatchModalProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ interface NewMatchModalProps {
     title: string;
     date: string;
     electricConfig?: ElectricConfig;
+    shootOutConfig?: ShootOutConfig;
     player1HandicapPoints?: number;
     player2HandicapPoints?: number;
   }) => void;
@@ -46,6 +47,13 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
   const [handicapGiverIndex, setHandicapGiverIndex] = useState<0 | 1>(0);
   const [handicapGiverRatio, setHandicapGiverRatio] = useState<number>(80);
   const [customRatioInput, setCustomRatioInput] = useState<string>('80');
+
+  // Shoot Out Mode State
+  const [shootOutDurationMins, setShootOutDurationMins] = useState<number>(10);
+  const [firstHalfShotSec, setFirstHalfShotSec] = useState<number>(15);
+  const [secondHalfRule, setSecondHalfRule] = useState<'reduced' | 'same' | 'custom'>('reduced');
+  const [secondHalfCustomSec, setSecondHalfCustomSec] = useState<number>(10);
+  const [minFoulPenalty, setMinFoulPenalty] = useState<number>(5);
 
   if (!isOpen) return null;
 
@@ -85,15 +93,27 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
       };
     }
 
+    let shootOutConfig: ShootOutConfig | undefined = undefined;
+    if (gameMode === 'shoot-out') {
+      shootOutConfig = {
+        matchDurationMinutes: Math.max(1, shootOutDurationMins),
+        firstHalfShotClockSec: Math.max(5, firstHalfShotSec),
+        secondHalfRule,
+        secondHalfCustomSec: Math.max(5, secondHalfCustomSec),
+        minFoulPenalty: Math.max(4, minFoulPenalty),
+      };
+    }
+
     onStartMatch({
       player1Name: player1Name.trim() || 'ผู้เล่น 1',
       player2Name: player2Name.trim() || 'ผู้เล่น 2',
       gameMode,
       matchLengthType,
       bestOfFrames: finalBestOf,
-      title: title.trim() || (matchLengthType === 'unlimited' ? 'เล่นซ้อม/ไปเรื่อยๆ' : `Best of ${finalBestOf}`),
+      title: title.trim() || (matchLengthType === 'unlimited' ? 'เล่นซ้อม/ไปเรื่อยๆ' : (gameMode === 'shoot-out' ? 'Shoot Out' : `Best of ${finalBestOf}`)),
       date,
       electricConfig,
+      shootOutConfig,
       player1HandicapPoints: Math.max(0, player1HandicapPoints || 0),
       player2HandicapPoints: Math.max(0, player2HandicapPoints || 0),
     });
@@ -122,10 +142,10 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3.5 text-xs sm:text-sm">
-          {/* Format Selection: 15 Reds vs 6 Reds vs Snooker Ga vs Electric Count */}
+          {/* Format Selection: 15 Reds vs 6 Reds vs Snooker Ga vs Electric Count vs Shoot Out */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-300">1. เลือกรูปแบบกติกา</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5">
               <button
                 type="button"
                 onClick={() => setGameMode('15-reds')}
@@ -180,8 +200,167 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
                 </div>
                 <span className="text-[9px] opacity-90 text-cyan-200">นับลูก / แต้มต่อ</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setGameMode('shoot-out');
+                  setMatchLengthType('best-of');
+                  setBestOfFrames(1);
+                  setTitle('Shoot Out (1 เฟรม)');
+                }}
+                className={`p-2 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
+                  gameMode === 'shoot-out'
+                    ? 'bg-amber-600 border-amber-300 text-white shadow-lg shadow-amber-600/40 font-bold ring-2 ring-amber-400/50'
+                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                <div className="flex items-center space-x-0.5">
+                  <span className="text-xs">⏱️</span>
+                  <span className="text-xs font-black text-amber-200">ชู๊ตเอาท์</span>
+                </div>
+                <span className="text-[9px] opacity-90 text-amber-300">Shoot Out จับเวลา</span>
+              </button>
             </div>
           </div>
+
+          {/* Shoot Out Configuration Box */}
+          {gameMode === 'shoot-out' && (
+            <div className="bg-amber-950/30 border border-amber-700/60 rounded-xl p-3 space-y-3 animate-fadeIn">
+              <div className="flex items-center justify-between text-amber-300 border-b border-amber-800/60 pb-1.5">
+                <div className="flex items-center space-x-1.5 font-black text-xs">
+                  <Timer className="w-4 h-4 text-amber-400" />
+                  <span>ตั้งค่าเวลาการแข่งขัน Shoot Out (Shoot Out Time Settings)</span>
+                </div>
+                <span className="text-[10px] text-amber-300/80 font-mono">1 เฟรมจบ</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                {/* 1. Match Duration */}
+                <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 space-y-1.5">
+                  <label className="font-bold text-slate-300 block text-[11px]">1. เวลาแข่งขันรวม</label>
+                  <div className="grid grid-cols-3 gap-1">
+                    {[10, 7, 5].map((mins) => (
+                      <button
+                        key={mins}
+                        type="button"
+                        onClick={() => setShootOutDurationMins(mins)}
+                        className={`py-1 rounded text-center font-bold text-xs transition cursor-pointer ${
+                          shootOutDurationMins === mins
+                            ? 'bg-amber-500 text-slate-950 font-black shadow'
+                            : 'bg-slate-900 text-slate-300 border border-slate-700 hover:bg-slate-800'
+                        }`}
+                      >
+                        {mins} นาที
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+                    <span>หรือกำหนดเอง:</span>
+                    <div className="flex items-center space-x-1">
+                      <input
+                        type="number"
+                        min={1}
+                        max={60}
+                        value={shootOutDurationMins}
+                        onChange={(e) => setShootOutDurationMins(Math.max(1, parseInt(e.target.value, 10) || 10))}
+                        className="w-12 bg-slate-900 border border-slate-700 rounded px-1 text-center font-mono font-bold text-amber-300 text-xs outline-none"
+                      />
+                      <span>นาที</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. First Half Shot Clock */}
+                <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 space-y-1.5">
+                  <label className="font-bold text-slate-300 block text-[11px]">2. ช็อตคล็อกครึ่งแรก</label>
+                  <div className="grid grid-cols-3 gap-1">
+                    {[15, 20, 12].map((sec) => (
+                      <button
+                        key={sec}
+                        type="button"
+                        onClick={() => setFirstHalfShotSec(sec)}
+                        className={`py-1 rounded text-center font-bold text-xs transition cursor-pointer ${
+                          firstHalfShotSec === sec
+                            ? 'bg-emerald-500 text-slate-950 font-black shadow'
+                            : 'bg-slate-900 text-slate-300 border border-slate-700 hover:bg-slate-800'
+                        }`}
+                      >
+                        {sec} วิ
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+                    <span>หรือกำหนดเอง:</span>
+                    <div className="flex items-center space-x-1">
+                      <input
+                        type="number"
+                        min={5}
+                        max={60}
+                        value={firstHalfShotSec}
+                        onChange={(e) => setFirstHalfShotSec(Math.max(5, parseInt(e.target.value, 10) || 15))}
+                        className="w-12 bg-slate-900 border border-slate-700 rounded px-1 text-center font-mono font-bold text-emerald-300 text-xs outline-none"
+                      />
+                      <span>วิ</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Second Half Shot Clock (User's specific request) */}
+                <div className="bg-slate-950/80 p-2.5 rounded-lg border border-amber-500/40 space-y-1.5">
+                  <label className="font-bold text-amber-300 block text-[11px]">3. ช็อตคล็อกครึ่งหลัง (5 นาทีหลัง)</label>
+                  <div className="space-y-1 text-[11px]">
+                    <label className="flex items-center space-x-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="secondHalfRule"
+                        checked={secondHalfRule === 'reduced'}
+                        onChange={() => setSecondHalfRule('reduced')}
+                        className="accent-amber-400 cursor-pointer"
+                      />
+                      <span className="text-white font-bold">ลดเหลือ 10 วินาที (สากล)</span>
+                    </label>
+                    <label className="flex items-center space-x-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="secondHalfRule"
+                        checked={secondHalfRule === 'same'}
+                        onChange={() => setSecondHalfRule('same')}
+                        className="accent-amber-400 cursor-pointer"
+                      />
+                      <span className="text-amber-200 font-bold">คงไว้ที่ {firstHalfShotSec} วิ เท่าเดิม</span>
+                    </label>
+                    <label className="flex items-center space-x-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="secondHalfRule"
+                        checked={secondHalfRule === 'custom'}
+                        onChange={() => setSecondHalfRule('custom')}
+                        className="accent-amber-400 cursor-pointer"
+                      />
+                      <span className="text-slate-300">กำหนดเอง:</span>
+                      <input
+                        type="number"
+                        min={5}
+                        max={30}
+                        value={secondHalfCustomSec}
+                        onChange={(e) => {
+                          setSecondHalfCustomSec(Math.max(5, parseInt(e.target.value, 10) || 10));
+                          setSecondHalfRule('custom');
+                        }}
+                        className="w-10 bg-slate-900 border border-slate-700 rounded px-1 text-center font-mono font-bold text-white text-xs outline-none"
+                      />
+                      <span className="text-[10px] text-slate-400">วิ</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-amber-950/50 border border-amber-800/60 rounded-lg p-2 text-[10px] text-amber-200">
+                💡 <strong>กติกาฟาวล์ Shoot Out:</strong> ฟาวล์ทุกกรณี ฝ่ายตรงข้ามได้สิทธิ์ <strong>Ball in Hand</strong> วางขาวตำแหน่งใดก็ได้บนโต๊ะ และได้แต้มฟาวล์ขั้นต่ำ 5 แต้ม
+              </div>
+            </div>
+          )}
 
           {/* Electric Snooker / Ball Count Configuration Box */}
           {gameMode === 'electric-count' && (
@@ -417,10 +596,24 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
           )}
 
           {/* Match Length Mode: Best of / Total Games vs Unlimited */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-300">
-              {gameMode === 'electric-count' ? '2. เลือกจำนวนเกม / รูปแบบการแข่ง' : '2. เลือกความยาวของเกม / รูปแบบการแข่ง'}
-            </label>
+          {gameMode === 'shoot-out' ? (
+            <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
+              <div className="flex items-center space-x-2">
+                <span className="text-base">⏱️</span>
+                <div>
+                  <span className="font-bold text-white block">2. รูปแบบการแข่งขัน: 1 เฟรมจบ (Single Frame)</span>
+                  <span className="text-[10px] text-slate-400">แข่งขันนับเวลาถอยหลัง {shootOutDurationMins} นาที ผู้ที่มีแต้มมากกว่าเมื่อหมดเวลาเป็นผู้ชนะ</span>
+                </div>
+              </div>
+              <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-black px-2.5 py-1 rounded-lg">
+                1 Frame
+              </span>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-300">
+                {gameMode === 'electric-count' ? '2. เลือกจำนวนเกม / รูปแบบการแข่ง' : '2. เลือกความยาวของเกม / รูปแบบการแข่ง'}
+              </label>
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
@@ -559,6 +752,7 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
               </div>
             )}
           </div>
+          )}
 
           {/* Players Names & Handicap Points */}
           <div className="space-y-2">
