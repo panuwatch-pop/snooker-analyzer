@@ -1580,6 +1580,7 @@ export function App() {
                 onContinueMatch={handleContinueElectricMatch}
                 onFinishMatch={handleFinishElectricMatch}
                 onEndGame={() => handleEndElectricGame()}
+                isKeyboardDisplay={false}
               />
             ) : (
               <Scoreboard
@@ -1673,6 +1674,7 @@ export function App() {
                 onContinueMatch={handleContinueElectricMatch}
                 onFinishMatch={handleFinishElectricMatch}
                 onEndGame={() => handleEndElectricGame()}
+                isKeyboardDisplay={true}
               />
               <BallPots
                 redsRemaining={currentFrame.redsRemaining}
