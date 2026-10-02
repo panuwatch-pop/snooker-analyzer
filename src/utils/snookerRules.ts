@@ -265,14 +265,14 @@ export function getClearedColors(shots: Shot[], redsRemaining: number): Set<Ball
 }
 
 export interface PotViolationWarning {
-  type: 'red_exceeded' | 'consecutive_colors' | 'color_already_cleared';
+  type: 'red_exceeded' | 'color_before_red' | 'consecutive_colors' | 'consecutive_reds' | 'color_already_cleared';
   title: string;
   message: string;
   submessage: string;
 }
 
 /**
- * Checks if a pot shot potentially violates snooker rules (e.g. potting reds exceeding count, or potting colors twice consecutively).
+ * Checks if a pot shot potentially violates snooker rules (e.g. potting reds exceeding count, potting color before red, or potting colors twice consecutively).
  */
 export function checkPotBallViolation(
   ball: BallColor,
@@ -290,19 +290,43 @@ export function checkPotBallViolation(
     };
   }
 
-  // 2. Color potted twice consecutively in the same visit while reds remain:
   const pottedInVisit = currentVisitShots.filter(s => s.action === 'pot' && s.ballPotted);
   const lastPotInVisit = pottedInVisit.length > 0 ? pottedInVisit[pottedInVisit.length - 1] : null;
 
-  if (redsRemaining > 0 && lastPotInVisit && lastPotInVisit.ballPotted !== 'red' && ball !== 'red') {
-    const prevBallName = BALL_MAP[lastPotInVisit.ballPotted as BallColor]?.nameTh || lastPotInVisit.ballPotted;
-    const currentBallName = BALL_MAP[ball]?.nameTh || ball;
-    return {
-      type: 'consecutive_colors',
-      title: 'กดลูกสีซ้ำ 2 ครั้ง',
-      message: `คุณเพิ่งตบลูก${prevBallName}ไปในไม้นี้ และกำลังจะตบลูก${currentBallName}ซ้ำอีกครั้งโดยไม่มีลูกแดงคั่น`,
-      submessage: 'ตามกติกาสนุ๊กเกอร์ต้องตบแดงสลับสี คุณต้องการ "ทำต่อ" หรือ "ย้อนกลับ"?',
-    };
+  // 2. While reds remain on the table (redsRemaining > 0):
+  if (redsRemaining > 0) {
+    // 2.1 Trying to pot a color ball at the start of a turn (no red potted yet in this visit):
+    if (!lastPotInVisit && ball !== 'red') {
+      const currentBallName = BALL_MAP[ball]?.nameTh || ball;
+      return {
+        type: 'color_before_red',
+        title: 'ยังมีลูกแดงอยู่บนโต๊ะ',
+        message: `โต๊ะยังมีลูกแดงเหลืออยู่ ${redsRemaining} ลูก ตามกติกาสนุ๊กเกอร์ต้องตบลูกแดงลงก่อน จึงจะตบลูกสี (${currentBallName}) ได้`,
+        submessage: 'คุณต้องการ "ทำต่อ" เพื่อบันทึกแต้มนี้ หรือ "ย้อนกลับ" เพื่อยกเลิก?',
+      };
+    }
+
+    // 2.2 Color potted twice consecutively in the same visit without a red in between:
+    if (lastPotInVisit && lastPotInVisit.ballPotted !== 'red' && ball !== 'red') {
+      const prevBallName = BALL_MAP[lastPotInVisit.ballPotted as BallColor]?.nameTh || lastPotInVisit.ballPotted;
+      const currentBallName = BALL_MAP[ball]?.nameTh || ball;
+      return {
+        type: 'consecutive_colors',
+        title: 'กดลูกสีซ้ำ 2 ครั้ง',
+        message: `คุณเพิ่งตบลูก${prevBallName}ไปในไม้นี้ และกำลังจะตบลูก${currentBallName}ซ้ำอีกครั้งโดยไม่มีลูกแดงคั่น`,
+        submessage: 'ตามกติกาสนุ๊กเกอร์ต้องตบแดงสลับสี คุณต้องการ "ทำต่อ" หรือ "ย้อนกลับ"?',
+      };
+    }
+
+    // 2.3 Red potted consecutively in the same visit without a color in between:
+    if (lastPotInVisit && lastPotInVisit.ballPotted === 'red' && ball === 'red') {
+      return {
+        type: 'consecutive_reds',
+        title: 'กดลูกแดงซ้ำ 2 ครั้ง',
+        message: 'คุณเพิ่งตบลูกแดงไป และกำลังจะตบลูกแดงซ้ำอีกครั้งโดยไม่มีลูกสีคั่น (หากเป็นการตบแดงลงพร้อมกันหลายลูกในไม้เดียว ให้กดยกเลิกแล้วเลือกปุ่มตบแดงหลายลูก)',
+        submessage: 'ตามกติกาสนุ๊กเกอร์ต้องตบแดงสลับสี คุณต้องการ "ทำต่อ" หรือ "ย้อนกลับ"?',
+      };
+    }
   }
 
   // 3. Color already cleared off the table when reds are 0:
