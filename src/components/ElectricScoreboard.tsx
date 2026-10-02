@@ -248,14 +248,14 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-950/80 text-slate-400 text-[9px] xs:text-[10px] sm:text-xs uppercase tracking-wider border-b border-slate-800">
-                <th className={`py-1.5 px-1 xs:px-2 font-semibold w-10 sm:w-12 text-center ${isKeyboardDisplay ? 'py-2.5 sm:py-3 text-[10px] sm:text-xs' : ''}`}>คิว</th>
-                <th className={`py-1.5 px-2 xs:px-3 font-semibold ${isKeyboardDisplay ? 'py-2.5 sm:py-3 text-xs sm:text-sm' : ''}`}>ชื่อผู้เล่น</th>
-                <th className={`py-1.5 px-0.5 font-semibold text-center text-emerald-400 bg-emerald-950/20 w-11 xs:w-12 sm:w-14 ${isKeyboardDisplay ? 'py-2.5 sm:py-3 text-[10px] sm:text-xs' : ''}`}>แต้ม +</th>
-                <th className={`py-1.5 px-0.5 font-semibold text-center text-rose-400 bg-rose-950/20 w-11 xs:w-12 sm:w-14 ${isKeyboardDisplay ? 'py-2.5 sm:py-3 text-[10px] sm:text-xs' : ''}`}>แต้ม -</th>
-                <th className={`py-1.5 px-0.5 font-semibold text-center text-amber-400 bg-amber-950/20 w-11 xs:w-12 sm:w-14 ${isKeyboardDisplay ? 'py-2.5 sm:py-3 text-[10px] sm:text-xs' : ''}`}>⚡ ค่าไฟ</th>
-                <th className={`py-1.5 px-0.5 font-bold text-center text-indigo-300 bg-slate-800/50 w-13 xs:w-16 sm:w-20 ${isKeyboardDisplay ? 'py-2.5 sm:py-3 text-xs sm:text-sm' : ''}`}>แต้มรวม</th>
-                <th className={`py-1.5 px-0.5 font-bold text-center text-amber-300 bg-slate-800/50 w-13 xs:w-16 sm:w-20 ${isKeyboardDisplay ? 'py-2.5 sm:py-3 text-xs sm:text-sm' : ''}`}>⚡ ค่าไฟรวม</th>
+              <tr className="bg-slate-950/90 text-slate-300 text-[10px] xs:text-xs sm:text-sm uppercase tracking-wider border-b border-slate-800">
+                <th className={`py-2 px-1 xs:px-2 font-bold w-12 sm:w-14 text-center ${isKeyboardDisplay ? 'py-3 sm:py-3.5' : ''}`}>คิว</th>
+                <th className={`py-2 px-3 font-bold ${isKeyboardDisplay ? 'py-3 sm:py-3.5 text-sm sm:text-base' : ''}`}>ชื่อผู้เล่น</th>
+                <th className={`py-2 px-1 font-bold text-center text-emerald-400 bg-emerald-950/30 w-16 sm:w-20 md:w-24 ${isKeyboardDisplay ? 'py-3 sm:py-3.5' : ''}`}>แต้ม +</th>
+                <th className={`py-2 px-1 font-bold text-center text-rose-400 bg-rose-950/30 w-16 sm:w-20 md:w-24 ${isKeyboardDisplay ? 'py-3 sm:py-3.5' : ''}`}>แต้ม -</th>
+                <th className={`py-2 px-1 font-bold text-center text-amber-400 bg-amber-950/30 w-16 sm:w-20 md:w-24 ${isKeyboardDisplay ? 'py-3 sm:py-3.5' : ''}`}>⚡ ค่าไฟ</th>
+                <th className={`py-2 px-1 font-extrabold text-center text-indigo-300 bg-slate-800/60 w-20 sm:w-24 md:w-28 ${isKeyboardDisplay ? 'py-3 sm:py-3.5' : ''}`}>แต้มรวม</th>
+                <th className={`py-2 px-1 font-extrabold text-center text-amber-300 bg-slate-800/60 w-20 sm:w-24 md:w-28 ${isKeyboardDisplay ? 'py-3 sm:py-3.5' : ''}`}>⚡ ค่าไฟรวม</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs sm:text-sm">
@@ -276,10 +276,18 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
                         : 'hover:bg-slate-800/30'
                     }`}
                   >
-                    <td className={`px-1 xs:px-2 text-center font-mono text-slate-400 ${isKeyboardDisplay ? 'py-2.5 xs:py-3.5 text-sm sm:text-base font-bold' : 'py-1 xs:py-1.5'}`}>
-                      {isStriker ? <span className="text-amber-400 font-bold">▶ {idx + 1}</span> : idx + 1}
+                    <td className={`px-1 xs:px-2 text-center font-mono ${isKeyboardDisplay ? 'py-3 xs:py-3.5' : 'py-1.5 xs:py-2'}`}>
+                      {isStriker ? (
+                        <span className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/50 font-black text-xs sm:text-sm animate-pulse">
+                          ▶{idx + 1}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-800/60 text-slate-400 font-bold text-xs sm:text-sm">
+                          {idx + 1}
+                        </span>
+                      )}
                     </td>
-                    <td className={`px-2 xs:px-3 text-slate-200 ${isKeyboardDisplay ? 'py-2.5 xs:py-3.5' : 'py-1 xs:py-1.5'}`}>
+                    <td className={`px-2 xs:px-3 text-slate-200 ${isKeyboardDisplay ? 'py-3 xs:py-3.5' : 'py-1.5 xs:py-2'}`}>
                       <div className="flex items-center gap-1.5 xs:gap-2 flex-wrap">
                         <span className={`font-black text-white tracking-wide ${isKeyboardDisplay ? 'text-base xs:text-lg sm:text-xl md:text-2xl' : 'text-sm sm:text-base'}`}>
                           {p.name}
@@ -291,30 +299,40 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
                         )}
                         {isStriker && (
                           <span className={`rounded font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 ${isKeyboardDisplay ? 'px-1.5 py-0.5 text-[10px] xs:text-xs' : 'px-1 py-0.2 text-[8px] xs:text-[9px]'}`}>
-                            คนแทง
+                            🎯 คนแทง
                           </span>
                         )}
                         {isDefender && (
                           <span className={`rounded font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 ${isKeyboardDisplay ? 'px-1.5 py-0.5 text-[10px] xs:text-xs' : 'px-1 py-0.2 text-[8px] xs:text-[9px]'}`}>
-                            คนป้องกัน
+                            🛡️ คนป้องกัน
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className={`px-0.5 text-center font-bold text-emerald-400 bg-emerald-950/10 font-mono text-xs sm:text-sm ${isKeyboardDisplay ? 'py-2.5 xs:py-3.5' : 'py-1 xs:py-1.5'}`}>
-                      {p.currentPlus > 0 ? `+${p.currentPlus}` : '0'}
+                    <td className={`px-1 text-center ${isKeyboardDisplay ? 'py-3 xs:py-3.5' : 'py-1.5 xs:py-2'}`}>
+                      <div className="inline-flex items-center justify-center min-w-[38px] sm:min-w-[48px] md:min-w-[56px] py-1 px-1.5 sm:px-2 rounded-lg bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 font-mono font-black tracking-wider text-xs sm:text-sm md:text-base shadow-sm">
+                        {p.currentPlus > 0 ? `+${p.currentPlus}` : '0'}
+                      </div>
                     </td>
-                    <td className={`px-0.5 text-center font-bold text-rose-400 bg-rose-950/10 font-mono text-xs sm:text-sm ${isKeyboardDisplay ? 'py-2.5 xs:py-3.5' : 'py-1 xs:py-1.5'}`}>
-                      {p.currentMinus > 0 ? `-${p.currentMinus}` : '0'}
+                    <td className={`px-1 text-center ${isKeyboardDisplay ? 'py-3 xs:py-3.5' : 'py-1.5 xs:py-2'}`}>
+                      <div className="inline-flex items-center justify-center min-w-[38px] sm:min-w-[48px] md:min-w-[56px] py-1 px-1.5 sm:px-2 rounded-lg bg-rose-950/80 border border-rose-500/50 text-rose-300 font-mono font-black tracking-wider text-xs sm:text-sm md:text-base shadow-sm">
+                        {p.currentMinus > 0 ? `-${p.currentMinus}` : '0'}
+                      </div>
                     </td>
-                    <td className={`px-0.5 text-center font-bold text-amber-400 bg-amber-950/10 font-mono text-xs sm:text-sm ${isKeyboardDisplay ? 'py-2.5 xs:py-3.5' : 'py-1 xs:py-1.5'}`}>
-                      {p.currentFee}
+                    <td className={`px-1 text-center ${isKeyboardDisplay ? 'py-3 xs:py-3.5' : 'py-1.5 xs:py-2'}`}>
+                      <div className="inline-flex items-center justify-center min-w-[38px] sm:min-w-[48px] md:min-w-[56px] py-1 px-1.5 sm:px-2 rounded-lg bg-amber-950/80 border border-amber-500/50 text-amber-300 font-mono font-black tracking-wider text-xs sm:text-sm md:text-base shadow-sm">
+                        {p.currentFee}
+                      </div>
                     </td>
-                    <td className={`px-0.5 text-center font-mono font-bold text-indigo-300 bg-slate-800/30 text-xs sm:text-sm ${isKeyboardDisplay ? 'py-2.5 xs:py-3.5 text-sm sm:text-base font-black' : 'py-1 xs:py-1.5'}`}>
-                      {p.totalScore + netCurrent}
+                    <td className={`px-1 text-center ${isKeyboardDisplay ? 'py-3 xs:py-3.5' : 'py-1.5 xs:py-2'}`}>
+                      <div className="inline-flex items-center justify-center min-w-[46px] sm:min-w-[58px] md:min-w-[68px] py-1 sm:py-1.5 px-2 sm:px-2.5 rounded-lg bg-gradient-to-r from-indigo-950/90 to-slate-900 border-2 border-indigo-400/70 text-indigo-200 font-mono font-black tracking-wider text-sm sm:text-base md:text-lg shadow-md">
+                        {p.totalScore + netCurrent}
+                      </div>
                     </td>
-                    <td className={`px-0.5 text-center font-mono font-bold text-amber-300 bg-slate-800/30 text-xs sm:text-sm ${isKeyboardDisplay ? 'py-2.5 xs:py-3.5 text-sm sm:text-base font-black' : 'py-1 xs:py-1.5'}`}>
-                      {p.totalFee + p.currentFee}
+                    <td className={`px-1 text-center ${isKeyboardDisplay ? 'py-3 xs:py-3.5' : 'py-1.5 xs:py-2'}`}>
+                      <div className="inline-flex items-center justify-center min-w-[46px] sm:min-w-[58px] md:min-w-[68px] py-1 sm:py-1.5 px-2 sm:px-2.5 rounded-lg bg-gradient-to-r from-amber-950/90 to-slate-900 border-2 border-amber-400/70 text-amber-300 font-mono font-black tracking-wider text-sm sm:text-base md:text-lg shadow-md">
+                        {p.totalFee + p.currentFee}
+                      </div>
                     </td>
                   </tr>
                 );
