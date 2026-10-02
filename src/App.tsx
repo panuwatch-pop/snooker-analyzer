@@ -1206,7 +1206,7 @@ export function App() {
       const key = e.key;
       const code = e.code;
 
-      // 0. When Frame End Modal is open: Enter -> เริ่มเฟรมใหม่ / . -> ปิดหน้าต่าง
+      // 0. When Frame End Modal is open: Enter -> เริ่มเฟรมใหม่ / . -> ปิดหน้าต่าง / / or Backspace -> จบแมตช์
       if (isFrameEndModalOpen) {
         if (key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === ' ' || code === 'Space' || key === 'Tab' || key === 'ใ') {
           e.preventDefault();
@@ -1225,6 +1225,13 @@ export function App() {
           } else {
             handleNextFrame();
           }
+          return;
+        }
+
+        // Finish match shortcut: / or Backspace or * or =
+        if (key === '/' || code === 'NumpadDivide' || code === 'Slash' || key === 'Backspace' || code === 'Backspace' || key === '*' || code === 'NumpadMultiply' || key === '=' || code === 'Equal') {
+          e.preventDefault();
+          handleFinishMatch();
           return;
         }
 
@@ -1255,7 +1262,7 @@ export function App() {
       }
 
       // Ignore global shortcuts when other modals are open
-      if (isNewMatchModalOpen || isKeypadGuideOpen) {
+      if (isNewMatchModalOpen || isKeypadGuideOpen || match.electricConfig?.isMatchCompleted) {
         if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete' || key === 'Escape' || key === 'Clear') {
           setIsKeypadGuideOpen(false);
           return;

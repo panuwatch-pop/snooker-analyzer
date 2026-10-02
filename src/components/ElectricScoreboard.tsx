@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trophy, Target, Shield, Zap, RotateCcw, AlertTriangle, Play, ChevronRight, X, Sparkles } from 'lucide-react';
 import { BallColor, ElectricConfig, ElectricPlayer, Frame, Match } from '../types/snooker';
 import { BALL_MAP, getElectricDefenderIndex } from '../utils/snookerRules';
@@ -43,6 +43,66 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
   isKeyboardDisplay = false,
 }) => {
   const [showFinalReport, setShowFinalReport] = useState<boolean>(false);
+
+  // Keyboard navigation for End Game modals (Scheduled games finished & Final report)
+  useEffect(() => {
+    if (!electricConfig.isMatchCompleted && !showFinalReport) return;
+
+    const handleModalKeyDown = (e: KeyboardEvent) => {
+      const key = e.key;
+      const code = e.code;
+
+      // When Final Report modal is active
+      if (showFinalReport) {
+        if (
+          key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' ||
+          key === '.' || code === 'NumpadDecimal' || code === 'Period' ||
+          key === 'Escape' || key === 'Clear' ||
+          key === 'Backspace' || code === 'Backspace' ||
+          key === ' ' || code === 'Space'
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          setShowFinalReport(false);
+          return;
+        }
+        return;
+      }
+
+      // When End of Scheduled Games modal is active
+      if (electricConfig.isMatchCompleted) {
+        // Option 1: 🏁 จบเกม & สรุปผล -> Enter / / / =
+        if (
+          key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' ||
+          key === '/' || code === 'NumpadDivide' || code === 'Slash' ||
+          key === '=' || code === 'Equal' || code === 'NumpadEqual'
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          onFinishMatch();
+          setShowFinalReport(true);
+          return;
+        }
+
+        // Option 2: ➕ เล่นต่อ (นับต่อจากเดิม) -> + / Backspace / Space / 1 / *
+        if (
+          key === '+' || code === 'NumpadAdd' ||
+          key === 'Backspace' || code === 'Backspace' ||
+          key === ' ' || code === 'Space' ||
+          key === '1' || code === 'Numpad1' || code === 'Digit1' ||
+          key === '*' || code === 'NumpadMultiply'
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          onContinueMatch();
+          return;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleModalKeyDown, true);
+    return () => window.removeEventListener('keydown', handleModalKeyDown, true);
+  }, [electricConfig.isMatchCompleted, showFinalReport, onContinueMatch, onFinishMatch]);
 
   const players: ElectricPlayer[] = electricConfig.players || [
     { id: 'p1', name: match.player1Name || 'ผู้เล่น 1', currentPlus: 0, currentMinus: 0, currentFee: 0, totalScore: 0, totalFee: 0 },
@@ -237,6 +297,7 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
                 title="จบเกมปัจจุบัน และย้ายคนชนะขึ้นเปิดเกมถัดไป (คีย์ลัด: /)"
               >
                 <span>🏁 จบเกมนี้</span>
+                <span className="text-[10px] bg-black/30 border border-purple-300/40 px-1 py-0.2 rounded text-purple-100 font-mono font-normal">[/]</span>
               </button>
             )}
             <span className="text-[10px] sm:text-xs text-emerald-400 font-mono bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-800/40 flex items-center gap-1">
@@ -370,19 +431,27 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
 
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
+                type="button"
                 onClick={onContinueMatch}
-                className="p-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-slate-200 font-semibold text-sm transition cursor-pointer"
+                className="p-3.5 bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 rounded-xl text-slate-200 font-semibold text-sm transition cursor-pointer flex flex-col items-center justify-center gap-1.5 shadow-md"
               >
-                ➕ เล่นต่อ (นับต่อจากเดิม)
+                <span className="flex items-center gap-1 text-sm font-bold">➕ เล่นต่อ (นับต่อ)</span>
+                <span className="px-2.5 py-0.5 rounded bg-black/50 border border-slate-600 font-mono text-xs text-amber-300 font-bold">
+                  [+ หรือ ⌫]
+                </span>
               </button>
               <button
+                type="button"
                 onClick={() => {
                   onFinishMatch();
                   setShowFinalReport(true);
                 }}
-                className="p-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-amber-500/20 cursor-pointer"
+                className="p-3.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 active:scale-95 text-slate-950 font-black rounded-xl text-sm transition shadow-lg shadow-amber-500/20 cursor-pointer flex flex-col items-center justify-center gap-1.5"
               >
-                🏁 จบเกม & สรุปผล
+                <span className="flex items-center gap-1 text-sm font-black">🏁 จบเกม & สรุปผล</span>
+                <span className="px-2.5 py-0.5 rounded bg-slate-950/40 border border-amber-900/40 font-mono text-xs text-slate-950 font-black">
+                  [Enter ↵]
+                </span>
               </button>
             </div>
           </div>
@@ -448,19 +517,24 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
 
             <div className="flex justify-end gap-2 pt-2">
               <button
+                type="button"
                 onClick={() => setShowFinalReport(false)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl"
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 text-xs font-semibold rounded-xl flex items-center gap-2 cursor-pointer border border-slate-700"
               >
-                ปิดหน้านี้
+                <span>ปิดหน้านี้</span>
+                <span className="px-2 py-0.5 rounded bg-black/40 border border-slate-600 font-mono text-[11px] text-slate-300 font-bold">
+                  [Enter / . / Esc]
+                </span>
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setShowFinalReport(false);
                   onResetMatch();
                 }}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl shadow-lg"
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-semibold rounded-xl shadow-lg cursor-pointer flex items-center gap-1"
               >
-                เริ่มแมตช์ใหม่
+                <span>🔄 เริ่มแมตช์ใหม่</span>
               </button>
             </div>
           </div>

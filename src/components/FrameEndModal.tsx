@@ -178,6 +178,7 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
               >
                 <CheckCircle2 className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
                 <span>จบแมตช์ & บันทึกผล</span>
+                <span className="text-[10px] bg-black/40 border border-slate-600 px-1.5 py-0.5 rounded text-amber-300 font-mono font-bold">[/ หรือ ⌫]</span>
               </button>
             </>
           ) : !isMatchWon ? (
@@ -197,6 +198,7 @@ export const FrameEndModal: React.FC<FrameEndModalProps> = ({
               >
                 <CheckCircle2 className="w-3.5 h-3.5 xs:w-4 xs:h-4 text-amber-400" />
                 <span>จบแมตช์ตอนนี้</span>
+                <span className="text-[10px] bg-black/40 border border-slate-600 px-1.5 py-0.5 rounded text-slate-300 font-mono font-bold">[/ หรือ ⌫]</span>
               </button>
             </>
           ) : (
