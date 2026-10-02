@@ -24,6 +24,7 @@ interface BallPotsProps {
   onNewMatch: () => void;
   onMultiRedPot: (count: number) => void;
   canUndo: boolean;
+  hidePotButtons?: boolean;
 }
 
 export const BallPots: React.FC<BallPotsProps> = ({
@@ -35,6 +36,7 @@ export const BallPots: React.FC<BallPotsProps> = ({
   isGaMode = false,
   isElectricMode = false,
   electricConfig,
+  hidePotButtons = false,
   onToggleFoulMode,
   onPotBall,
   onFoul,
@@ -206,120 +208,141 @@ export const BallPots: React.FC<BallPotsProps> = ({
         </div>
       </div>
 
-      {/* Ball Potting / Foul Mode Panel */}
-      <div className={`rounded-md xs:rounded-lg md:rounded-xl p-0.5 xs:p-1 md:p-1.5 shadow transition-all border ${
-        isFoulMode
-          ? 'bg-gradient-to-b from-rose-950/80 via-slate-900 to-slate-900 border-rose-500/80 ring-1 ring-rose-500/40'
-          : 'bg-slate-900/95 border-slate-800'
-      }`}>
-        {/* If in Foul Mode & Ga Mode: Show Snooker Ga Dedicated Foul Selector */}
-        {isFoulMode && isGaMode ? (
-          <div className="space-y-0.5 xs:space-y-1 py-0.2 animate-fadeIn">
-            {/* Compact Ga deduction options */}
-            <div className="bg-slate-950/80 p-0.5 xs:p-1 rounded-md border border-rose-900/60 space-y-0.5">
-              <div className="flex items-center justify-between text-[7px] xs:text-[9px] md:text-xs text-slate-300 font-bold">
-                <span className="flex items-center space-x-1">
-                  <Target className="w-2 h-2 xs:w-2.5 xs:h-2.5 text-purple-400" />
-                  <span>เลือกจำนวนกาที่เสีย:</span>
-                </span>
-                <span className="text-purple-300 font-mono font-black text-[7px] xs:text-[9px] md:text-xs">
-                  {selectedGaPenalty > 0 ? `-${selectedGaPenalty} กา` : 'ไม่เสียกา (0 กา)'}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-4 sm:grid-cols-7 gap-0.5 xs:gap-1">
-                {[0, 1, 2, 3, 4, 5, 6].map((ga) => (
-                  <button
-                    key={ga}
-                    type="button"
-                    onClick={() => setSelectedGaPenalty(ga)}
-                    className={`py-0.5 xs:py-1 px-0.5 rounded-md font-mono font-bold text-[8px] xs:text-[10px] md:text-xs border transition-all cursor-pointer ${
-                      selectedGaPenalty === ga
-                        ? 'bg-purple-600 text-white border-purple-400 ring-1 ring-purple-400 font-black'
-                        : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700'
-                    }`}
-                  >
-                    {ga === 0 ? '0 กา' : `-${ga} กา`}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Action Buttons for Submitting Ga Foul */}
-            <div className="flex space-x-1 pt-0.2">
-              <button
-                type="button"
-                onClick={onToggleFoulMode}
-                className="flex-1 py-1 xs:py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[8px] xs:text-[10px] md:text-xs border border-slate-700 cursor-pointer"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onFoul(7, selectedGaPenalty);
-                  setSelectedGaPenalty(0);
-                }}
-                className="flex-2 py-1 xs:py-1.5 rounded-md bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-[8px] xs:text-[10px] md:text-xs border border-rose-400 shadow-md flex items-center justify-center space-x-1"
-              >
-                <AlertTriangle className="w-2.5 h-2.5 xs:w-3 xs:h-3 text-amber-300" />
-                <span>ยืนยันฟาวล์ {selectedGaPenalty > 0 ? `(-${selectedGaPenalty} กา)` : ''}</span>
-              </button>
-            </div>
+      {/* Ball Potting / Foul Mode Panel OR Keyboard Mode Guide Bar */}
+      {hidePotButtons ? (
+        /* Keyboard Mode: Sleek Helper Bar without Potting Buttons */
+        <div className="bg-slate-950/90 border border-slate-800 rounded-md xs:rounded-lg md:rounded-xl p-1 xs:p-1.5 shadow flex flex-wrap items-center justify-between gap-1 text-[8px] xs:text-[10px] sm:text-xs">
+          <div className="flex items-center space-x-1 sm:space-x-1.5 flex-wrap">
+            <span className="font-black text-amber-300 flex items-center space-x-1">
+              <span>⌨️ คีย์บอร์ด (Keypad):</span>
+            </span>
+            <span className="font-mono text-slate-300">
+              [1] แดง | [2] เหลือง | [3] เขียว | [4] น้ำตาล | [5] น้ำเงิน | [6] ชมพู | [7] ดำ
+            </span>
           </div>
-        ) : (
-          /* Standard Ball Potting Grid / Standard Foul 4-7 */
-          <div className="grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-1.5">
-            {ballList.map((ballKey) => {
-              const ball = BALL_MAP[ballKey];
-              const displayPts = getDisplayedBallPoints(ballKey);
-              const isFoulTarget = isElectricMode ? true : ball.points >= 4;
+          <div className="flex items-center space-x-1 sm:space-x-1.5 font-mono text-[7px] xs:text-[9px] sm:text-[10px] text-slate-400">
+            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-emerald-300">[Enter] เปลี่ยนเทิร์น</span>
+            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-amber-300">[⌫/*] ย้อนกลับ</span>
+            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-rose-300">[-] ฟาวล์</span>
+            <span className="bg-slate-900 border border-slate-700 px-1 py-0.2 rounded text-fuchsia-300">[/] {isElectricMode ? 'จบเกม' : 'จบเฟรม'}</span>
+          </div>
+        </div>
+      ) : (
+        /* Normal Touch Mode: 7 Ball Potting Grid / Foul Selector */
+        <div className={`rounded-md xs:rounded-lg md:rounded-xl p-0.5 xs:p-1 md:p-1.5 shadow transition-all border ${
+          isFoulMode
+            ? 'bg-gradient-to-b from-rose-950/80 via-slate-900 to-slate-900 border-rose-500/80 ring-1 ring-rose-500/40'
+            : 'bg-slate-900/95 border-slate-800'
+        }`}>
+          {/* If in Foul Mode & Ga Mode: Show Snooker Ga Dedicated Foul Selector */}
+          {isFoulMode && isGaMode ? (
+            <div className="space-y-0.5 xs:space-y-1 py-0.2 animate-fadeIn">
+              {/* Compact Ga deduction options */}
+              <div className="bg-slate-950/80 p-0.5 xs:p-1 rounded-md border border-rose-900/60 space-y-0.5">
+                <div className="flex items-center justify-between text-[7px] xs:text-[9px] md:text-xs text-slate-300 font-bold">
+                  <span className="flex items-center space-x-1">
+                    <Target className="w-2 h-2 xs:w-2.5 xs:h-2.5 text-purple-400" />
+                    <span>เลือกจำนวนกาที่เสีย:</span>
+                  </span>
+                  <span className="text-purple-300 font-mono font-black text-[7px] xs:text-[9px] md:text-xs">
+                    {selectedGaPenalty > 0 ? `-${selectedGaPenalty} กา` : 'ไม่เสียกา (0 กา)'}
+                  </span>
+                </div>
 
-              if (isFoulMode && !isFoulTarget) {
-                return (
-                  <div
-                    key={ballKey}
-                    className="invisible pointer-events-none py-1 xs:py-1.5 sm:py-2 px-0.5"
-                  />
-                );
-              }
+                <div className="grid grid-cols-4 sm:grid-cols-7 gap-0.5 xs:gap-1">
+                  {[0, 1, 2, 3, 4, 5, 6].map((ga) => (
+                    <button
+                      key={ga}
+                      type="button"
+                      onClick={() => setSelectedGaPenalty(ga)}
+                      className={`py-0.5 xs:py-1 px-0.5 rounded-md font-mono font-bold text-[8px] xs:text-[10px] md:text-xs border transition-all cursor-pointer ${
+                        selectedGaPenalty === ga
+                          ? 'bg-purple-600 text-white border-purple-400 ring-1 ring-purple-400 font-black'
+                          : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700'
+                      }`}
+                    >
+                      {ga === 0 ? '0 กา' : `-${ga} กา`}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-              return (
+              {/* Action Buttons for Submitting Ga Foul */}
+              <div className="flex space-x-1 pt-0.2">
                 <button
-                  key={ballKey}
-                  onClick={() => handleBallClick(ballKey)}
-                  className={`group relative flex flex-col items-center justify-center py-1 xs:py-1.5 sm:py-2 md:py-2.5 px-0.5 rounded-md xs:rounded-lg md:rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 shadow`}
-                  title={isFoulMode ? `เสียฟาวล์ ${isElectricMode && electricConfig ? electricConfig.foulPenalty : ball.points} แต้ม` : `ลูก${ball.nameTh} (+${displayPts} แต้ม)`}
+                  type="button"
+                  onClick={onToggleFoulMode}
+                  className="flex-1 py-0.5 xs:py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[8px] xs:text-[10px] md:text-xs border border-slate-700 cursor-pointer"
                 >
-                  <span className="font-mono font-black text-base xs:text-lg sm:text-2xl md:text-3xl leading-none drop-shadow select-none">
-                    {isFoulMode ? `-${isElectricMode && electricConfig ? electricConfig.foulPenalty : ball.points}` : displayPts}
-                  </span>
-
-                  <span className="absolute -top-0.5 -right-0.5 bg-slate-950/90 text-amber-300 text-[5px] xs:text-[6px] sm:text-[7px] font-mono font-bold px-0.5 rounded-full border border-slate-700">
-                    {ball.numpadKey}
-                  </span>
+                  ยกเลิก
                 </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onFoul(7, selectedGaPenalty);
+                    setSelectedGaPenalty(0);
+                  }}
+                  className="flex-2 py-0.5 xs:py-1 rounded-md bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-[8px] xs:text-[10px] md:text-xs border border-rose-400 shadow-md flex items-center justify-center space-x-1"
+                >
+                  <AlertTriangle className="w-2.5 h-2.5 xs:w-3 xs:h-3 text-amber-300" />
+                  <span>ยืนยันฟาวล์ {selectedGaPenalty > 0 ? `(-${selectedGaPenalty} กา)` : ''}</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Standard Ball Potting Grid / Standard Foul 4-7 */
+            <div className="grid grid-cols-7 gap-0.5 xs:gap-1 sm:gap-1.5">
+              {ballList.map((ballKey) => {
+                const ball = BALL_MAP[ballKey];
+                const displayPts = getDisplayedBallPoints(ballKey);
+                const isFoulTarget = isElectricMode ? true : ball.points >= 4;
+
+                if (isFoulMode && !isFoulTarget) {
+                  return (
+                    <div
+                      key={ballKey}
+                      className="invisible pointer-events-none py-1 xs:py-1.5 sm:py-2 px-0.5"
+                    />
+                  );
+                }
+
+                return (
+                  <button
+                    key={ballKey}
+                    onClick={() => handleBallClick(ballKey)}
+                    className={`group relative flex flex-col items-center justify-center py-1 xs:py-1.5 sm:py-2 px-0.5 rounded-md xs:rounded-lg md:rounded-xl transition-all duration-150 cursor-pointer border active:scale-92 ${ball.cssClass} hover:brightness-115 shadow`}
+                    title={isFoulMode ? `เสียฟาวล์ ${isElectricMode && electricConfig ? electricConfig.foulPenalty : ball.points} แต้ม` : `ลูก${ball.nameTh} (+${displayPts} แต้ม)`}
+                  >
+                    <span className="font-mono font-black text-sm xs:text-base sm:text-xl md:text-2xl leading-none drop-shadow select-none">
+                      {isFoulMode ? `-${isElectricMode && electricConfig ? electricConfig.foulPenalty : ball.points}` : displayPts}
+                    </span>
+
+                    <span className="absolute -top-0.5 -right-0.5 bg-slate-950/90 text-amber-300 text-[5px] xs:text-[6px] sm:text-[7px] font-mono font-bold px-0.5 rounded-full border border-slate-700">
+                      {ball.numpadKey}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Main Action Controls */}
       <div className="flex items-stretch gap-0.5 xs:gap-1 sm:gap-1.5">
         {/* Foul Button */}
         <button
           onClick={onToggleFoulMode}
-          className={`w-16 xs:w-20 sm:w-28 md:w-32 flex-shrink-0 flex items-center justify-center space-x-0.5 xs:space-x-1 font-extrabold py-1 xs:py-1.5 md:py-2 px-0.5 xs:px-1 rounded-md xs:rounded-lg md:rounded-xl border transition-all cursor-pointer active:scale-98 shadow ${
+          className={`w-14 xs:w-18 sm:w-24 md:w-28 flex-shrink-0 flex items-center justify-center space-x-0.5 xs:space-x-1 font-extrabold py-0.5 xs:py-1 sm:py-1.5 md:py-2 px-0.5 xs:px-1 rounded-md xs:rounded-lg md:rounded-xl border transition-all cursor-pointer active:scale-98 shadow ${
             isFoulMode
               ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 ring-2 ring-rose-500/50 animate-pulse'
               : 'bg-gradient-to-r from-rose-700 via-rose-800 to-red-900 hover:from-rose-600 hover:to-red-800 text-white border-rose-600'
           }`}
         >
-          <AlertTriangle className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 text-amber-300 flex-shrink-0 animate-bounce" />
+          <AlertTriangle className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 text-amber-300 flex-shrink-0" />
           <div className="text-left min-w-0">
-            <div className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm leading-none font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
-            <div className="text-[5px] xs:text-[6px] sm:text-[8px] text-rose-200 font-normal hidden xs:block mt-0.5">[-] / [+]</div>
+            <div className="text-[8px] xs:text-[9px] sm:text-xs md:text-sm leading-none font-black truncate">{isFoulMode ? 'ยกเลิก' : 'ฟาวล์'}</div>
+            <div className="text-[5px] xs:text-[6px] sm:text-[7px] text-rose-200 font-normal hidden xs:block mt-0.5">[-] / [+]</div>
           </div>
         </button>
 
@@ -327,10 +350,10 @@ export const BallPots: React.FC<BallPotsProps> = ({
         {isGaMode && (
           <button
             onClick={() => setShowManualGaModal(true)}
-            className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white font-extrabold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-purple-500 shadow-sm cursor-pointer active:scale-98 transition-all"
+            className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white font-extrabold py-0.5 xs:py-1 sm:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-purple-500 shadow-sm cursor-pointer active:scale-98 transition-all"
             title="เพิ่ม/ปรับจำนวนกาโดยตรง"
           >
-            <Target className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3.5 sm:h-3.5 text-amber-300 flex-shrink-0" />
+            <Target className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 text-amber-300 flex-shrink-0" />
             <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-black truncate mt-0.5">เพิ่มกา</span>
           </button>
         )}
@@ -338,51 +361,51 @@ export const BallPots: React.FC<BallPotsProps> = ({
         {/* Miss / End Turn Button */}
         <button
           onClick={() => onEndTurn('miss')}
-          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-emerald-300 font-bold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-emerald-700/60 shadow-sm cursor-pointer active:scale-98 transition-all"
+          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-emerald-300 font-bold py-0.5 xs:py-1 sm:py-1.5 px-0.5 rounded-md xs:rounded-lg border border-emerald-700/60 shadow-sm cursor-pointer active:scale-98 transition-all"
           title="เปลี่ยนเทิร์น / สลับคนแทง (คีย์ลัด: Enter)"
         >
-          <RotateCcw className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
+          <RotateCcw className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 flex-shrink-0" />
           <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-black truncate mt-0.5">เปลี่ยนเทิร์น</span>
-          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-emerald-400/80 font-mono hidden xs:block">[Enter]</span>
+          <span className="text-[5px] xs:text-[6px] sm:text-[7px] text-emerald-400/80 font-mono hidden xs:block">[Enter]</span>
         </button>
 
         {/* Undo Button (Moved next to เปลี่ยนเทิร์น) */}
         <button
           onClick={onUndo}
           disabled={!canUndo}
-          className={`flex-1 flex flex-col items-center justify-center font-bold py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border transition-all cursor-pointer ${
+          className={`flex-1 flex flex-col items-center justify-center font-bold py-0.5 xs:py-1 sm:py-1.5 px-0.5 rounded-md xs:rounded-lg border transition-all cursor-pointer ${
             canUndo
               ? 'bg-gradient-to-b from-amber-950 to-slate-900 hover:from-amber-900 hover:to-slate-800 text-amber-300 border-amber-600/80 shadow-sm active:scale-98'
               : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-50'
           }`}
           title="ย้อนกลับแต้ม (คีย์ลัด: Backspace ⌫ หรือ *)"
         >
-          <Undo2 className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 flex-shrink-0 text-amber-400" />
+          <Undo2 className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0 text-amber-400" />
           <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs leading-tight font-black truncate mt-0.5">ย้อนกลับ</span>
-          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-amber-400/80 font-mono hidden xs:block">[⌫]</span>
+          <span className="text-[5px] xs:text-[6px] sm:text-[7px] text-amber-400/80 font-mono hidden xs:block">[⌫]</span>
         </button>
 
-        {/* End Frame Button (Prominent & bright vibrant purple/fuchsia) */}
+        {/* End Frame / End Game Button */}
         <button
           onClick={onEndFrame}
-          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black py-0.5 xs:py-1 md:py-1.5 px-0.5 rounded-md xs:rounded-lg border-2 border-fuchsia-300 shadow-lg shadow-purple-950 cursor-pointer active:scale-98 transition-all"
-          title="จบเฟรมปัจจุบัน (คีย์ลัด: / หรือ =)"
+          className="flex-1 flex flex-col items-center justify-center bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black py-0.5 xs:py-1 sm:py-1.5 px-0.5 rounded-md xs:rounded-lg border-2 border-fuchsia-300 shadow-lg shadow-purple-950 cursor-pointer active:scale-98 transition-all"
+          title={`${isElectricMode ? 'จบเกม' : 'จบเฟรม'}ปัจจุบัน (คีย์ลัด: / หรือ =)`}
         >
-          <Flag className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 text-yellow-300 flex-shrink-0" />
-          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs font-black leading-tight truncate mt-0.5">จบเฟรม</span>
-          <span className="text-[5px] xs:text-[6px] sm:text-[8px] text-fuchsia-200 font-mono hidden xs:block font-bold">[/]</span>
+          <Flag className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 text-yellow-300 flex-shrink-0" />
+          <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs font-black leading-tight truncate mt-0.5">{isElectricMode ? 'จบเกม' : 'จบเฟรม'}</span>
+          <span className="text-[5px] xs:text-[6px] sm:text-[7px] text-fuchsia-200 font-mono hidden xs:block font-bold">[/]</span>
         </button>
 
         {/* Spacing / Divider between จบเฟรม & เริ่มใหม่ */}
         <div className="w-px bg-slate-700/80 self-stretch my-0.5 hidden xs:block mx-0.5" />
 
-        {/* New Match Button (Vibrant & prominent with extra margin spacing) */}
+        {/* New Match Button */}
         <button
           onClick={onNewMatch}
-          className="flex-1 ml-1 xs:ml-2 flex flex-col items-center justify-center bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 hover:from-emerald-400 hover:to-cyan-300 text-slate-950 font-black py-0.5 xs:py-1 md:py-1.5 px-1 rounded-md xs:rounded-lg border-2 border-emerald-200 ring-2 ring-teal-400/50 shadow-lg shadow-teal-950 cursor-pointer active:scale-98 transition-all"
+          className="flex-1 ml-0.5 xs:ml-1 sm:ml-2 flex flex-col items-center justify-center bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 hover:from-emerald-400 hover:to-cyan-300 text-slate-950 font-black py-0.5 xs:py-1 sm:py-1.5 px-1 rounded-md xs:rounded-lg border-2 border-emerald-200 ring-2 ring-teal-400/50 shadow-lg shadow-teal-950 cursor-pointer active:scale-98 transition-all"
           title="เริ่มแมตช์ใหม่"
         >
-          <Sparkles className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-4 sm:h-4 text-slate-950 flex-shrink-0" />
+          <Sparkles className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 text-slate-950 flex-shrink-0" />
           <span className="text-[7px] xs:text-[8px] sm:text-[9px] md:text-xs font-black leading-tight truncate mt-0.5 text-slate-950">เริ่มใหม่</span>
           <span className="text-[5px] xs:text-[6px] sm:text-[7px] text-slate-900 font-bold hidden xs:block">New Match</span>
         </button>

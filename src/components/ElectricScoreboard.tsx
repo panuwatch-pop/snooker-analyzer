@@ -80,31 +80,31 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-3 flex-shrink-0 animate-in fade-in duration-200">
+    <div className="w-full max-w-7xl mx-auto space-y-1 xs:space-y-1.5 sm:space-y-2 flex-shrink-0 animate-in fade-in duration-200">
       
       {/* 1. MATCH PROGRESS & SCHEDULED GAMES TRACKER (❌ กากบาทเกมที่จบแล้ว) */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 sm:p-3 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">
-            <Zap className="w-4 h-4" />
+      <div className="bg-slate-900/90 border border-slate-800 rounded-lg xs:rounded-xl p-1.5 xs:p-2 sm:p-2.5 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="p-1 sm:p-1.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
           <div>
-            <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">ความคืบหน้าการแข่งขัน</div>
-            <div className="text-sm font-bold text-amber-300 font-mono">
+            <div className="text-[9px] xs:text-[10px] text-slate-400 uppercase tracking-wider font-semibold">ความคืบหน้าการแข่งขัน</div>
+            <div className="text-xs sm:text-sm font-bold text-amber-300 font-mono">
               {targetGames === 0 ? `เกมที่ ${currentGame} (เล่นเรื่อยๆ ไม่จำกัด)` : `เกมที่ ${currentGame} / ${targetGames}`}
             </div>
           </div>
         </div>
 
         {/* Games Pills */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1 xs:gap-1.5">
           {targetGames > 0 ? (
             Array.from({ length: targetGames }, (_, i) => i + 1).map((g) => {
               if (g < currentGame) {
                 return (
                   <div
                     key={g}
-                    className="px-2 py-1 rounded-md bg-rose-950/40 text-rose-300 border border-rose-800/40 text-xs font-mono font-bold flex items-center gap-1 opacity-75"
+                    className="px-1.5 py-0.5 rounded-md bg-rose-950/40 text-rose-300 border border-rose-800/40 text-[10px] xs:text-xs font-mono font-bold flex items-center gap-1 opacity-75"
                     title={`เกมที่ ${g} จบแล้ว`}
                   >
                     <span className="text-rose-400 font-black">❌</span>
@@ -115,7 +115,7 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
                 return (
                   <div
                     key={g}
-                    className="px-2.5 py-1 rounded-md bg-amber-500/25 text-amber-300 border border-amber-500/50 text-xs font-mono font-black flex items-center gap-1 shadow-sm ring-1 ring-amber-500/30"
+                    className="px-2 py-0.5 rounded-md bg-amber-500/25 text-amber-300 border border-amber-500/50 text-[10px] xs:text-xs font-mono font-black flex items-center gap-1 shadow-sm ring-1 ring-amber-500/30"
                   >
                     <span className="animate-spin text-amber-400">⏳</span>
                     <span>เกม {g} (กำลังเล่น)</span>
@@ -125,7 +125,7 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
                 return (
                   <div
                     key={g}
-                    className="px-2 py-1 rounded-md bg-slate-800/80 text-slate-400 border border-slate-700/60 text-xs font-mono font-medium"
+                    className="px-1.5 py-0.5 rounded-md bg-slate-800/80 text-slate-400 border border-slate-700/60 text-[10px] xs:text-xs font-mono font-medium"
                   >
                     <span>เกม {g}</span>
                   </div>
@@ -133,7 +133,7 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
               }
             })
           ) : (
-            <div className="px-3 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold flex items-center gap-1.5">
+            <div className="px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] xs:text-xs font-mono font-bold flex items-center gap-1.5">
               <span>⏳ กำลังเล่นเกมที่ {currentGame}</span>
             </div>
           )}
@@ -141,51 +141,51 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
       </div>
 
       {/* 2. STATUS CARDS: Striker, Defender, Table Phase, Special Points Banner */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2">
         {/* Striker Card */}
-        <div className="bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-900 border border-amber-500/40 rounded-xl p-2.5 sm:p-3 flex items-center justify-between shadow-md">
+        <div className="bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-900 border border-amber-500/40 rounded-lg xs:rounded-xl p-1.5 xs:p-2 sm:p-2.5 flex items-center justify-between shadow-md">
           <div className="min-w-0">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-amber-400 flex items-center gap-1">
+            <span className="text-[9px] xs:text-[10px] uppercase tracking-wider font-semibold text-amber-400 flex items-center gap-1">
               <span>🎯 คนกำลังแทง</span>
             </span>
-            <div className="text-base sm:text-xl font-bold text-white mt-0.5 truncate">{currentStriker.name}</div>
-            <div className="text-[10px] text-amber-300/80 font-mono mt-0.5">
+            <div className="text-sm sm:text-base font-bold text-white mt-0.5 truncate">{currentStriker.name}</div>
+            <div className="text-[9px] xs:text-[10px] text-amber-300/80 font-mono mt-0.5">
               เบรก: {currentBreak} แต้ม {ballsInCurrentVisit > 0 ? `(${ballsInCurrentVisit} ลูก)` : ''}
             </div>
           </div>
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300 text-sm sm:text-lg flex-shrink-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300 text-xs sm:text-sm flex-shrink-0">
             ▶
           </div>
         </div>
 
         {/* Defender Card */}
-        <div className="bg-gradient-to-br from-rose-950/40 via-slate-900 to-slate-900 border border-rose-500/40 rounded-xl p-2.5 sm:p-3 flex items-center justify-between shadow-md">
+        <div className="bg-gradient-to-br from-rose-950/40 via-slate-900 to-slate-900 border border-rose-500/40 rounded-lg xs:rounded-xl p-1.5 xs:p-2 sm:p-2.5 flex items-center justify-between shadow-md">
           <div className="min-w-0">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-rose-400 flex items-center gap-1">
+            <span className="text-[9px] xs:text-[10px] uppercase tracking-wider font-semibold text-rose-400 flex items-center gap-1">
               <span>🛡️ คนป้องกันก่อนหน้า</span>
             </span>
-            <div className="text-base sm:text-xl font-bold text-white mt-0.5 truncate">{currentDefender.name}</div>
-            <div className="text-[10px] text-rose-300/80 font-mono mt-0.5">
+            <div className="text-sm sm:text-base font-bold text-white mt-0.5 truncate">{currentDefender.name}</div>
+            <div className="text-[9px] xs:text-[10px] text-rose-300/80 font-mono mt-0.5">
               (คนเสียแต้ม/ค่าไฟในไม้นี้)
             </div>
           </div>
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-300 text-sm sm:text-lg flex-shrink-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-300 text-xs sm:text-sm flex-shrink-0">
             🛡️
           </div>
         </div>
 
         {/* 6 Reds Status */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 sm:p-3 flex items-center justify-between shadow-md">
+        <div className="bg-slate-900 border border-slate-800 rounded-lg xs:rounded-xl p-1.5 xs:p-2 sm:p-2.5 flex items-center justify-between shadow-md">
           <div>
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">สถานะโต๊ะ (เฉพาะ 6 แดง)</span>
-            <div className="text-base sm:text-xl font-bold text-red-400 mt-0.5 font-mono">
+            <span className="text-[9px] xs:text-[10px] uppercase tracking-wider font-semibold text-slate-400">สถานะโต๊ะ (เฉพาะ 6 แดง)</span>
+            <div className="text-sm sm:text-base font-bold text-red-400 mt-0.5 font-mono">
               {redsRemaining > 0 ? `${redsRemaining} แดง` : 'ลูกแดงหมด'}
             </div>
-            <div className="text-[10px] text-slate-400 mt-0.5">
+            <div className="text-[9px] xs:text-[10px] text-slate-400 mt-0.5">
               เวลาไม้: <span className="font-mono text-amber-300">{shotDurationSec}s</span>
             </div>
           </div>
-          <div className={`px-2 py-1 text-xs font-semibold rounded ${
+          <div className={`px-1.5 py-0.5 text-[10px] xs:text-xs font-semibold rounded ${
             redsRemaining > 0
               ? 'bg-red-500/10 text-red-300 border border-red-500/20'
               : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse'
@@ -195,34 +195,34 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
         </div>
 
         {/* Special Points Info (Yellow, Black, Last Black, Foul) */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 sm:p-3 flex flex-col justify-between shadow-md">
+        <div className="bg-slate-900 border border-slate-800 rounded-lg xs:rounded-xl p-1.5 xs:p-2 sm:p-2.5 flex flex-col justify-between shadow-md">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-amber-400">แต้มพิเศษ</span>
-            <span className="text-[10px] text-rose-400 font-mono">ฟาวล์: -{foulPenalty}</span>
+            <span className="text-[9px] xs:text-[10px] uppercase tracking-wider font-semibold text-amber-400">แต้มพิเศษ</span>
+            <span className="text-[9px] xs:text-[10px] text-rose-400 font-mono">ฟาวล์: -{foulPenalty}</span>
           </div>
-          <div className="text-[10px] text-slate-300 space-y-0.5 mt-1 font-mono">
+          <div className="text-[9px] xs:text-[10px] text-slate-300 space-y-0.5 mt-0.5 font-mono">
             <div>เหลือง: <span className="text-yellow-400 font-bold">+{yellowPts}</span> | ดำ: <span className="text-slate-200 font-bold">+{blackPts}</span></div>
             <div>ดำสุดท้าย: <span className="text-amber-400 font-bold">+{lastBlackPts}</span></div>
           </div>
-          <div className="flex items-center gap-1 mt-1">
-            <span className="text-[9px] text-slate-400">ค่าไฟ:</span>
+          <div className="flex items-center gap-1 mt-0.5">
+            <span className="text-[8px] xs:text-[9px] text-slate-400">ค่าไฟ:</span>
             {feeBalls.map(c => (
-              <span key={c} className={`w-2.5 h-2.5 rounded-full ${colorMap[c] || 'bg-slate-500'} inline-block`} title={colorNameTh[c]} />
+              <span key={c} className={`w-2 h-2 rounded-full ${colorMap[c] || 'bg-slate-500'} inline-block`} title={colorNameTh[c]} />
             ))}
           </div>
         </div>
       </div>
 
       {/* 3. MAIN SCORING TABLE (ตารางคะแนนตามสเปก 5 คอลัมน์) */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
-        <div className="px-4 py-3 bg-slate-800/80 border-b border-slate-800 flex items-center justify-between">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl sm:rounded-2xl shadow-xl overflow-hidden">
+        <div className="px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-800/80 border-b border-slate-800 flex items-center justify-between">
           <h2 className="font-bold text-slate-200 text-xs sm:text-sm flex items-center gap-2">
             <span>📊 ตารางคะแนนและค่าไฟ</span>
-            <span className="text-xs font-normal text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-800/40">
+            <span className="text-[10px] sm:text-xs font-normal text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-800/40">
               (เกมที่ {currentGame}: {players[0]?.name || ''} เปิดเกม)
             </span>
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {onEndGame && (
               <button
                 type="button"
@@ -231,14 +231,14 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
                     onEndGame();
                   }
                 }}
-                className="px-2.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-[11px] sm:text-xs rounded-lg shadow-sm border border-purple-400/50 flex items-center gap-1 active:scale-95 transition cursor-pointer"
+                className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-[10px] sm:text-xs rounded-lg shadow-sm border border-purple-400/50 flex items-center gap-1 active:scale-95 transition cursor-pointer"
                 title="จบเกมปัจจุบัน และย้ายคนชนะขึ้นเปิดเกมถัดไป (คีย์ลัด: /)"
               >
                 <span>🏁 จบเกมนี้</span>
               </button>
             )}
-            <span className="text-xs text-emerald-400 font-mono bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-800/40 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> กำลังแข่งขัน
+            <span className="text-[10px] sm:text-xs text-emerald-400 font-mono bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-800/40 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> แข่งขัน
             </span>
           </div>
         </div>
@@ -246,14 +246,14 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-950/80 text-slate-400 text-[11px] sm:text-xs uppercase tracking-wider border-b border-slate-800">
-                <th className="py-2.5 px-3 font-semibold w-14 text-center">คิวแทง</th>
-                <th className="py-2.5 px-4 font-semibold">ชื่อ</th>
-                <th className="py-2.5 px-3 font-semibold text-center text-emerald-400 bg-emerald-950/20">แต้ม + ในเกมปัจจุบัน</th>
-                <th className="py-2.5 px-3 font-semibold text-center text-rose-400 bg-rose-950/20">แต้ม - ในเกมปัจจุบัน</th>
-                <th className="py-2.5 px-3 font-semibold text-center text-amber-400 bg-amber-950/20">⚡ ค่าไฟ ในเกมปัจจุบัน</th>
-                <th className="py-2.5 px-3 font-semibold text-center text-indigo-300 font-bold bg-slate-800/50">แต้มรวม</th>
-                <th className="py-2.5 px-3 font-semibold text-center text-amber-300 font-bold bg-slate-800/50">⚡ ค่าไฟรวม</th>
+              <tr className="bg-slate-950/80 text-slate-400 text-[9px] xs:text-[10px] sm:text-xs uppercase tracking-wider border-b border-slate-800">
+                <th className="py-1 px-1.5 xs:px-2 font-semibold w-10 sm:w-12 text-center">คิวแทง</th>
+                <th className="py-1 px-2 xs:px-3 font-semibold">ชื่อ</th>
+                <th className="py-1 px-1.5 xs:px-2 font-semibold text-center text-emerald-400 bg-emerald-950/20">แต้ม +</th>
+                <th className="py-1 px-1.5 xs:px-2 font-semibold text-center text-rose-400 bg-rose-950/20">แต้ม -</th>
+                <th className="py-1 px-1.5 xs:px-2 font-semibold text-center text-amber-400 bg-amber-950/20">⚡ ค่าไฟ</th>
+                <th className="py-1 px-1.5 xs:px-2 font-semibold text-center text-indigo-300 font-bold bg-slate-800/50">แต้มรวม</th>
+                <th className="py-1 px-1.5 xs:px-2 font-semibold text-center text-amber-300 font-bold bg-slate-800/50">⚡ ค่าไฟรวม</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs sm:text-sm">
@@ -274,42 +274,42 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
                         : 'hover:bg-slate-800/30'
                     }`}
                   >
-                    <td className="py-3 px-3 text-center font-mono text-slate-400">
+                    <td className="py-1 xs:py-1.5 px-1.5 xs:px-2 text-center font-mono text-slate-400">
                       {isStriker ? <span className="text-amber-400 font-bold">▶ {idx + 1}</span> : idx + 1}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-slate-200">
+                    <td className="py-1 xs:py-1.5 px-2 xs:px-3 font-semibold text-slate-200">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span>{p.name}</span>
                         {isOpener && (
-                          <span className="px-1.5 py-0.2 rounded text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
-                            👑 คนเปิดเกม
+                          <span className="px-1 py-0.2 rounded text-[8px] xs:text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
+                            👑 เปิดเกม
                           </span>
                         )}
                         {isStriker && (
-                          <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                          <span className="px-1 py-0.2 rounded text-[8px] xs:text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40">
                             คนแทง
                           </span>
                         )}
                         {isDefender && (
-                          <span className="px-1.5 py-0.2 rounded text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                          <span className="px-1 py-0.2 rounded text-[8px] xs:text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/40">
                             คนป้องกัน
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-center font-bold text-emerald-400 bg-emerald-950/10 font-mono text-sm sm:text-base">
+                    <td className="py-1 xs:py-1.5 px-1.5 xs:px-2 text-center font-bold text-emerald-400 bg-emerald-950/10 font-mono text-xs sm:text-sm">
                       {p.currentPlus > 0 ? `+${p.currentPlus}` : '0'}
                     </td>
-                    <td className="py-3 px-3 text-center font-bold text-rose-400 bg-rose-950/10 font-mono text-sm sm:text-base">
+                    <td className="py-1 xs:py-1.5 px-1.5 xs:px-2 text-center font-bold text-rose-400 bg-rose-950/10 font-mono text-xs sm:text-sm">
                       {p.currentMinus > 0 ? `-${p.currentMinus}` : '0'}
                     </td>
-                    <td className="py-3 px-3 text-center font-bold text-amber-400 bg-amber-950/10 font-mono text-sm sm:text-base">
+                    <td className="py-1 xs:py-1.5 px-1.5 xs:px-2 text-center font-bold text-amber-400 bg-amber-950/10 font-mono text-xs sm:text-sm">
                       {p.currentFee}
                     </td>
-                    <td className="py-3 px-3 text-center font-mono font-bold text-indigo-300 bg-slate-800/30 text-sm sm:text-base">
+                    <td className="py-1 xs:py-1.5 px-1.5 xs:px-2 text-center font-mono font-bold text-indigo-300 bg-slate-800/30 text-xs sm:text-sm">
                       {p.totalScore + netCurrent}
                     </td>
-                    <td className="py-3 px-3 text-center font-mono font-bold text-amber-300 bg-slate-800/30 text-sm sm:text-base">
+                    <td className="py-1 xs:py-1.5 px-1.5 xs:px-2 text-center font-mono font-bold text-amber-300 bg-slate-800/30 text-xs sm:text-sm">
                       {p.totalFee + p.currentFee}
                     </td>
                   </tr>
@@ -319,14 +319,14 @@ export const ElectricScoreboard: React.FC<ElectricScoreboardProps> = ({
           </table>
         </div>
 
-        <div className="px-4 py-2.5 bg-slate-950/60 border-t border-slate-800/80 text-[11px] text-slate-400 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse"></span> สีเหลือง = คนกำลังแทง</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-500 inline-block"></span> สีแดง = คนป้องกัน (เสียแต้ม/ค่าไฟ)</span>
-            <span className="flex items-center gap-1"><span className="text-amber-400 font-bold">👑 บนสุด</span> = คนเปิดเกมประจำรอบนี้</span>
+        <div className="px-2.5 py-1 bg-slate-950/60 border-t border-slate-800/80 text-[9px] sm:text-[10px] text-slate-400 flex flex-wrap items-center justify-between gap-1">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse"></span> สีเหลือง = คนแทง</span>
+            <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block"></span> สีแดง = คนป้องกัน</span>
+            <span className="flex items-center gap-1"><span className="text-amber-400 font-bold">👑 บนสุด</span> = คนเปิดเกม</span>
           </div>
-          <div className="text-slate-400">
-            *เมื่อหมด 6 แดง ตบลูกสีที่เป็นค่าไฟจะสะสมค่าไฟให้คนป้องกันทันที
+          <div className="text-slate-400 hidden xs:block">
+            *หมด 6 แดง ตบลูกสีที่เป็นค่าไฟจะสะสมค่าไฟให้คนป้องกันทันที
           </div>
         </div>
       </div>

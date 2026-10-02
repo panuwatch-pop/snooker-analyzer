@@ -1559,9 +1559,9 @@ export function App() {
         onToggleTheme={toggleTheme}
       />
 
-      <main className="flex-1 min-h-0 p-0.5 xs:p-1 sm:p-2 md:p-3 max-w-7xl w-full mx-auto flex flex-col overflow-hidden">
+      <main className="flex-1 min-h-0 p-0.5 xs:p-1 sm:p-2 md:p-3 max-w-7xl w-full mx-auto flex flex-col overflow-y-auto">
         {activeTab === 'scoreboard' && (
-          <div className="flex-1 min-h-0 flex flex-col justify-between space-y-0 xs:space-y-0.5 sm:space-y-1.5 md:space-y-2 animate-fadeIn overflow-hidden">
+          <div className="flex-1 min-h-0 flex flex-col justify-between space-y-0.5 xs:space-y-1 sm:space-y-1.5 md:space-y-2 animate-fadeIn">
             {match.gameMode === 'electric-count' && (match.electricConfig || currentFrame.electricConfig) ? (
               <ElectricScoreboard
                 match={match}
@@ -1618,6 +1618,7 @@ export function App() {
               isGaMode={match.gameMode === 'snooker-ga'}
               isElectricMode={match.gameMode === 'electric-count'}
               electricConfig={match.electricConfig || currentFrame.electricConfig}
+              hidePotButtons={false}
               onToggleFoulMode={() => {
                 if (match.gameMode === 'electric-count') {
                   handleElectricFoul();
@@ -1654,7 +1655,7 @@ export function App() {
 
         {activeTab === 'keyboard-display' && (
           match.gameMode === 'electric-count' && (match.electricConfig || currentFrame.electricConfig) ? (
-            <div className="flex-1 min-h-0 flex flex-col justify-between space-y-1 md:space-y-2 animate-fadeIn overflow-hidden">
+            <div className="flex-1 min-h-0 flex flex-col justify-between space-y-0.5 xs:space-y-1 md:space-y-2 animate-fadeIn">
               <ElectricScoreboard
                 match={match}
                 frame={currentFrame}
@@ -1682,6 +1683,7 @@ export function App() {
                 isGaMode={false}
                 isElectricMode={true}
                 electricConfig={match.electricConfig || currentFrame.electricConfig}
+                hidePotButtons={true}
                 onToggleFoulMode={handleElectricFoul}
                 onPotBall={handlePotBall}
                 onFoul={() => handleElectricFoul()}
