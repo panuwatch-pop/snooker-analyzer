@@ -32,8 +32,24 @@ export interface BallInfo {
   regularKey: string;
 }
 
+export interface ElectricPlayer {
+  id: string;
+  name: string;
+  currentPlus: number;
+  currentMinus: number;
+  currentFee: number;
+  totalScore: number;
+  totalFee: number;
+}
+
 export interface ElectricConfig {
   countMode: 'ball-only' | 'ball-plus-ga'; // 'ball-only' = 1 ball = 1 pt, 'ball-plus-ga' = count balls + ga bonus
+  targetGames?: number; // 0 = unlimited, 5, 10, etc.
+  currentGame?: number;
+  players?: ElectricPlayer[];
+  strikerIndex?: number;
+  feeBalls?: BallColor[];
+  ballPoints?: number;
   redPoints: number; // default 1
   yellowPoints: number; // default 1 or 2 or 4
   greenPoints: number; // default 1
@@ -47,6 +63,7 @@ export interface ElectricConfig {
   handicapGiverIndex: 0 | 1; // 0 = Player 1 gives handicap, 1 = Player 2 gives handicap
   handicapGiverRatio: number; // e.g. 80 means 100:80 (plays 100 pts -> counts 80 pts)
   handicapReceiverRatio: number; // 100
+  isMatchCompleted?: boolean;
 }
  
 export interface ShootOutConfig {

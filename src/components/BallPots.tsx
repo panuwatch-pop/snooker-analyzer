@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
-import { AlertTriangle, RotateCcw, Shield, Undo2, Flag, Layers, Edit3, Target, Plus, Minus, Sparkles, Zap } from 'lucide-react';
-import { BallColor, PocketLocation, ElectricConfig } from '../types/snooker';
-import { BALL_MAP, getBallBasePoints } from '../utils/snookerRules';
+import React, { useState, useMemo } from 'react';
+import { AlertTriangle, RotateCcw, Shield, Undo2, Flag, Layers, Edit3, Target, Plus, Minus, Sparkles, Zap, X } from 'lucide-react';
+import { BallColor, PocketLocation, ElectricConfig, Shot, GameMode } from '../types/snooker';
+import { BALL_MAP, getBallBasePoints, FINAL_COLORS, getClearedColors } from '../utils/snookerRules';
 import { SnookerTablePockets } from './SnookerTablePockets';
 
 interface BallPotsProps {
   redsRemaining: number;
   currentVisitShots: any[];
+  shots?: Shot[];
+  gameMode?: GameMode;
   isFoulMode: boolean;
   isGaMode?: boolean;
   isElectricMode?: boolean;
@@ -27,6 +29,8 @@ interface BallPotsProps {
 export const BallPots: React.FC<BallPotsProps> = ({
   redsRemaining,
   currentVisitShots,
+  shots = [],
+  gameMode = '6-reds',
   isFoulMode,
   isGaMode = false,
   isElectricMode = false,
@@ -99,8 +103,76 @@ export const BallPots: React.FC<BallPotsProps> = ({
     }
   };
 
+  const totalReds = (gameMode === '6-reds' || isElectricMode) ? 6 : (gameMode === '15-reds' ? 15 : 6);
+  const pottedRedsCount = Math.max(0, Math.min(totalReds, totalReds - redsRemaining));
+
+  const clearedColors = useMemo(() => getClearedColors(shots, redsRemaining), [shots, redsRemaining]);
+
+  const tableBallsRemaining = (totalReds - pottedRedsCount) + (FINAL_COLORS.length - clearedColors.size);
+
   return (
     <div className="w-full max-w-7xl mx-auto space-y-0.5 xs:space-y-1 sm:space-y-1.5 flex-shrink-0 relative">
+      {/* Table Balls Status: 6 Reds + Yellow through Black with ❌ on potted balls */}
+      <div className="bg-slate-900/95 border border-slate-800 rounded-md xs:rounded-lg md:rounded-xl p-0.5 xs:p-1 shadow-sm flex flex-wrap items-center justify-between gap-0.5 xs:gap-1">
+        <div className="flex items-center space-x-1 text-[7px] xs:text-[9px] md:text-xs font-bold text-slate-300">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+          <span>ลูกบนโต๊ะ ({tableBallsRemaining}):</span>
+        </div>
+
+        <div className="flex items-center space-x-1 xs:space-x-1.5 overflow-x-auto max-w-full py-0.2 px-0.5">
+          {/* Red Balls */}
+          <div className="flex items-center space-x-0.5 xs:space-x-1">
+            {Array.from({ length: totalReds }).map((_, idx) => {
+              const isPotted = idx < pottedRedsCount;
+              return (
+                <div
+                  key={`table-red-${idx}`}
+                  className={`relative w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center font-mono font-black text-[7px] xs:text-[9px] md:text-xs select-none shadow transition-all ${
+                    isPotted
+                      ? 'ball-red opacity-30 scale-90 border border-red-950'
+                      : 'ball-red border border-white/40 shadow-red-500/20'
+                  }`}
+                  title={isPotted ? `แดงลูกที่ ${idx + 1} (ตบลงแล้ว ❌)` : `แดงลูกที่ ${idx + 1} (บนโต๊ะ)`}
+                >
+                  {isPotted ? (
+                    <X className="w-2.5 h-2.5 xs:w-3.5 xs:h-3.5 text-rose-500 drop-shadow stroke-[3.5]" />
+                  ) : (
+                    <span className="text-white drop-shadow-sm leading-none">1</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="h-3 xs:h-4 w-px bg-slate-700/60 mx-0.5 flex-shrink-0" />
+
+          {/* Yellow through Black */}
+          <div className="flex items-center space-x-0.5 xs:space-x-1">
+            {FINAL_COLORS.map((colorKey) => {
+              const b = BALL_MAP[colorKey];
+              const isPotted = clearedColors.has(colorKey);
+              return (
+                <div
+                  key={`table-color-${colorKey}`}
+                  className={`relative w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center font-mono font-black text-[7px] xs:text-[9px] md:text-xs select-none shadow transition-all ${
+                    isPotted
+                      ? `${b.cssClass} opacity-30 scale-90 border border-slate-900`
+                      : `${b.cssClass} border border-white/40 shadow-sm`
+                  }`}
+                  title={isPotted ? `${b.nameTh} (ตบลงแล้ว ❌)` : `${b.nameTh} (${b.points} แต้ม)`}
+                >
+                  {isPotted ? (
+                    <X className="w-2.5 h-2.5 xs:w-3.5 xs:h-3.5 text-rose-500 drop-shadow stroke-[3.5]" />
+                  ) : (
+                    <span className="text-white drop-shadow-sm leading-none">{b.points}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       {/* Potted Balls in Current Break - Mini colored spheres with numbers and Ga badges */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-md xs:rounded-lg md:rounded-xl p-0.5 xs:p-1 shadow-sm flex flex-wrap items-center justify-between gap-0.5 xs:gap-1">
         <div className="flex items-center space-x-1 text-[7px] xs:text-[9px] md:text-xs font-bold text-slate-300">

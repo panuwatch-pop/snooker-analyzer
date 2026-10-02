@@ -39,14 +39,101 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
 
   // Electric Snooker / Ball Count Mode State
   const [countMode, setCountMode] = useState<'ball-only' | 'ball-plus-ga'>('ball-only');
-  const [yellowPoints, setYellowPoints] = useState<number>(2);
-  const [blackPoints, setBlackPoints] = useState<number>(4);
-  const [lastBlackPoints, setLastBlackPoints] = useState<number>(7);
-  const [foulPenalty, setFoulPenalty] = useState<number>(4);
+  const [electricPlayers, setElectricPlayers] = useState<string[]>(['Pop', 'A', 'C']);
+  const [targetGames, setTargetGames] = useState<number>(5);
+  const [customTargetGamesInput, setCustomTargetGamesInput] = useState<string>('7');
+  const [isCustomTargetGames, setIsCustomTargetGames] = useState<boolean>(false);
+  const [feeBalls, setFeeBalls] = useState<BallColor[]>(['yellow', 'brown', 'black']);
+  const [ballPoints, setBallPoints] = useState<number>(1);
+  const [yellowPoints, setYellowPoints] = useState<number>(1);
+  const [blackPoints, setBlackPoints] = useState<number>(2);
+  const [lastBlackPoints, setLastBlackPoints] = useState<number>(4);
+  const [foulPenalty, setFoulPenalty] = useState<number>(2);
   const [handicapEnabled, setHandicapEnabled] = useState<boolean>(false);
   const [handicapGiverIndex, setHandicapGiverIndex] = useState<0 | 1>(0);
   const [handicapGiverRatio, setHandicapGiverRatio] = useState<number>(80);
   const [customRatioInput, setCustomRatioInput] = useState<string>('80');
+  const [presetNameInput, setPresetNameInput] = useState<string>('');
+  const [presets, setPresets] = useState<{ name: string; config: any }[]>(() => {
+    try {
+      const saved = localStorage.getItem('electric_snooker_presets');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [
+      { name: 'ก๊วนมาตรฐาน (เหลือง 1, ดำ 2, ดำท้าย 4)', config: { yellowPoints: 1, blackPoints: 2, lastBlackPoints: 4, foulPenalty: 2, feeBalls: ['yellow', 'brown', 'black'], ballPoints: 1 } },
+      { name: 'ก๊วนเหลือง 2 แต้ม (ดำปกติ 2, ดำท้าย 4)', config: { yellowPoints: 2, blackPoints: 2, lastBlackPoints: 4, foulPenalty: 2, feeBalls: ['yellow', 'brown', 'black'], ballPoints: 1 } },
+      { name: 'ก๊วนลูกดำดุ (ดำปกติ 2, ดำท้าย 7)', config: { yellowPoints: 1, blackPoints: 2, lastBlackPoints: 7, foulPenalty: 2, feeBalls: ['yellow', 'brown', 'black'], ballPoints: 1 } },
+    ];
+  });
+
+  const handleAddElectricPlayer = () => {
+    if (electricPlayers.length >= 5) {
+      alert('จำนวนผู้เล่นสูงสุด 5 คน');
+      return;
+    }
+    setElectricPlayers(prev => [...prev, `ผู้เล่น ${prev.length + 1}`]);
+  };
+
+  const handleRemoveElectricPlayer = (index: number) => {
+    if (electricPlayers.length <= 2) {
+      alert('กติกาต้องมีผู้เล่นอย่างน้อย 2 คน');
+      return;
+    }
+    setElectricPlayers(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleToggleFeeBall = (color: BallColor) => {
+    setFeeBalls(prev =>
+      prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]
+    );
+  };
+
+  const handleSavePreset = () => {
+    const name = presetNameInput.trim();
+    if (!name) {
+      alert('กรุณาใส่ชื่อพรีเซ็ต');
+      return;
+    }
+    const newPreset = {
+      name,
+      config: {
+        yellowPoints,
+        blackPoints,
+        lastBlackPoints,
+        foulPenalty,
+        feeBalls,
+        ballPoints,
+        electricPlayers,
+        targetGames,
+      },
+    };
+    const updated = [...presets, newPreset];
+    setPresets(updated);
+    try {
+      localStorage.setItem('electric_snooker_presets', JSON.stringify(updated));
+    } catch {}
+    setPresetNameInput('');
+    alert(`บันทึกพรีเซ็ต "${name}" เรียบร้อยแล้ว`);
+  };
+
+  const handleLoadPreset = (p: { name: string; config: any }) => {
+    if (p.config.yellowPoints !== undefined) setYellowPoints(p.config.yellowPoints);
+    if (p.config.blackPoints !== undefined) setBlackPoints(p.config.blackPoints);
+    if (p.config.lastBlackPoints !== undefined) setLastBlackPoints(p.config.lastBlackPoints);
+    if (p.config.foulPenalty !== undefined) setFoulPenalty(p.config.foulPenalty);
+    if (p.config.feeBalls) setFeeBalls(p.config.feeBalls);
+    if (p.config.ballPoints !== undefined) setBallPoints(p.config.ballPoints);
+    if (p.config.electricPlayers && Array.isArray(p.config.electricPlayers)) setElectricPlayers(p.config.electricPlayers);
+    if (p.config.targetGames !== undefined) {
+      setTargetGames(p.config.targetGames);
+      if (p.config.targetGames !== 5 && p.config.targetGames !== 10 && p.config.targetGames !== 15 && p.config.targetGames > 0) {
+        setIsCustomTargetGames(true);
+        setCustomTargetGamesInput(p.config.targetGames.toString());
+      } else {
+        setIsCustomTargetGames(false);
+      }
+    }
+  };
 
   // Shoot Out Mode State
   const [shootOutDurationMins, setShootOutDurationMins] = useState<number>(10);
@@ -75,8 +162,31 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
 
     let electricConfig: ElectricConfig | undefined = undefined;
     if (gameMode === 'electric-count') {
+      const finalPlayers: ElectricPlayer[] = electricPlayers
+        .filter(n => n.trim().length > 0)
+        .map((name, idx) => ({
+          id: `ep-${Date.now()}-${idx}`,
+          name: name.trim(),
+          currentPlus: 0,
+          currentMinus: 0,
+          currentFee: 0,
+          totalScore: 0,
+          totalFee: 0,
+        }));
+
+      const resolvedPlayers = finalPlayers.length >= 2 ? finalPlayers : [
+        { id: 'ep-1', name: 'Pop', currentPlus: 0, currentMinus: 0, currentFee: 0, totalScore: 0, totalFee: 0 },
+        { id: 'ep-2', name: 'A', currentPlus: 0, currentMinus: 0, currentFee: 0, totalScore: 0, totalFee: 0 },
+      ];
+
       electricConfig = {
         countMode,
+        targetGames: matchLengthType === 'unlimited' ? 0 : targetGames,
+        currentGame: 1,
+        players: resolvedPlayers,
+        strikerIndex: 0,
+        feeBalls,
+        ballPoints,
         redPoints: 1,
         yellowPoints,
         greenPoints: 1,
@@ -104,13 +214,17 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
       };
     }
 
+    const defaultTitle = gameMode === 'electric-count'
+      ? `สนุ๊กเกอร์ไฟฟ้า 6 แดง (${matchLengthType === 'unlimited' ? 'เล่นเรื่อยๆ' : `${targetGames} เกม`})`
+      : (matchLengthType === 'unlimited' ? 'เล่นซ้อม/ไปเรื่อยๆ' : (gameMode === 'shoot-out' ? 'Shoot Out' : `Best of ${finalBestOf}`));
+
     onStartMatch({
-      player1Name: player1Name.trim() || 'ผู้เล่น 1',
-      player2Name: player2Name.trim() || 'ผู้เล่น 2',
+      player1Name: gameMode === 'electric-count' ? (electricPlayers[0] || 'ผู้เล่น 1') : (player1Name.trim() || 'ผู้เล่น 1'),
+      player2Name: gameMode === 'electric-count' ? (electricPlayers[1] || 'ผู้เล่น 2') : (player2Name.trim() || 'ผู้เล่น 2'),
       gameMode,
       matchLengthType,
       bestOfFrames: finalBestOf,
-      title: title.trim() || (matchLengthType === 'unlimited' ? 'เล่นซ้อม/ไปเรื่อยๆ' : (gameMode === 'shoot-out' ? 'Shoot Out' : `Best of ${finalBestOf}`)),
+      title: title.trim() || defaultTitle,
       date,
       electricConfig,
       shootOutConfig,
@@ -364,84 +478,294 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
 
           {/* Electric Snooker / Ball Count Configuration Box */}
           {gameMode === 'electric-count' && (
-            <div className="bg-cyan-950/40 border border-cyan-700/60 rounded-xl p-3 space-y-3 animate-fadeIn">
-              <div className="flex items-center justify-between text-cyan-300 border-b border-cyan-800/60 pb-1.5">
-                <div className="flex items-center space-x-1.5 font-black text-xs">
-                  <Zap className="w-4 h-4 text-cyan-400" />
-                  <span>ตั้งค่าสนุ๊กไฟฟ้า / นับเป็นลูก (Electric Snooker Settings)</span>
+            <div className="bg-gradient-to-br from-amber-950/30 via-slate-900 to-slate-950 border border-amber-500/50 rounded-2xl p-3.5 sm:p-4 space-y-4 animate-fadeIn shadow-xl">
+              <div className="flex items-center justify-between text-amber-300 border-b border-amber-800/60 pb-2">
+                <div className="flex items-center space-x-2 font-black text-sm">
+                  <Zap className="w-4 h-4 text-amber-400" />
+                  <span>⚡ ตั้งค่าสนุ๊กเกอร์ไฟฟ้า 6 แดง (Electric 6-Reds Settings)</span>
+                </div>
+                <span className="text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full font-bold">
+                  6 แดงเท่านั้น
+                </span>
+              </div>
+
+              {/* Presets Bar */}
+              <div className="space-y-1.5 bg-slate-950/70 p-2.5 rounded-xl border border-slate-800">
+                <div className="flex items-center justify-between text-[11px] text-slate-300">
+                  <span className="font-semibold">💾 พรีเซ็ตก๊วน (Presets):</span>
+                  <span className="text-[10px] text-slate-400">คลิกเพื่อโหลดการตั้งค่า</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {presets.map((p, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleLoadPreset(p)}
+                      className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-medium transition cursor-pointer"
+                    >
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-1.5 pt-1">
+                  <input
+                    type="text"
+                    placeholder="บันทึกชื่อก๊วนใหม่..."
+                    value={presetNameInput}
+                    onChange={(e) => setPresetNameInput(e.target.value)}
+                    className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSavePreset}
+                    className="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-lg transition cursor-pointer"
+                  >
+                    บันทึกพรีเซ็ต
+                  </button>
                 </div>
               </div>
 
-              {/* Sub-Option A: Count Mode (Ball-only vs Ball+Ga) */}
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-cyan-200">ระบบการนับลูก</label>
-                <div className="grid grid-cols-2 gap-1.5">
+              {/* 1. Players Management (2 - 5 Players) */}
+              <div className="space-y-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-xs font-bold text-slate-200">1. รายชื่อผู้เล่น (2 - 5 คน):</label>
+                    <p className="text-[10px] text-slate-400">เรียงตามลำดับคิวแทงจากบนลงล่าง</p>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setCountMode('ball-only')}
-                    className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
-                      countMode === 'ball-only'
-                        ? 'bg-cyan-600 border-cyan-300 text-white font-black shadow'
-                        : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'
+                    onClick={handleAddElectricPlayer}
+                    disabled={electricPlayers.length >= 5}
+                    className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition cursor-pointer ${
+                      electricPlayers.length >= 5
+                        ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
                     }`}
                   >
-                    <div className="text-xs font-black">🔢 นับเป็นลูกล้วน</div>
-                    <div className="text-[9px] opacity-80">ตบเท่าไหร่นับเท่านั้น (ลูกละ 1 แต้ม)</div>
+                    + เพิ่มผู้เล่น ({electricPlayers.length}/5)
                   </button>
+                </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setCountMode('ball-plus-ga')}
-                    className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
-                      countMode === 'ball-plus-ga'
-                        ? 'bg-cyan-600 border-cyan-300 text-white font-black shadow'
-                        : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    <div className="text-xs font-black">🎯 นับลูกผสมกา</div>
-                    <div className="text-[9px] opacity-80">แดงนับ 1, ลูกสีหลุมกานับแต้มพิเศษ</div>
-                  </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  {electricPlayers.map((name, idx) => (
+                    <div key={idx} className="flex items-center gap-2 bg-slate-900/90 border border-slate-700/80 rounded-lg p-1.5 px-2">
+                      <span className="font-mono text-xs text-amber-400 font-bold w-4 text-center">{idx + 1}.</span>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setElectricPlayers(prev => {
+                            const copy = [...prev];
+                            copy[idx] = val;
+                            return copy;
+                          });
+                        }}
+                        placeholder={`ผู้เล่น ${idx + 1}`}
+                        className="flex-1 bg-transparent text-xs text-slate-100 font-semibold outline-none"
+                      />
+                      {electricPlayers.length > 2 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveElectricPlayer(idx)}
+                          className="text-rose-400 hover:text-rose-300 text-xs px-1.5 py-0.5 rounded cursor-pointer"
+                          title="ลบผู้เล่นนี้"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Sub-Option B: Custom Points (Yellow, Black, Last Black, Foul) */}
-              <div className="space-y-2 pt-1 border-t border-cyan-900/50">
-                <label className="text-[11px] font-bold text-cyan-200">กำหนดแต้มลูกพิเศษ & ฟาวล์</label>
-                <div className="grid grid-cols-2 gap-2 text-xs">
+              {/* 2. Target Games Selector */}
+              <div className="space-y-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                <label className="text-xs font-bold text-slate-200">2. รูปแบบจำนวนเกมที่เล่น:</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTargetGames(5);
+                      setMatchLengthType('best-of');
+                      setIsCustomTargetGames(false);
+                    }}
+                    className={`py-2 px-2 rounded-lg border font-bold text-center transition cursor-pointer ${
+                      matchLengthType === 'best-of' && !isCustomTargetGames && targetGames === 5
+                        ? 'bg-amber-500 text-slate-950 border-amber-300 shadow font-black'
+                        : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800'
+                    }`}
+                  >
+                    5 เกม
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTargetGames(10);
+                      setMatchLengthType('best-of');
+                      setIsCustomTargetGames(false);
+                    }}
+                    className={`py-2 px-2 rounded-lg border font-bold text-center transition cursor-pointer ${
+                      matchLengthType === 'best-of' && !isCustomTargetGames && targetGames === 10
+                        ? 'bg-amber-500 text-slate-950 border-amber-300 shadow font-black'
+                        : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800'
+                    }`}
+                  >
+                    10 เกม (มาตรฐาน)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTargetGames(15);
+                      setMatchLengthType('best-of');
+                      setIsCustomTargetGames(false);
+                    }}
+                    className={`py-2 px-2 rounded-lg border font-bold text-center transition cursor-pointer ${
+                      matchLengthType === 'best-of' && !isCustomTargetGames && targetGames === 15
+                        ? 'bg-amber-500 text-slate-950 border-amber-300 shadow font-black'
+                        : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800'
+                    }`}
+                  >
+                    15 เกม
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCustomTargetGames(true);
+                      setMatchLengthType('best-of');
+                      const val = parseInt(customTargetGamesInput, 10) || 7;
+                      setTargetGames(val);
+                    }}
+                    className={`py-2 px-2 rounded-lg border font-bold text-center transition cursor-pointer ${
+                      matchLengthType === 'best-of' && isCustomTargetGames
+                        ? 'bg-amber-500 text-slate-950 border-amber-300 shadow font-black'
+                        : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800'
+                    }`}
+                  >
+                    ✏️ กำหนดเอง
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTargetGames(0);
+                      setMatchLengthType('unlimited');
+                      setIsCustomTargetGames(false);
+                    }}
+                    className={`py-2 px-2.5 rounded-lg border font-bold text-center transition cursor-pointer col-span-2 sm:col-span-1 ${
+                      matchLengthType === 'unlimited'
+                        ? 'bg-purple-600 text-white border-purple-400 shadow font-black'
+                        : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800'
+                    }`}
+                  >
+                    เล่นเรื่อยๆ (ไม่จำกัด)
+                  </button>
+                </div>
+
+                {matchLengthType === 'best-of' && isCustomTargetGames && (
+                  <div className="flex items-center gap-2.5 p-2.5 bg-slate-900 border border-amber-500/50 rounded-xl text-xs animate-fadeIn">
+                    <span className="text-amber-300 font-bold">ระบุจำนวนเกมที่ต้องการเล่น:</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={99}
+                      value={customTargetGamesInput}
+                      onChange={(e) => {
+                        setCustomTargetGamesInput(e.target.value);
+                        const val = parseInt(e.target.value, 10);
+                        if (val > 0) setTargetGames(val);
+                      }}
+                      className="w-20 bg-slate-950 border border-amber-400 text-amber-300 font-mono font-black text-sm text-center rounded-lg px-2.5 py-1.5 outline-none focus:ring-1 focus:ring-amber-400"
+                      placeholder="เช่น 7"
+                      autoFocus
+                    />
+                    <span className="text-slate-300 font-semibold">เกม (แข่งขัน {targetGames} เกม)</span>
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Fee Balls Selection (Checkboxes) */}
+              <div className="space-y-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-200">3. เลือกลูกสีที่เป็น "ค่าไฟ":</label>
+                  <span className="text-[10px] text-amber-400">*คิดค่าไฟเมื่อ 6 แดงหมดโต๊ะเท่านั้น</span>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-xs">
+                  {(['yellow', 'green', 'brown', 'blue', 'pink', 'black'] as BallColor[]).map((c) => {
+                    const isChecked = feeBalls.includes(c);
+                    const colorStyleMap: Record<string, string> = {
+                      yellow: 'bg-yellow-400',
+                      green: 'bg-emerald-500',
+                      brown: 'bg-amber-800',
+                      blue: 'bg-blue-500',
+                      pink: 'bg-pink-500',
+                      black: 'bg-slate-900 border border-slate-500',
+                    };
+                    const colorNameTh: Record<string, string> = {
+                      yellow: 'เหลือง',
+                      green: 'เขียว',
+                      brown: 'น้ำตาล',
+                      blue: 'น้ำเงิน',
+                      pink: 'ชมพู',
+                      black: 'ดำ',
+                    };
+
+                    return (
+                      <label
+                        key={c}
+                        className={`flex items-center gap-1.5 p-2 rounded-lg border cursor-pointer transition ${
+                          isChecked
+                            ? 'bg-amber-500/15 border-amber-500/50 text-amber-200 font-semibold'
+                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleToggleFeeBall(c)}
+                          className="accent-amber-500 rounded cursor-pointer"
+                        />
+                        <span className={`w-3 h-3 rounded-full ${colorStyleMap[c]} inline-block flex-shrink-0`}></span>
+                        <span>{colorNameTh[c]}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 4. Custom Points Setting (Yellow, Black, Last Black, Foul, Other balls) */}
+              <div className="space-y-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                <label className="text-xs font-bold text-slate-200">4. กำหนดแต้มลูกพิเศษ & ฟาวล์:</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                   {/* Yellow Points */}
-                  <div className="bg-slate-900/90 border border-slate-700 rounded-lg p-2 space-y-1">
-                    <span className="text-[10px] text-yellow-300 font-bold block">🟡 แต้มลูกเหลือง</span>
-                    <div className="flex gap-1">
-                      {[1, 2, 4].map((pts) => (
+                  <div className="bg-slate-900 p-2.5 rounded-lg border border-slate-800 space-y-1">
+                    <span className="text-[11px] font-bold text-yellow-300 block">🟡 แต้มลูกเหลือง</span>
+                    <div className="flex items-center gap-1">
+                      {[1, 2].map((pts) => (
                         <button
                           key={pts}
                           type="button"
                           onClick={() => setYellowPoints(pts)}
-                          className={`flex-1 py-1 rounded font-mono font-black text-xs cursor-pointer ${
-                            yellowPoints === pts
-                              ? 'bg-yellow-500 text-slate-950 shadow'
-                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                          className={`flex-1 py-1 rounded font-mono font-bold text-xs cursor-pointer ${
+                            yellowPoints === pts ? 'bg-yellow-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-300'
                           }`}
                         >
-                          {pts}
+                          {pts} แต้ม
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Black Points */}
-                  <div className="bg-slate-900/90 border border-slate-700 rounded-lg p-2 space-y-1">
-                    <span className="text-[10px] text-slate-300 font-bold block">⚫ แต้มลูกดำระหว่างเกม</span>
-                    <div className="flex gap-1">
-                      {[1, 2, 4, 7].map((pts) => (
+                  {/* Black Normal Points */}
+                  <div className="bg-slate-900 p-2.5 rounded-lg border border-slate-800 space-y-1">
+                    <span className="text-[11px] font-bold text-slate-200 block">⚫ ลูกดำระหว่างเกม</span>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 4].map((pts) => (
                         <button
                           key={pts}
                           type="button"
                           onClick={() => setBlackPoints(pts)}
-                          className={`flex-1 py-1 rounded font-mono font-black text-xs cursor-pointer ${
-                            blackPoints === pts
-                              ? 'bg-slate-200 text-slate-950 shadow'
-                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                          className={`flex-1 py-1 rounded font-mono font-bold text-xs cursor-pointer ${
+                            blackPoints === pts ? 'bg-slate-200 text-slate-950 shadow' : 'bg-slate-800 text-slate-300'
                           }`}
                         >
                           {pts}
@@ -450,19 +774,17 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Last Black Points */}
-                  <div className="bg-slate-900/90 border border-slate-700 rounded-lg p-2 space-y-1">
-                    <span className="text-[10px] text-amber-300 font-bold block">🏆 แต้มลูกดำสุดท้าย</span>
-                    <div className="flex gap-1">
-                      {[2, 4, 7, 10].map((pts) => (
+                  {/* Final Black Points */}
+                  <div className="bg-slate-900 p-2.5 rounded-lg border border-amber-500/40 space-y-1">
+                    <span className="text-[11px] font-bold text-amber-300 block">👑 ดำสุดท้ายปิดเกม</span>
+                    <div className="flex items-center gap-1">
+                      {[2, 4, 7].map((pts) => (
                         <button
                           key={pts}
                           type="button"
                           onClick={() => setLastBlackPoints(pts)}
-                          className={`flex-1 py-1 rounded font-mono font-black text-xs cursor-pointer ${
-                            lastBlackPoints === pts
-                              ? 'bg-amber-500 text-slate-950 shadow'
-                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                          className={`flex-1 py-1 rounded font-mono font-bold text-xs cursor-pointer ${
+                            lastBlackPoints === pts ? 'bg-amber-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-300'
                           }`}
                         >
                           {pts}
@@ -472,18 +794,16 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
                   </div>
 
                   {/* Foul Penalty */}
-                  <div className="bg-slate-900/90 border border-slate-700 rounded-lg p-2 space-y-1">
-                    <span className="text-[10px] text-rose-300 font-bold block">⚠️ แต้มเสียฟาวล์</span>
-                    <div className="flex gap-1">
-                      {[1, 4, 7].map((pts) => (
+                  <div className="bg-slate-900 p-2.5 rounded-lg border border-rose-500/40 space-y-1">
+                    <span className="text-[11px] font-bold text-rose-300 block">🚨 แต้มเสียฟาวล์</span>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 4].map((pts) => (
                         <button
                           key={pts}
                           type="button"
                           onClick={() => setFoulPenalty(pts)}
-                          className={`flex-1 py-1 rounded font-mono font-black text-xs cursor-pointer ${
-                            foulPenalty === pts
-                              ? 'bg-rose-500 text-white shadow'
-                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                          className={`flex-1 py-1 rounded font-mono font-bold text-xs cursor-pointer ${
+                            foulPenalty === pts ? 'bg-rose-500 text-white shadow' : 'bg-slate-800 text-slate-300'
                           }`}
                         >
                           {pts}
@@ -492,111 +812,19 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Sub-Option C: Handicap Rate System (เช่น 100 ต่อ 80) */}
-              <div className="space-y-2 pt-1 border-t border-cyan-900/50">
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold text-cyan-200 flex items-center space-x-1">
-                    <Percent className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>ระบบแต้มต่อ (Handicap Rate)</span>
-                  </label>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={handicapEnabled}
-                      onChange={(e) => setHandicapEnabled(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500"></div>
-                  </label>
+                <div className="flex items-center justify-between pt-1 text-[11px] text-slate-400">
+                  <span>แต้มลูกอื่นๆ (แดง, เขียว, น้ำตาล, น้ำเงิน, ชมพู): <strong>{ballPoints} แต้ม</strong></span>
+                  <span className="text-amber-400/90 font-mono">ฟาวล์หักผู้แทง ให้คนก่อนหน้า</span>
                 </div>
-
-                {handicapEnabled && (
-                  <div className="bg-slate-900/90 border border-slate-700 rounded-lg p-2.5 space-y-2 animate-fadeIn">
-                    {/* Choose Handicap Giver */}
-                    <div className="space-y-1">
-                      <span className="text-[10px] text-slate-300 font-bold block">1. เลือกผู้ต่อ (Handicap Giver)</span>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setHandicapGiverIndex(0)}
-                          className={`p-1.5 rounded-lg border text-center font-bold text-xs cursor-pointer ${
-                            handicapGiverIndex === 0
-                              ? 'bg-cyan-600 border-cyan-300 text-white shadow'
-                              : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
-                          }`}
-                        >
-                          {p1Display} (ผู้ต่อ)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setHandicapGiverIndex(1)}
-                          className={`p-1.5 rounded-lg border text-center font-bold text-xs cursor-pointer ${
-                            handicapGiverIndex === 1
-                              ? 'bg-cyan-600 border-cyan-300 text-white shadow'
-                              : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
-                          }`}
-                        >
-                          {p2Display} (ผู้ต่อ)
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Choose Handicap Ratio */}
-                    <div className="space-y-1">
-                      <span className="text-[10px] text-slate-300 font-bold block">2. เลือกอัตราต่อ (เช่น 100 ต่อ 80)</span>
-                      <div className="grid grid-cols-4 gap-1">
-                        {[90, 80, 70, 50].map((ratio) => (
-                          <button
-                            key={ratio}
-                            type="button"
-                            onClick={() => {
-                              setHandicapGiverRatio(ratio);
-                              setCustomRatioInput(ratio.toString());
-                            }}
-                            className={`p-1.5 rounded-lg border text-center font-mono font-bold text-xs cursor-pointer ${
-                              handicapGiverRatio === ratio
-                                ? 'bg-cyan-500 text-slate-950 border-cyan-300 font-black shadow'
-                                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-                            }`}
-                          >
-                            100:{ratio}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Custom Ratio */}
-                      <div className="flex items-center space-x-2 pt-1 text-xs">
-                        <span className="text-slate-400">หรือกำหนดอัตรา: 100 ต่อ</span>
-                        <input
-                          type="number"
-                          min={1}
-                          max={99}
-                          value={customRatioInput}
-                          onChange={(e) => {
-                            setCustomRatioInput(e.target.value);
-                            const val = parseInt(e.target.value, 10);
-                            if (val > 0) setHandicapGiverRatio(val);
-                          }}
-                          className="w-16 bg-slate-950 border border-slate-700 rounded-md px-2 py-0.5 text-center font-mono font-bold text-cyan-300 outline-none focus:border-cyan-500"
-                        />
-                        <span className="text-slate-400">แต้ม</span>
-                      </div>
-                    </div>
-
-                    {/* Explanation */}
-                    <div className="bg-cyan-950/60 border border-cyan-800/60 rounded-md p-1.5 text-[10px] text-cyan-200">
-                      💡 <strong>สรุปแต้มต่อ:</strong> {giverName} แทงได้ 100 แต้ม จะได้รับจริง <strong>{handicapGiverRatio} แต้ม (x{handicapGiverRatio / 100})</strong> ส่วน {receiverName} ได้รับเต็ม 100%
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           )}
 
-          {/* Match Length Mode: Best of / Total Games vs Unlimited */}
-          {gameMode === 'shoot-out' ? (
+          {/* Match Length Mode: Best of / Total Games vs Unlimited (Non-Electric modes) */}
+          {gameMode !== 'electric-count' && (
+            <>
+              {gameMode === 'shoot-out' ? (
             <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
               <div className="flex items-center space-x-2">
                 <span className="text-base">⏱️</span>
@@ -752,7 +980,7 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
               </div>
             )}
           </div>
-          )}
+              )}
 
           {/* Players Names & Handicap Points */}
           <div className="space-y-2">
@@ -888,6 +1116,8 @@ export const NewMatchModal: React.FC<NewMatchModalProps> = ({
               )}
             </div>
           </div>
+            </>
+          )}
 
           {/* Match Title & Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

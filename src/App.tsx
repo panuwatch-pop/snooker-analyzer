@@ -10,8 +10,10 @@ import { HistoryTab } from './components/HistoryTab';
 import { NewMatchModal } from './components/NewMatchModal';
 import { FrameEndModal } from './components/FrameEndModal';
 import { KeyboardDisplayScreen } from './components/KeyboardDisplayScreen';
+import { ElectricScoreboard } from './components/ElectricScoreboard';
+import { AlertTriangle, RotateCcw, Undo2 } from 'lucide-react';
 import { Match, Frame, Shot, Visit, BallColor, GameMode, PocketLocation, ElectricConfig, ShootOutConfig } from './types/snooker';
-import { BALL_MAP, createInitialFrame, calculatePlayerStats, calculateGaForPot, calculateElectricPotPoints, calculateRemainingPoints, DEFAULT_SHOOT_OUT_CONFIG } from './utils/snookerRules';
+import { BALL_MAP, createInitialFrame, calculatePlayerStats, calculateGaForPot, calculateElectricPotPoints, calculateRemainingPoints, getElectricDefenderIndex, applyElectricScoreGain, applyElectricScoreLoss, isElectricFinalBlack, DEFAULT_SHOOT_OUT_CONFIG, checkPotBallViolation, PotViolationWarning } from './utils/snookerRules';
 import { soundManager, numberToThaiWords } from './utils/audio';
 import { saveActiveMatch, loadActiveMatch, saveMatchToHistory, loadAppTheme, saveAppTheme, AppTheme } from './utils/storage';
 
@@ -25,6 +27,11 @@ export function App() {
   const [isFoulMode, setIsFoulMode] = useState<boolean>(false);
   const [announcedDeficitFrameId, setAnnouncedDeficitFrameId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [potWarningModal, setPotWarningModal] = useState<{
+    ball: BallColor;
+    pocket?: PocketLocation;
+    warning: PotViolationWarning;
+  } | null>(null);
 
   useEffect(() => {
     saveAppTheme(theme);
@@ -88,7 +95,7 @@ export function App() {
   });
 
   // Turn state
-  const [activeStrikerIndex, setActiveStrikerIndex] = useState<0 | 1>(0);
+  const [activeStrikerIndex, setActiveStrikerIndex] = useState<number>(0);
   const [currentBreak, setCurrentBreak] = useState<number>(0);
   const [ballsInCurrentVisit, setBallsInCurrentVisit] = useState<number>(0);
   const [currentVisitNumber, setCurrentVisitNumber] = useState<number>(1);
@@ -109,6 +116,7 @@ export function App() {
   const [isShootOutPaused, setIsShootOutPaused] = useState<boolean>(true);
   const [isBlueBallActive, setIsBlueBallActive] = useState<boolean>(false);
   const [ballInHandActive, setBallInHandActive] = useState<boolean>(false);
+  const [electricSnapshots, setElectricSnapshots] = useState<any[]>([]);
 
   const getShootOutMaxShotSec = useCallback((matchSec: number) => {
     const cfg = match.shootOutConfig || DEFAULT_SHOOT_OUT_CONFIG;
@@ -217,7 +225,22 @@ export function App() {
       endedWithOpportunityGiven: false,
     };
 
-    const nextStrikerIndex = (activeStrikerIndex === 0 ? 1 : 0) as 0 | 1;
+    const totalElectricPlayers = match.electricConfig?.players?.length || 2;
+    const nextStrikerIndex = match.gameMode === 'electric-count'
+      ? ((activeStrikerIndex + 1) % totalElectricPlayers)
+      : (activeStrikerIndex === 0 ? 1 : 0);
+
+    if (match.gameMode === 'electric-count') {
+      setElectricSnapshots(prev => [...prev, {
+        match: JSON.parse(JSON.stringify(match)),
+        activeStrikerIndex,
+        currentBreak,
+        ballsInCurrentVisit,
+        currentVisitNumber,
+        currentVisitShots: [...currentVisitShots],
+      }]);
+    }
+
     updatedShots.push(endShot);
     updatedVisits.push(visitRecord);
 
@@ -288,7 +311,7 @@ export function App() {
   }, [match.gameMode, match.electricConfig, announcedDeficitFrameId]);
 
   // Unconstrained Ball Potting with Ga Pocket Calculation & Electric Snooker
-  const handlePotBall = useCallback((ball: BallColor, pocket?: PocketLocation) => {
+  const executePotBall = useCallback((ball: BallColor, pocket?: PocketLocation) => {
     const isElectric = match.gameMode === 'electric-count';
     const isGa = match.gameMode === 'snooker-ga';
     const effectiveElectricConfig = match.electricConfig || currentFrame.electricConfig;
@@ -299,8 +322,8 @@ export function App() {
     let noteText = `ตบลูก ${BALL_MAP[ball].nameTh} (+${points})`;
 
     if (isElectric) {
-      const isLastBlack = currentFrame.redsRemaining === 0 && ball === 'black';
-      const electricRes = calculateElectricPotPoints(ball, pocket, isLastBlack, effectiveElectricConfig, activeStrikerIndex);
+      const isLastBlack = isElectricFinalBlack(currentFrame.shots || [], currentFrame.redsRemaining, ball);
+      const electricRes = calculateElectricPotPoints(ball, pocket, isLastBlack, effectiveElectricConfig, activeStrikerIndex, currentFrame.redsRemaining);
       points = electricRes.points;
       rawPoints = electricRes.rawPoints;
       noteText = electricRes.description;
@@ -371,6 +394,69 @@ export function App() {
     updatedShots.push(newShot);
     setCurrentVisitShots(prev => [...prev, newShot]);
 
+    if (isElectric && effectiveElectricConfig?.players) {
+      const players = [...effectiveElectricConfig.players];
+      const totalElectricPlayers = players.length;
+      const strikerIdx = activeStrikerIndex % totalElectricPlayers;
+      const defenderIdx = getElectricDefenderIndex(strikerIdx, totalElectricPlayers);
+      const isLastBlack = isElectricFinalBlack(currentFrame.shots || [], currentFrame.redsRemaining, ball);
+
+      // Save electric snapshot
+      setElectricSnapshots(prev => [...prev, {
+        match: JSON.parse(JSON.stringify(match)),
+        activeStrikerIndex,
+        currentBreak,
+        ballsInCurrentVisit,
+        currentVisitNumber,
+        currentVisitShots: [...currentVisitShots],
+      }]);
+
+      const strikerNewScores = applyElectricScoreGain(players[strikerIdx].currentPlus, players[strikerIdx].currentMinus, points);
+      const defenderNewScores = applyElectricScoreLoss(players[defenderIdx].currentPlus, players[defenderIdx].currentMinus, points);
+
+      players[strikerIdx] = {
+        ...players[strikerIdx],
+        currentPlus: strikerNewScores.currentPlus,
+        currentMinus: strikerNewScores.currentMinus,
+      };
+      players[defenderIdx] = {
+        ...players[defenderIdx],
+        currentPlus: defenderNewScores.currentPlus,
+        currentMinus: defenderNewScores.currentMinus,
+        currentFee: currentFrame.redsRemaining === 0 && (effectiveElectricConfig.feeBalls || ['yellow', 'brown', 'black']).includes(ball)
+          ? players[defenderIdx].currentFee + 1
+          : players[defenderIdx].currentFee,
+      };
+
+      if (isLastBlack) {
+        soundManager.playApplause();
+      }
+
+      const updatedConfig: ElectricConfig = {
+        ...effectiveElectricConfig,
+        players,
+      };
+
+      const updatedFrame: Frame = {
+        ...currentFrame,
+        player1Score: (players[0]?.currentPlus || 0) - (players[0]?.currentMinus || 0),
+        player2Score: (players[1]?.currentPlus || 0) - (players[1]?.currentMinus || 0),
+        redsRemaining: nextReds,
+        shots: updatedShots,
+        visits: updatedVisits,
+        electricConfig: updatedConfig,
+      };
+
+      const newFrames = [...match.frames];
+      newFrames[match.currentFrameIndex] = updatedFrame;
+
+      setMatch({ ...match, electricConfig: updatedConfig, frames: newFrames });
+      setCurrentBreak(newBreak);
+      setBallsInCurrentVisit(newBallsCount);
+      setShotStartTime(Date.now());
+      return;
+    }
+
     const newP1Score = activeStrikerIndex === 0 ? Math.round((currentFrame.player1Score + points) * 10) / 10 : currentFrame.player1Score;
     const newP2Score = activeStrikerIndex === 1 ? Math.round((currentFrame.player2Score + points) * 10) / 10 : currentFrame.player2Score;
     const newP1Ga = activeStrikerIndex === 0 ? (currentFrame.player1Ga || 0) + gaEarned : (currentFrame.player1Ga || 0);
@@ -411,10 +497,33 @@ export function App() {
     currentBreak,
     currentFrame,
     currentVisitNumber,
+    currentVisitShots,
     match,
     shotStartTime,
     resetShootOutShotClock,
   ]);
+
+  // Check rules before potting (reds exceeded, colors twice consecutively, etc.)
+  const handlePotBall = useCallback((ball: BallColor, pocket?: PocketLocation) => {
+    const violation = checkPotBallViolation(
+      ball,
+      currentFrame.redsRemaining,
+      currentVisitShots,
+      currentFrame.shots || []
+    );
+
+    if (violation) {
+      soundManager.playFoulSound();
+      setPotWarningModal({
+        ball,
+        pocket,
+        warning: violation,
+      });
+      return;
+    }
+
+    executePotBall(ball, pocket);
+  }, [currentFrame.redsRemaining, currentVisitShots, currentFrame.shots, executePotBall]);
 
   // Add Direct Custom Points
   const handleAddCustomPoints = (points: number, label: string) => {
@@ -528,6 +637,175 @@ export function App() {
     setMatch({ ...match, frames: newFrames });
     setCurrentVisitShots(prev => [...prev, gaShot]);
   }, [activeStrikerIndex, ballsInCurrentVisit, currentBreak, currentFrame, currentVisitNumber, match, shotStartTime]);
+
+  const handleElectricFoul = useCallback(() => {
+    if (!match.electricConfig?.players) return;
+
+    soundManager.playFoulSound();
+    const foulPenalty = match.electricConfig.foulPenalty ?? 2;
+    soundManager.speakFoul(foulPenalty);
+
+    // Save electric snapshot
+    setElectricSnapshots(prev => [...prev, {
+      match: JSON.parse(JSON.stringify(match)),
+      activeStrikerIndex,
+      currentBreak,
+      ballsInCurrentVisit,
+      currentVisitNumber,
+      currentVisitShots: [...currentVisitShots],
+    }]);
+
+    const players = [...match.electricConfig.players];
+    const totalElectricPlayers = players.length;
+    const strikerIdx = activeStrikerIndex % totalElectricPlayers;
+    const defenderIdx = getElectricDefenderIndex(strikerIdx, totalElectricPlayers);
+
+    // Striker loses foulPenalty, defender gains foulPenalty
+    const strikerNewScores = applyElectricScoreLoss(players[strikerIdx].currentPlus, players[strikerIdx].currentMinus, foulPenalty);
+    const defenderNewScores = applyElectricScoreGain(players[defenderIdx].currentPlus, players[defenderIdx].currentMinus, foulPenalty);
+
+    players[strikerIdx] = {
+      ...players[strikerIdx],
+      currentPlus: strikerNewScores.currentPlus,
+      currentMinus: strikerNewScores.currentMinus,
+    };
+    players[defenderIdx] = {
+      ...players[defenderIdx],
+      currentPlus: defenderNewScores.currentPlus,
+      currentMinus: defenderNewScores.currentMinus,
+    };
+
+    const nextStriker = (strikerIdx + 1) % totalElectricPlayers;
+    const updatedConfig: ElectricConfig = {
+      ...match.electricConfig,
+      players,
+    };
+
+    setMatch(prev => {
+      const copy = { ...prev, electricConfig: updatedConfig };
+      const copyFrames = [...copy.frames];
+      copyFrames[copy.currentFrameIndex] = {
+        ...copyFrames[copy.currentFrameIndex],
+        player1Score: (players[0]?.currentPlus || 0) - (players[0]?.currentMinus || 0),
+        player2Score: (players[1]?.currentPlus || 0) - (players[1]?.currentMinus || 0),
+        electricConfig: updatedConfig,
+      };
+      copy.frames = copyFrames;
+      return copy;
+    });
+
+    setActiveStrikerIndex(nextStriker);
+    setCurrentBreak(0);
+    setBallsInCurrentVisit(0);
+    setCurrentVisitNumber(prev => prev + 1);
+    setCurrentVisitShots([]);
+    setShotStartTime(Date.now());
+  }, [match, activeStrikerIndex, currentBreak, ballsInCurrentVisit, currentVisitNumber]);
+
+  const handleEndElectricGame = useCallback((winnerIdx?: number) => {
+    if (!match.electricConfig?.players) return;
+    soundManager.playApplause();
+    confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
+
+    const cfg = match.electricConfig;
+    const players = [...cfg.players];
+    const totalElectricPlayers = players.length;
+    const strikerIdx = activeStrikerIndex % totalElectricPlayers;
+    const defenderIdx = getElectricDefenderIndex(strikerIdx, totalElectricPlayers);
+
+    // If winnerIdx not specified, default to player who had the best net score in the frame, or the current striker
+    let winningPlayerIdx = winnerIdx;
+    if (winningPlayerIdx === undefined) {
+      let maxNet = -Infinity;
+      let bestIdx = strikerIdx;
+      players.forEach((p, idx) => {
+        const net = p.currentPlus - p.currentMinus;
+        if (net > maxNet) {
+          maxNet = net;
+          bestIdx = idx;
+        }
+      });
+      winningPlayerIdx = bestIdx;
+    }
+
+    // Accumulate current game scores to total
+    const accumulated = players.map(p => ({
+      ...p,
+      totalScore: p.totalScore + (p.currentPlus - p.currentMinus),
+      totalFee: p.totalFee + p.currentFee,
+      currentPlus: 0,
+      currentMinus: 0,
+      currentFee: 0,
+    }));
+
+    const winner = accumulated[winningPlayerIdx];
+    const defenderTargetIdx = defenderIdx === winningPlayerIdx ? (winningPlayerIdx + 1) % totalElectricPlayers : defenderIdx;
+    const prevDefender = accumulated[defenderTargetIdx];
+    const others = accumulated.filter((_, i) => i !== winningPlayerIdx && i !== defenderTargetIdx);
+
+    // Queue reordering: Winner (opener) at index 0 (top row), Defender at index 1, others in relative order
+    const newQueue = [winner, prevDefender, ...others];
+    const currentG = (cfg.currentGame || 1);
+    const targetG = cfg.targetGames ?? 5;
+    const isMatchComplete = targetG > 0 && currentG >= targetG;
+
+    const updatedConfig: ElectricConfig = {
+      ...cfg,
+      players: newQueue,
+      currentGame: currentG + 1,
+      isMatchCompleted: isMatchComplete,
+    };
+
+    const resetFrame: Frame = createInitialFrame(
+      match.currentFrameIndex + 2,
+      'electric-count',
+      0,
+      0,
+      updatedConfig
+    );
+
+    setMatch(prev => ({
+      ...prev,
+      player1Name: newQueue[0]?.name || prev.player1Name,
+      player2Name: newQueue[1]?.name || prev.player2Name,
+      electricConfig: updatedConfig,
+      frames: [...prev.frames, resetFrame],
+      currentFrameIndex: prev.currentFrameIndex + 1,
+    }));
+
+    setActiveStrikerIndex(0);
+    setCurrentBreak(0);
+    setBallsInCurrentVisit(0);
+    setCurrentVisitNumber(1);
+    setCurrentVisitShots([]);
+    setShotStartTime(Date.now());
+  }, [match, activeStrikerIndex]);
+
+  const handleContinueElectricMatch = useCallback(() => {
+    if (!match.electricConfig) return;
+    const updatedConfig: ElectricConfig = {
+      ...match.electricConfig,
+      targetGames: (match.electricConfig.targetGames || 5) + 5,
+      isMatchCompleted: false,
+    };
+    setMatch(prev => ({
+      ...prev,
+      electricConfig: updatedConfig,
+    }));
+  }, [match.electricConfig]);
+
+  const handleFinishElectricMatch = useCallback(() => {
+    if (!match.electricConfig) return;
+    const updatedConfig: ElectricConfig = {
+      ...match.electricConfig,
+      isMatchCompleted: true,
+    };
+    setMatch(prev => ({
+      ...prev,
+      isCompleted: true,
+      electricConfig: updatedConfig,
+    }));
+  }, [match.electricConfig]);
 
   const handleSubmitFoul = useCallback((points: number, options?: { isFreeBall?: boolean; switchStriker?: boolean; note?: string; recipientPlayerIndex?: 0 | 1; gaPenalty?: number }) => {
     soundManager.playFoulSound();
@@ -735,6 +1013,22 @@ export function App() {
   ]);
 
   const handleUndo = useCallback(() => {
+    if (match.gameMode === 'electric-count') {
+      if (electricSnapshots.length === 0) return;
+      const copy = [...electricSnapshots];
+      const last = copy.pop();
+      if (last) {
+        setMatch(last.match);
+        setActiveStrikerIndex(last.activeStrikerIndex);
+        setCurrentBreak(last.currentBreak);
+        setBallsInCurrentVisit(last.ballsInCurrentVisit);
+        setCurrentVisitNumber(last.currentVisitNumber);
+        setCurrentVisitShots(last.currentVisitShots || []);
+        setElectricSnapshots(copy);
+      }
+      return;
+    }
+
     if (!currentFrame.shots || currentFrame.shots.length === 0) return;
 
     const newShots = [...currentFrame.shots];
@@ -942,6 +1236,24 @@ export function App() {
         return;
       }
 
+      // 0.1 When Pot Warning Modal is open: Enter/Space -> ทำต่อ, Esc/Backspace/. -> ย้อนกลับ
+      if (potWarningModal) {
+        if (key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === ' ' || code === 'Space' || key === 'Tab' || key === 'ใ') {
+          e.preventDefault();
+          const { ball, pocket } = potWarningModal;
+          setPotWarningModal(null);
+          executePotBall(ball, pocket);
+          return;
+        }
+
+        if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete' || key === 'Escape' || key === 'Clear' || key === 'Backspace' || code === 'Backspace') {
+          e.preventDefault();
+          setPotWarningModal(null);
+          return;
+        }
+        return;
+      }
+
       // Ignore global shortcuts when other modals are open
       if (isNewMatchModalOpen || isKeypadGuideOpen) {
         if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete' || key === 'Escape' || key === 'Clear') {
@@ -1026,10 +1338,14 @@ export function App() {
         return;
       }
 
-      // 4. Slash (/) or Equal (=) or 'E' -> จบเฟรม (End Frame Modal)
+      // 4. Slash (/) or Equal (=) or 'E' -> จบเฟรม (End Frame Modal / End Electric Game)
       if (key === '/' || code === 'NumpadDivide' || code === 'Slash' || key === '=' || code === 'NumpadEqual' || code === 'Equal' || key === 'LaunchApplication2' || key === 'Calculator' || key === 'e' || key === 'E' || code === 'KeyE' || key === 'ำ') {
         e.preventDefault();
-        setIsFrameEndModalOpen(true);
+        if (match.gameMode === 'electric-count') {
+          handleEndElectricGame();
+        } else {
+          setIsFrameEndModalOpen(true);
+        }
         return;
       }
 
@@ -1085,10 +1401,14 @@ export function App() {
         return;
       }
 
-      // 8. Minus (-) -> Open Foul Mode (ให้เลือกฟาวล์ 4, 5, 6, 7)
+      // 8. Minus (-) -> Open Foul Mode or Electric Foul
       if (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') {
         e.preventDefault();
-        setIsFoulMode(true);
+        if (match.gameMode === 'electric-count') {
+          handleElectricFoul();
+        } else {
+          setIsFoulMode(true);
+        }
         return;
       }
 
@@ -1124,6 +1444,8 @@ export function App() {
     isFrameEndModalOpen,
     isKeypadGuideOpen,
     isFoulMode,
+    potWarningModal,
+    executePotBall,
     currentFrame,
     match,
     handlePotBall,
@@ -1240,15 +1562,156 @@ export function App() {
       <main className="flex-1 min-h-0 p-0.5 xs:p-1 sm:p-2 md:p-3 max-w-7xl w-full mx-auto flex flex-col overflow-hidden">
         {activeTab === 'scoreboard' && (
           <div className="flex-1 min-h-0 flex flex-col justify-between space-y-0 xs:space-y-0.5 sm:space-y-1.5 md:space-y-2 animate-fadeIn overflow-hidden">
-            <Scoreboard
+            {match.gameMode === 'electric-count' && (match.electricConfig || currentFrame.electricConfig) ? (
+              <ElectricScoreboard
+                match={match}
+                frame={currentFrame}
+                electricConfig={(match.electricConfig || currentFrame.electricConfig)!}
+                activeStrikerIndex={activeStrikerIndex}
+                redsRemaining={currentFrame.redsRemaining}
+                currentBreak={currentBreak}
+                ballsInCurrentVisit={ballsInCurrentVisit}
+                shotDurationSec={shotDurationSec}
+                onPotBall={handlePotBall}
+                onFoul={handleElectricFoul}
+                onNextTurn={() => handleEndTurn('end-turn')}
+                onUndo={handleUndo}
+                onResetMatch={() => setIsNewMatchModalOpen(true)}
+                onContinueMatch={handleContinueElectricMatch}
+                onFinishMatch={handleFinishElectricMatch}
+                onEndGame={() => handleEndElectricGame()}
+              />
+            ) : (
+              <Scoreboard
+                player1Name={match.player1Name}
+                player2Name={match.player2Name}
+                activeStrikerIndex={(activeStrikerIndex % 2) as 0 | 1}
+                currentBreak={currentBreak}
+                ballsInCurrentVisit={ballsInCurrentVisit}
+                frame={currentFrame}
+                frameDurationFormatted={formatTime(frameDurationSec)}
+                shotDurationSec={shotDurationSec}
+                isGaMode={match.gameMode === 'snooker-ga'}
+                isElectricMode={match.gameMode === 'electric-count'}
+                electricConfig={match.electricConfig || currentFrame.electricConfig}
+                p1CumulativeScore={p1CumulativeScore}
+                p2CumulativeScore={p2CumulativeScore}
+                currentGameNumber={match.currentFrameIndex + 1}
+                totalGames={match.bestOfFrames}
+                isShootOutMode={match.gameMode === 'shoot-out'}
+                shootOutRemainingSec={shootOutRemainingSec}
+                shootOutShotSec={shootOutShotSec}
+                isShootOutPaused={isShootOutPaused}
+                ballInHandActive={ballInHandActive}
+                onResetShotClock={resetShootOutShotClock}
+                onTogglePauseShootOut={handleTogglePauseShootOut}
+                onSwitchStriker={() => handleEndTurn('miss')}
+              />
+            )}
+
+            <BallPots
+              redsRemaining={currentFrame.redsRemaining}
+              currentVisitShots={currentVisitShots}
+              shots={currentFrame.shots || []}
+              gameMode={match.gameMode}
+              isFoulMode={isFoulMode}
+              isGaMode={match.gameMode === 'snooker-ga'}
+              isElectricMode={match.gameMode === 'electric-count'}
+              electricConfig={match.electricConfig || currentFrame.electricConfig}
+              onToggleFoulMode={() => {
+                if (match.gameMode === 'electric-count') {
+                  handleElectricFoul();
+                } else {
+                  setIsFoulMode(prev => !prev);
+                }
+              }}
+              onPotBall={handlePotBall}
+              onFoul={(pts, gaPenalty) => {
+                if (match.gameMode === 'electric-count') {
+                  handleElectricFoul();
+                } else {
+                  handleSubmitFoul(pts, { isFreeBall: false, switchStriker: true, note: `ฟาวล์ +${pts} แต้ม${gaPenalty && gaPenalty > 0 ? ` (หัก -${gaPenalty} กา)` : ''}`, gaPenalty });
+                  setIsFoulMode(false);
+                }
+              }}
+              onAddCustomPoints={handleAddCustomPoints}
+              onManualAddGa={handleManualAddGa}
+              onEndTurn={handleEndTurn}
+              onUndo={handleUndo}
+              onEndFrame={() => {
+                if (match.gameMode === 'electric-count') {
+                  handleEndElectricGame();
+                } else {
+                  setIsFrameEndModalOpen(true);
+                }
+              }}
+              onNewMatch={() => setIsNewMatchModalOpen(true)}
+              onMultiRedPot={handleMultiRedPot}
+              canUndo={Boolean(match.gameMode === 'electric-count' ? electricSnapshots.length > 0 : (currentFrame.shots && currentFrame.shots.length > 0))}
+            />
+          </div>
+        )}
+
+        {activeTab === 'keyboard-display' && (
+          match.gameMode === 'electric-count' && (match.electricConfig || currentFrame.electricConfig) ? (
+            <div className="flex-1 min-h-0 flex flex-col justify-between space-y-1 md:space-y-2 animate-fadeIn overflow-hidden">
+              <ElectricScoreboard
+                match={match}
+                frame={currentFrame}
+                electricConfig={(match.electricConfig || currentFrame.electricConfig)!}
+                activeStrikerIndex={activeStrikerIndex}
+                redsRemaining={currentFrame.redsRemaining}
+                currentBreak={currentBreak}
+                ballsInCurrentVisit={ballsInCurrentVisit}
+                shotDurationSec={shotDurationSec}
+                onPotBall={handlePotBall}
+                onFoul={handleElectricFoul}
+                onNextTurn={() => handleEndTurn('end-turn')}
+                onUndo={handleUndo}
+                onResetMatch={() => setIsNewMatchModalOpen(true)}
+                onContinueMatch={handleContinueElectricMatch}
+                onFinishMatch={handleFinishElectricMatch}
+                onEndGame={() => handleEndElectricGame()}
+              />
+              <BallPots
+                redsRemaining={currentFrame.redsRemaining}
+                currentVisitShots={currentVisitShots}
+                shots={currentFrame.shots || []}
+                gameMode={match.gameMode}
+                isFoulMode={isFoulMode}
+                isGaMode={false}
+                isElectricMode={true}
+                electricConfig={match.electricConfig || currentFrame.electricConfig}
+                onToggleFoulMode={handleElectricFoul}
+                onPotBall={handlePotBall}
+                onFoul={() => handleElectricFoul()}
+                onAddCustomPoints={handleAddCustomPoints}
+                onManualAddGa={handleManualAddGa}
+                onEndTurn={handleEndTurn}
+                onUndo={handleUndo}
+                onEndFrame={() => {
+                  if (match.gameMode === 'electric-count') {
+                    handleEndElectricGame();
+                  } else {
+                    setIsFrameEndModalOpen(true);
+                  }
+                }}
+                onNewMatch={() => setIsNewMatchModalOpen(true)}
+                onMultiRedPot={handleMultiRedPot}
+                canUndo={Boolean(electricSnapshots.length > 0)}
+              />
+            </div>
+          ) : (
+            <KeyboardDisplayScreen
               player1Name={match.player1Name}
               player2Name={match.player2Name}
-              activeStrikerIndex={activeStrikerIndex}
+              activeStrikerIndex={(activeStrikerIndex % 2) as 0 | 1}
               currentBreak={currentBreak}
               ballsInCurrentVisit={ballsInCurrentVisit}
               frame={currentFrame}
               frameDurationFormatted={formatTime(frameDurationSec)}
               shotDurationSec={shotDurationSec}
+              gameMode={match.gameMode}
               isGaMode={match.gameMode === 'snooker-ga'}
               isElectricMode={match.gameMode === 'electric-count'}
               electricConfig={match.electricConfig || currentFrame.electricConfig}
@@ -1256,6 +1719,8 @@ export function App() {
               p2CumulativeScore={p2CumulativeScore}
               currentGameNumber={match.currentFrameIndex + 1}
               totalGames={match.bestOfFrames}
+              currentVisitShots={currentVisitShots}
+              isFoulMode={isFoulMode}
               isShootOutMode={match.gameMode === 'shoot-out'}
               shootOutRemainingSec={shootOutRemainingSec}
               shootOutShotSec={shootOutShotSec}
@@ -1263,76 +1728,22 @@ export function App() {
               ballInHandActive={ballInHandActive}
               onResetShotClock={resetShootOutShotClock}
               onTogglePauseShootOut={handleTogglePauseShootOut}
-              onSwitchStriker={() => handleEndTurn('miss')}
-            />
-
-            <BallPots
-              redsRemaining={currentFrame.redsRemaining}
-              currentVisitShots={currentVisitShots}
-              isFoulMode={isFoulMode}
-              isGaMode={match.gameMode === 'snooker-ga'}
-              isElectricMode={match.gameMode === 'electric-count'}
-              electricConfig={match.electricConfig || currentFrame.electricConfig}
-              onToggleFoulMode={() => setIsFoulMode(prev => !prev)}
-              onPotBall={handlePotBall}
-              onFoul={(pts, gaPenalty) => {
-                handleSubmitFoul(pts, { isFreeBall: false, switchStriker: true, note: `ฟาวล์ +${pts} แต้ม${gaPenalty && gaPenalty > 0 ? ` (หัก -${gaPenalty} กา)` : ''}`, gaPenalty });
+              onFoulSelect={(pts) => {
+                handleSubmitFoul(pts, { switchStriker: true, note: `ฟาวล์ +${pts} แต้ม` });
                 setIsFoulMode(false);
               }}
-              onAddCustomPoints={handleAddCustomPoints}
-              onManualAddGa={handleManualAddGa}
+              onCancelFoulMode={() => setIsFoulMode(false)}
+              onSwitchStriker={() => handleEndTurn('miss')}
               onEndTurn={handleEndTurn}
               onUndo={handleUndo}
               onEndFrame={() => setIsFrameEndModalOpen(true)}
               onNewMatch={() => setIsNewMatchModalOpen(true)}
-              onMultiRedPot={handleMultiRedPot}
+              onOpenKeypadGuide={() => setIsKeypadGuideOpen(true)}
               canUndo={currentFrame.shots && currentFrame.shots.length > 0}
+              theme={theme}
+              onToggleTheme={toggleTheme}
             />
-          </div>
-        )}
-
-        {activeTab === 'keyboard-display' && (
-          <KeyboardDisplayScreen
-            player1Name={match.player1Name}
-            player2Name={match.player2Name}
-            activeStrikerIndex={activeStrikerIndex}
-            currentBreak={currentBreak}
-            ballsInCurrentVisit={ballsInCurrentVisit}
-            frame={currentFrame}
-            frameDurationFormatted={formatTime(frameDurationSec)}
-            shotDurationSec={shotDurationSec}
-            gameMode={match.gameMode}
-            isGaMode={match.gameMode === 'snooker-ga'}
-            isElectricMode={match.gameMode === 'electric-count'}
-            electricConfig={match.electricConfig || currentFrame.electricConfig}
-            p1CumulativeScore={p1CumulativeScore}
-            p2CumulativeScore={p2CumulativeScore}
-            currentGameNumber={match.currentFrameIndex + 1}
-            totalGames={match.bestOfFrames}
-            currentVisitShots={currentVisitShots}
-            isFoulMode={isFoulMode}
-            isShootOutMode={match.gameMode === 'shoot-out'}
-            shootOutRemainingSec={shootOutRemainingSec}
-            shootOutShotSec={shootOutShotSec}
-            isShootOutPaused={isShootOutPaused}
-            ballInHandActive={ballInHandActive}
-            onResetShotClock={resetShootOutShotClock}
-            onTogglePauseShootOut={handleTogglePauseShootOut}
-            onFoulSelect={(pts) => {
-              handleSubmitFoul(pts, { switchStriker: true, note: `ฟาวล์ +${pts} แต้ม` });
-              setIsFoulMode(false);
-            }}
-            onCancelFoulMode={() => setIsFoulMode(false)}
-            onSwitchStriker={() => handleEndTurn('miss')}
-            onEndTurn={handleEndTurn}
-            onUndo={handleUndo}
-            onEndFrame={() => setIsFrameEndModalOpen(true)}
-            onNewMatch={() => setIsNewMatchModalOpen(true)}
-            onOpenKeypadGuide={() => setIsKeypadGuideOpen(true)}
-            canUndo={currentFrame.shots && currentFrame.shots.length > 0}
-            theme={theme}
-            onToggleTheme={toggleTheme}
-          />
+          )
         )}
 
         {activeTab === 'raw-data' && (
@@ -1372,6 +1783,81 @@ export function App() {
         onNextFrame={handleNextFrame}
         onFinishMatch={handleFinishMatch}
       />
+
+      {/* Potting Rule Violation Warning Modal */}
+      {potWarningModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 animate-fadeIn">
+          <div className="bg-slate-900 border-2 border-amber-500/80 rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6 text-center space-y-3.5 sm:space-y-4 animate-scaleUp">
+            {/* Warning Icon Badge */}
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-500/15 border-2 border-amber-500/40 text-amber-400 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20">
+              <AlertTriangle className="w-6 h-6 sm:w-8 sm:h-8 animate-pulse" />
+            </div>
+
+            {/* Title & Ball Badge */}
+            <div className="space-y-1">
+              <h3 className="text-base sm:text-lg font-black text-amber-300">
+                ⚠️ {potWarningModal.warning.title}
+              </h3>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
+                <span>กำลังจะตบ:</span>
+                <span className={`w-3.5 h-3.5 rounded-full inline-block ${BALL_MAP[potWarningModal.ball].cssClass}`} />
+                <span className="font-bold text-white">{BALL_MAP[potWarningModal.ball].nameTh}</span>
+              </div>
+            </div>
+
+            {/* Message Body */}
+            <div className="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 text-left space-y-1.5">
+              <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
+                {potWarningModal.warning.message}
+              </p>
+              <p className="text-[11px] sm:text-xs text-amber-300/90 font-medium">
+                {potWarningModal.warning.submessage}
+              </p>
+            </div>
+
+            {/* Main Action Buttons: Proceed vs Back/Cancel */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setPotWarningModal(null)}
+                className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer hover:border-slate-500"
+              >
+                <RotateCcw className="w-4 h-4 text-slate-400" />
+                <span>↩️ ย้อนกลับ (ยกเลิก)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const { ball, pocket } = potWarningModal;
+                  setPotWarningModal(null);
+                  executePotBall(ball, pocket);
+                }}
+                className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-amber-600/30 transition-all cursor-pointer"
+              >
+                <span>🟢 ทำต่อ (บันทึกแต้ม)</span>
+              </button>
+            </div>
+
+            {/* Optional Undo Last Shot */}
+            {(match.gameMode === 'electric-count' ? electricSnapshots.length > 0 : (currentFrame.shots && currentFrame.shots.length > 0)) && (
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPotWarningModal(null);
+                    handleUndo();
+                  }}
+                  className="text-[11px] sm:text-xs text-slate-400 hover:text-amber-400 flex items-center justify-center gap-1 mx-auto transition-colors cursor-pointer"
+                >
+                  <Undo2 className="w-3.5 h-3.5" />
+                  <span>หรือย้อนกลับช็อตก่อนหน้า (Undo)</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

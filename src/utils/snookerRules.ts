@@ -22,15 +22,25 @@ export const FINAL_COLORS: BallColor[] = ['yellow', 'green', 'brown', 'blue', 'p
  */
 export const DEFAULT_ELECTRIC_CONFIG: ElectricConfig = {
   countMode: 'ball-only',
+  targetGames: 5,
+  currentGame: 1,
+  players: [
+    { id: 'p1', name: 'Pop', currentPlus: 0, currentMinus: 0, currentFee: 0, totalScore: 0, totalFee: 0 },
+    { id: 'p2', name: 'A', currentPlus: 0, currentMinus: 0, currentFee: 0, totalScore: 0, totalFee: 0 },
+    { id: 'p3', name: 'C', currentPlus: 0, currentMinus: 0, currentFee: 0, totalScore: 0, totalFee: 0 },
+  ],
+  strikerIndex: 0,
+  feeBalls: ['yellow', 'brown', 'black'],
+  ballPoints: 1,
   redPoints: 1,
-  yellowPoints: 2,
+  yellowPoints: 1,
   greenPoints: 1,
   brownPoints: 1,
   bluePoints: 1,
   pinkPoints: 1,
-  blackPoints: 4,
-  lastBlackPoints: 7,
-  foulPenalty: 4,
+  blackPoints: 2,
+  lastBlackPoints: 4,
+  foulPenalty: 2,
   handicapEnabled: false,
   handicapGiverIndex: 0,
   handicapGiverRatio: 80,
@@ -128,22 +138,209 @@ export function getBallBasePoints(
 }
 
 /**
+ * Calculate defender index in Electric Snooker (previous player in rotation queue)
+ */
+export function getElectricDefenderIndex(strikerIndex: number, totalPlayers: number): number {
+  if (totalPlayers <= 1) return 0;
+  return (strikerIndex - 1 + totalPlayers) % totalPlayers;
+}
+
+/**
+ * Calculate net offset for Electric Snooker scoring when gaining points.
+ * If player currently has currentMinus > 0, offset currentMinus first.
+ */
+export function applyElectricScoreGain(
+  currentPlus: number,
+  currentMinus: number,
+  points: number
+): { currentPlus: number; currentMinus: number } {
+  if (currentMinus > 0) {
+    if (currentMinus >= points) {
+      return { currentPlus: 0, currentMinus: currentMinus - points };
+    } else {
+      return { currentPlus: points - currentMinus, currentMinus: 0 };
+    }
+  }
+  return { currentPlus: currentPlus + points, currentMinus: 0 };
+}
+
+/**
+ * Calculate net offset for Electric Snooker scoring when losing points.
+ * If player currently has currentPlus > 0, offset currentPlus first.
+ */
+export function applyElectricScoreLoss(
+  currentPlus: number,
+  currentMinus: number,
+  points: number
+): { currentPlus: number; currentMinus: number } {
+  if (currentPlus > 0) {
+    if (currentPlus >= points) {
+      return { currentPlus: currentPlus - points, currentMinus: 0 };
+    } else {
+      return { currentPlus: 0, currentMinus: points - currentPlus };
+    }
+  }
+  return { currentPlus: 0, currentMinus: currentMinus + points };
+}
+
+/**
+ * Check if the ball being potted is the true FINAL black ball of the Electric Snooker frame.
+ * The black after the 6th red is NOT the final black.
+ * The final black only occurs after the clearance phase (i.e. Pink was already potted during final colors).
+ */
+export function isElectricFinalBlack(
+  shots: Shot[],
+  redsRemaining: number,
+  ball: BallColor
+): boolean {
+  if (ball !== 'black') return false;
+  if (redsRemaining > 0) return false;
+
+  // Find index of the very last red pot shot
+  let lastRedIndex = -1;
+  for (let i = shots.length - 1; i >= 0; i--) {
+    if (shots[i].action === 'pot' && shots[i].ballPotted === 'red') {
+      lastRedIndex = i;
+      break;
+    }
+  }
+
+  // If no red shot was ever potted, it's not the final black
+  if (lastRedIndex === -1) return false;
+
+  const lastRedShot = shots[lastRedIndex];
+  const shotsAfterLastRed = shots.slice(lastRedIndex + 1);
+  const potShotsAfterLastRed = shotsAfterLastRed.filter(s => s.action === 'pot' && s.ballPotted);
+
+  // If the first shot after the last red was in the same visit, it's the color for the 6th red
+  let colorPotsToExclude = 0;
+  if (potShotsAfterLastRed.length > 0 && potShotsAfterLastRed[0].visitNumber === lastRedShot.visitNumber) {
+    colorPotsToExclude = 1;
+  }
+
+  const finalColorPots = potShotsAfterLastRed.slice(colorPotsToExclude);
+  // In snooker clearance, the final black is preceded by pink!
+  return finalColorPots.some(s => s.ballPotted === 'pink');
+}
+
+/**
+ * Returns set of colors cleared off the table during the clearance phase (after all reds are potted).
+ */
+export function getClearedColors(shots: Shot[], redsRemaining: number): Set<BallColor> {
+  const cleared = new Set<BallColor>();
+  if (redsRemaining > 0) return cleared;
+
+  let lastRedIndex = -1;
+  for (let i = shots.length - 1; i >= 0; i--) {
+    if (shots[i].action === 'pot' && shots[i].ballPotted === 'red') {
+      lastRedIndex = i;
+      break;
+    }
+  }
+
+  if (lastRedIndex === -1) {
+    shots.forEach(s => {
+      if (s.action === 'pot' && s.ballPotted && s.ballPotted !== 'red') {
+        cleared.add(s.ballPotted as BallColor);
+      }
+    });
+    return cleared;
+  }
+
+  const lastRedShot = shots[lastRedIndex];
+  const colorPotShotsAfterRed = shots
+    .slice(lastRedIndex + 1)
+    .filter(s => s.action === 'pot' && s.ballPotted && s.ballPotted !== 'red');
+
+  let startIndex = 0;
+  if (colorPotShotsAfterRed.length > 0 && colorPotShotsAfterRed[0].visitNumber === lastRedShot.visitNumber) {
+    startIndex = 1;
+  }
+
+  for (let i = startIndex; i < colorPotShotsAfterRed.length; i++) {
+    cleared.add(colorPotShotsAfterRed[i].ballPotted as BallColor);
+  }
+
+  return cleared;
+}
+
+export interface PotViolationWarning {
+  type: 'red_exceeded' | 'consecutive_colors' | 'color_already_cleared';
+  title: string;
+  message: string;
+  submessage: string;
+}
+
+/**
+ * Checks if a pot shot potentially violates snooker rules (e.g. potting reds exceeding count, or potting colors twice consecutively).
+ */
+export function checkPotBallViolation(
+  ball: BallColor,
+  redsRemaining: number,
+  currentVisitShots: Shot[],
+  allFrameShots: Shot[]
+): PotViolationWarning | null {
+  // 1. Red count exceeded: ball is red, but no reds remain on the table
+  if (ball === 'red' && redsRemaining <= 0) {
+    return {
+      type: 'red_exceeded',
+      title: 'ลูกแดงบนโต๊ะหมดแล้ว',
+      message: 'ลูกแดงบนโต๊ะหมดแล้ว (เหลือ 0 ลูก) การกดลูกแดงอาจเป็นการบันทึกแต้มเกินจำนวนลูกแดงที่มี',
+      submessage: 'คุณต้องการ "ทำต่อ" เพื่อบันทึกแต้มนี้ หรือ "ย้อนกลับ" เพื่อยกเลิก?',
+    };
+  }
+
+  // 2. Color potted twice consecutively in the same visit while reds remain:
+  const pottedInVisit = currentVisitShots.filter(s => s.action === 'pot' && s.ballPotted);
+  const lastPotInVisit = pottedInVisit.length > 0 ? pottedInVisit[pottedInVisit.length - 1] : null;
+
+  if (redsRemaining > 0 && lastPotInVisit && lastPotInVisit.ballPotted !== 'red' && ball !== 'red') {
+    const prevBallName = BALL_MAP[lastPotInVisit.ballPotted as BallColor]?.nameTh || lastPotInVisit.ballPotted;
+    const currentBallName = BALL_MAP[ball]?.nameTh || ball;
+    return {
+      type: 'consecutive_colors',
+      title: 'กดลูกสีซ้ำ 2 ครั้ง',
+      message: `คุณเพิ่งตบลูก${prevBallName}ไปในไม้นี้ และกำลังจะตบลูก${currentBallName}ซ้ำอีกครั้งโดยไม่มีลูกแดงคั่น`,
+      submessage: 'ตามกติกาสนุ๊กเกอร์ต้องตบแดงสลับสี คุณต้องการ "ทำต่อ" หรือ "ย้อนกลับ"?',
+    };
+  }
+
+  // 3. Color already cleared off the table when reds are 0:
+  if (redsRemaining === 0 && ball !== 'red') {
+    const cleared = getClearedColors(allFrameShots, redsRemaining);
+    if (cleared.has(ball)) {
+      const ballName = BALL_MAP[ball]?.nameTh || ball;
+      return {
+        type: 'color_already_cleared',
+        title: `ลูก${ballName}ลงไปแล้ว`,
+        message: `ลูก${ballName} ถูกตบลงไปแล้ว (ไม่มีอยู่บนโต๊ะแล้ว) การตบลูกเดิมซ้ำอาจผิดกติกา`,
+        submessage: 'คุณต้องการ "ทำต่อ" เพื่อบันทึกแต้มนี้ หรือ "ย้อนกลับ" เพื่อยกเลิก?',
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
  * Calculate pot points for Electric Snooker / Ball Count
- * Live play scores raw ball points. Handicap is calculated at game/frame end.
+ * Live play scores raw ball points. Electric fee is accumulated when reds are cleared.
  */
 export function calculateElectricPotPoints(
   ball: BallColor,
   pocket?: PocketLocation,
   isFinalBlack: boolean = false,
   electricConfig?: ElectricConfig,
-  _playerIndex: 0 | 1 = 0
-): { points: number; rawPoints: number; isGaBonus: boolean; description: string } {
+  _playerIndex: number = 0,
+  redsRemaining: number = 6
+): { points: number; rawPoints: number; isGaBonus: boolean; isFee: boolean; description: string } {
   if (!electricConfig) {
     const raw = BALL_MAP[ball].points;
     return {
       points: raw,
       rawPoints: raw,
       isGaBonus: false,
+      isFee: false,
       description: `ตบลูก ${BALL_MAP[ball].nameTh} (+${raw})`,
     };
   }
@@ -151,13 +348,10 @@ export function calculateElectricPotPoints(
   let rawPoints = 1;
   let isGaBonus = false;
 
-  if (electricConfig.countMode === 'ball-only') {
-    // Pure ball count: custom points per ball or 1 pt each
-    rawPoints = getBallBasePoints(ball, isFinalBlack, electricConfig);
-  } else {
+  if (electricConfig.countMode === 'ball-plus-ga') {
     // Ball count + Ga bonus
     if (ball === 'red') {
-      rawPoints = electricConfig.redPoints;
+      rawPoints = electricConfig.redPoints || 1;
     } else {
       const isGa = isGaPocket(ball, pocket);
       if (isGa) {
@@ -167,14 +361,25 @@ export function calculateElectricPotPoints(
         rawPoints = 1; // Standard non-ga pocket counts as 1 ball
       }
     }
+  } else {
+    // Pure ball count: custom points per ball
+    rawPoints = getBallBasePoints(ball, isFinalBlack, electricConfig);
   }
 
-  const desc = `ตบลูก ${BALL_MAP[ball].nameTh}${isGaBonus ? ' (หลุมกา)' : ''} (+${rawPoints})`;
+  // Rule: Fee applies ONLY when all 6 reds are cleared and ball is in feeBalls
+  const feeBalls = electricConfig.feeBalls || ['yellow', 'brown', 'black'];
+  const isFee = redsRemaining === 0 && feeBalls.includes(ball);
+
+  let desc = `ตบลูก ${BALL_MAP[ball].nameTh}${isGaBonus ? ' (หลุมกา)' : ''} (+${rawPoints})`;
+  if (isFee) {
+    desc += ' ⚡ คิดค่าไฟ (+1)';
+  }
 
   return {
     points: rawPoints,
     rawPoints,
     isGaBonus,
+    isFee,
     description: desc,
   };
 }
