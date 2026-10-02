@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { Navbar } from './components/Navbar';
 import { Scoreboard } from './components/Scoreboard';
@@ -144,7 +144,10 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    saveActiveMatch(match);
+    const timer = setTimeout(() => {
+      saveActiveMatch(match);
+    }, 300);
+    return () => clearTimeout(timer);
   }, [match]);
 
   const currentFrame = match.frames[match.currentFrameIndex] || match.frames[0];
@@ -401,8 +404,8 @@ export function App() {
       const defenderIdx = getElectricDefenderIndex(strikerIdx, totalElectricPlayers);
       const isLastBlack = isElectricFinalBlack(currentFrame.shots || [], currentFrame.redsRemaining, ball);
 
-      // Save electric snapshot
-      setElectricSnapshots(prev => [...prev, {
+      // Save electric snapshot (keep latest 20 steps to prevent lag)
+      setElectricSnapshots(prev => [...prev.slice(-20), {
         match: JSON.parse(JSON.stringify(match)),
         activeStrikerIndex,
         currentBreak,
@@ -645,8 +648,8 @@ export function App() {
     const foulPenalty = match.electricConfig.foulPenalty ?? 2;
     soundManager.speakFoul(foulPenalty);
 
-    // Save electric snapshot
-    setElectricSnapshots(prev => [...prev, {
+    // Save electric snapshot (keep latest 20 steps to prevent lag)
+    setElectricSnapshots(prev => [...prev.slice(-20), {
       match: JSON.parse(JSON.stringify(match)),
       activeStrikerIndex,
       currentBreak,
@@ -1201,251 +1204,286 @@ export function App() {
     setActiveTab('history');
   }, [currentFrame, match]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const key = e.key;
-      const code = e.code;
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    const key = e.key;
+    const code = e.code;
 
-      // 0. When Frame End Modal is open: Enter -> เริ่มเฟรมใหม่ / . -> ปิดหน้าต่าง / / or Backspace -> จบแมตช์
-      if (isFrameEndModalOpen) {
-        if (key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === ' ' || code === 'Space' || key === 'Tab' || key === 'ใ') {
-          e.preventDefault();
-          const isElectric = match.gameMode === 'electric-count';
-          const isUnlimited = match.matchLengthType === 'unlimited' || match.bestOfFrames === 0;
-          const p1Won = currentFrame.player1Score > currentFrame.player2Score;
-          const p1Frames = p1Won ? match.player1FramesWon + 1 : match.player1FramesWon;
-          const p2Frames = !p1Won ? match.player2FramesWon + 1 : match.player2FramesWon;
-          const framesNeeded = isUnlimited ? Infinity : Math.ceil(match.bestOfFrames / 2);
-          const isMatchWon = isElectric
-            ? (!isUnlimited && (currentFrame.frameNumber >= match.bestOfFrames))
-            : (!isUnlimited && (p1Frames >= framesNeeded || p2Frames >= framesNeeded));
-
-          if (isMatchWon) {
-            handleFinishMatch();
-          } else {
-            handleNextFrame();
-          }
-          return;
-        }
-
-        // Finish match shortcut: / or Backspace or * or =
-        if (key === '/' || code === 'NumpadDivide' || code === 'Slash' || key === 'Backspace' || code === 'Backspace' || key === '*' || code === 'NumpadMultiply' || key === '=' || code === 'Equal') {
-          e.preventDefault();
-          handleFinishMatch();
-          return;
-        }
-
-        if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete' || key === 'Escape' || key === 'Clear') {
-          e.preventDefault();
-          setIsFrameEndModalOpen(false);
-          return;
-        }
-        return;
-      }
-
-      // 0.1 When Pot Warning Modal is open: Enter/Space -> ทำต่อ, Esc/Backspace/. -> ย้อนกลับ
-      if (potWarningModal) {
-        if (key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === ' ' || code === 'Space' || key === 'Tab' || key === 'ใ') {
-          e.preventDefault();
-          const { ball, pocket } = potWarningModal;
-          setPotWarningModal(null);
-          executePotBall(ball, pocket);
-          return;
-        }
-
-        if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete' || key === 'Escape' || key === 'Clear' || key === 'Backspace' || code === 'Backspace') {
-          e.preventDefault();
-          setPotWarningModal(null);
-          return;
-        }
-        return;
-      }
-
-      // Ignore global shortcuts when other modals are open
-      if (isNewMatchModalOpen || isKeypadGuideOpen || match.electricConfig?.isMatchCompleted) {
-        if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete' || key === 'Escape' || key === 'Clear') {
-          setIsKeypadGuideOpen(false);
-          return;
-        }
-        return;
-      }
-
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA') {
-        return;
-      }
-
-      // 1. When in Foul Mode: Pressing 4, 5, 6, 7 submits that foul point
-      if (isFoulMode) {
-        if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ArrowLeft' || key === 'ภ') {
-          handleSubmitFoul(4, { switchStriker: true, note: 'ฟาวล์ +4 แต้ม' });
-          setIsFoulMode(false);
-          return;
-        }
-        if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') {
-          handleSubmitFoul(5, { switchStriker: true, note: 'ฟาวล์ +5 แต้ม (น้ำเงิน)' });
-          setIsFoulMode(false);
-          return;
-        }
-        if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ArrowRight' || key === 'ุ') {
-          handleSubmitFoul(6, { switchStriker: true, note: 'ฟาวล์ +6 แต้ม (ชมพู)' });
-          setIsFoulMode(false);
-          return;
-        }
-        if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'Home' || key === 'ึ') {
-          handleSubmitFoul(7, { switchStriker: true, note: 'ฟาวล์ +7 แต้ม (ดำ)' });
-          setIsFoulMode(false);
-          return;
-        }
-        if (key === '0' || code === 'Numpad0' || key === '-' || key === '+') {
-          handleSubmitFoul(4, { switchStriker: true, note: 'ฟาวล์ +4 แต้ม' });
-          setIsFoulMode(false);
-          return;
-        }
-        if (key === 'Escape' || key === 'Clear' || key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete') {
-          setIsFoulMode(false);
-          return;
-        }
-      }
-
-      // 2. Keys 1 to 7: ALWAYS Direct Scoring Buttons (+1 to +7 points)
-      if (key === '1' || code === 'Digit1' || code === 'Numpad1' || key === 'End' || key === 'ๅ') {
-        handlePotBall('red');
-        return;
-      }
-      if (key === '2' || code === 'Digit2' || code === 'Numpad2' || key === 'ArrowDown') {
-        handlePotBall('yellow');
-        return;
-      }
-      if (key === '3' || code === 'Digit3' || code === 'Numpad3' || key === 'PageDown') {
-        handlePotBall('green');
-        return;
-      }
-      if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ArrowLeft' || key === 'ภ') {
-        handlePotBall('brown');
-        return;
-      }
-      if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') {
-        handlePotBall('blue');
-        return;
-      }
-      if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ArrowRight' || key === 'ุ') {
-        handlePotBall('pink');
-        return;
-      }
-      if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'Home' || key === 'ึ') {
-        handlePotBall('black');
-        return;
-      }
-
-      // 3. Backspace (⌫) or Asterisk (*) or Ctrl+Z -> ย้อนกลับ Undo
-      if (key === 'Backspace' || code === 'Backspace' || key === '*' || code === 'NumpadMultiply' || (e.ctrlKey && (key.toLowerCase() === 'z' || code === 'KeyZ'))) {
+    // 0. When Frame End Modal is open: Enter -> เริ่มเฟรมใหม่ / . -> ปิดหน้าต่าง / / or Backspace -> จบแมตช์
+    if (isFrameEndModalOpen) {
+      if (key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === ' ' || code === 'Space' || key === 'Tab' || key === 'ใ') {
         e.preventDefault();
+        const isElectric = match.gameMode === 'electric-count';
+        const isUnlimited = match.matchLengthType === 'unlimited' || match.bestOfFrames === 0;
+        const p1Won = currentFrame.player1Score > currentFrame.player2Score;
+        const p1Frames = p1Won ? match.player1FramesWon + 1 : match.player1FramesWon;
+        const p2Frames = !p1Won ? match.player2FramesWon + 1 : match.player2FramesWon;
+        const framesNeeded = isUnlimited ? Infinity : Math.ceil(match.bestOfFrames / 2);
+        const isMatchWon = isElectric
+          ? (!isUnlimited && (currentFrame.frameNumber >= match.bestOfFrames))
+          : (!isUnlimited && (p1Frames >= framesNeeded || p2Frames >= framesNeeded));
+
+        if (isMatchWon) {
+          handleFinishMatch();
+        } else {
+          handleNextFrame();
+        }
+        return;
+      }
+
+      // Finish match shortcut: / or Backspace or * or =
+      if (key === '/' || code === 'NumpadDivide' || code === 'Slash' || key === 'Backspace' || code === 'Backspace' || key === '*' || code === 'NumpadMultiply' || key === '=' || code === 'Equal') {
+        e.preventDefault();
+        handleFinishMatch();
+        return;
+      }
+
+      if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete' || key === 'Escape' || key === 'Clear') {
+        e.preventDefault();
+        setIsFrameEndModalOpen(false);
+        return;
+      }
+      return;
+    }
+
+    // 0.1 When Pot Warning Modal is open:
+    if (potWarningModal) {
+      // Option 1: ทำต่อ (บันทึกแต้ม) -> Enter / Space / 1 / Tab
+      if (
+        key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' ||
+        key === ' ' || code === 'Space' ||
+        key === 'Tab' || key === 'ใ' ||
+        key === '1' || code === 'Digit1' || code === 'Numpad1'
+      ) {
+        e.preventDefault();
+        const { ball, pocket } = potWarningModal;
+        setPotWarningModal(null);
+        executePotBall(ball, pocket);
+        return;
+      }
+
+      // Option 3: ย้อนกลับช็อตก่อนหน้า (Undo) -> *
+      if (key === '*' || code === 'NumpadMultiply') {
+        e.preventDefault();
+        setPotWarningModal(null);
         handleUndo();
         return;
       }
 
-      // 4. Slash (/) or Equal (=) or 'E' -> จบเฟรม (End Frame Modal / End Electric Game)
-      if (key === '/' || code === 'NumpadDivide' || code === 'Slash' || key === '=' || code === 'NumpadEqual' || code === 'Equal' || key === 'LaunchApplication2' || key === 'Calculator' || key === 'e' || key === 'E' || code === 'KeyE' || key === 'ำ') {
+      // Option 2: ย้อนกลับ (ยกเลิก) -> + / Backspace / . / Esc / Clear / Delete / 2 / -
+      if (
+        key === '+' || code === 'NumpadAdd' ||
+        key === 'Backspace' || code === 'Backspace' ||
+        key === '.' || code === 'NumpadDecimal' || code === 'Period' ||
+        key === 'Delete' || key === 'Escape' || key === 'Clear' ||
+        key === '2' || code === 'Digit2' || code === 'Numpad2' ||
+        key === '-' || code === 'NumpadSubtract' || code === 'Minus'
+      ) {
         e.preventDefault();
-        if (match.gameMode === 'electric-count') {
-          handleEndElectricGame();
-        } else {
-          setIsFrameEndModalOpen(true);
-        }
+        setPotWarningModal(null);
         return;
       }
+      return;
+    }
 
-      // Shoot Out Controls: 0 (Ins) or Space -> Toggle Pause/Resume
-      if (match.gameMode === 'shoot-out' && (key === '0' || code === 'Numpad0' || code === 'Digit0' || key === ' ' || code === 'Space' || key === 'Insert')) {
-        e.preventDefault();
-        handleTogglePauseShootOut();
-        return;
-      }
-
-      // Shoot Out Controls: Key 8 -> Reset Shot Clock immediately
-      if (match.gameMode === 'shoot-out' && (key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ArrowUp')) {
-        e.preventDefault();
-        resetShootOutShotClock();
-        return;
-      }
-
-      // Shoot Out Controls: Key - -> Immediate 5-pt Foul + Ball in Hand
-      if (match.gameMode === 'shoot-out' && (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์')) {
-        e.preventDefault();
-        handleSubmitFoul(match.shootOutConfig?.minFoulPenalty || 5, {
-          switchStriker: true,
-          note: 'ฟาวล์ 5 แต้ม (บอลอินแฮนด์)',
-        });
-        setBallInHandActive(true);
-        soundManager.speakBallInHand();
-        resetShootOutShotClock();
-        return;
-      }
-
-      // 5. Enter / Space / Tab -> เปลี่ยนเทิร์น (Switch Striker / End Turn)
-      if (key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === 'Tab' || code === 'Tab' || key === 'ใ' || (match.gameMode !== 'shoot-out' && (key === ' ' || code === 'Space'))) {
-        e.preventDefault();
-        handleEndTurn('miss');
-        return;
-      }
-
-      // 6. Period (.) / Del / Clear / Escape -> ยกเลิก (Cancel / Reset)
+    // Ignore global shortcuts when other modals are open
+    if (isNewMatchModalOpen || isKeypadGuideOpen || match.electricConfig?.isMatchCompleted) {
       if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete' || key === 'Escape' || key === 'Clear') {
-        if (isFoulMode) {
-          setIsFoulMode(false);
-          return;
-        }
-        setIsFrameEndModalOpen(false);
         setIsKeypadGuideOpen(false);
         return;
       }
+      return;
+    }
 
-      // 7. Plus (+) or F11 -> ขยายหน้าจอ / ย่อหน้าจอกลับ (Toggle Fullscreen)
-      if (key === '+' || code === 'NumpadAdd' || (code === 'Equal' && e.shiftKey) || key === 'F11' || code === 'F11') {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA') {
+      return;
+    }
+
+    // 1. When in Foul Mode: Pressing 4, 5, 6, 7 submits that foul point
+    if (isFoulMode) {
+      if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ArrowLeft' || key === 'ภ') {
         e.preventDefault();
-        toggleFullscreen();
+        handleSubmitFoul(4, { switchStriker: true, note: 'ฟาวล์ +4 แต้ม' });
+        setIsFoulMode(false);
         return;
       }
-
-      // 8. Minus (-) -> Open Foul Mode or Electric Foul
-      if (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') {
+      if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') {
         e.preventDefault();
-        if (match.gameMode === 'electric-count') {
-          handleElectricFoul();
-        } else {
-          setIsFoulMode(true);
-        }
+        handleSubmitFoul(5, { switchStriker: true, note: 'ฟาวล์ +5 แต้ม (น้ำเงิน)' });
+        setIsFoulMode(false);
         return;
       }
-
-      // 9. Key 8 / 'S' -> Safety shot (แทงกัน)
-      if (key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ArrowUp' || key === 's' || key === 'S' || code === 'KeyS' || key === 'ห') {
-        handleEndTurn('safety');
+      if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ArrowRight' || key === 'ุ') {
+        e.preventDefault();
+        handleSubmitFoul(6, { switchStriker: true, note: 'ฟาวล์ +6 แต้ม (ชมพู)' });
+        setIsFoulMode(false);
         return;
       }
-
-      // 10. Key 9 / PageUp -> Multi-red pot (ตบแดงซ้อน +1)
-      if (key === '9' || code === 'Digit9' || code === 'Numpad9' || key === 'PageUp') {
-        handleMultiRedPot(1);
+      if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'Home' || key === 'ึ') {
+        e.preventDefault();
+        handleSubmitFoul(7, { switchStriker: true, note: 'ฟาวล์ +7 แต้ม (ดำ)' });
+        setIsFoulMode(false);
         return;
       }
-
-      // 11. NumLock or H / ? -> Open Keypad Guide
-      if (code === 'NumLock' || key === 'NumLock' || key === '?' || key === 'h' || key === 'H') {
-        setIsKeypadGuideOpen(prev => !prev);
+      if (key === '0' || code === 'Numpad0' || key === '-' || key === '+') {
+        e.preventDefault();
+        handleSubmitFoul(4, { switchStriker: true, note: 'ฟาวล์ +4 แต้ม' });
+        setIsFoulMode(false);
         return;
       }
-
-      // 12. Key 'T' -> Toggle Theme (โทนมืด / โทนสว่าง)
-      if (key === 't' || key === 'T' || code === 'KeyT' || key === 'ะ') {
-        toggleTheme();
+      if (key === 'Escape' || key === 'Clear' || key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete') {
+        e.preventDefault();
+        setIsFoulMode(false);
         return;
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    // 2. Keys 1 to 7: ALWAYS Direct Scoring Buttons (+1 to +7 points)
+    if (key === '1' || code === 'Digit1' || code === 'Numpad1' || key === 'End' || key === 'ๅ') {
+      e.preventDefault();
+      handlePotBall('red');
+      return;
+    }
+    if (key === '2' || code === 'Digit2' || code === 'Numpad2' || key === 'ArrowDown') {
+      e.preventDefault();
+      handlePotBall('yellow');
+      return;
+    }
+    if (key === '3' || code === 'Digit3' || code === 'Numpad3' || key === 'PageDown') {
+      e.preventDefault();
+      handlePotBall('green');
+      return;
+    }
+    if (key === '4' || code === 'Digit4' || code === 'Numpad4' || key === 'ArrowLeft' || key === 'ภ') {
+      e.preventDefault();
+      handlePotBall('brown');
+      return;
+    }
+    if (key === '5' || code === 'Digit5' || code === 'Numpad5' || key === 'ถ') {
+      e.preventDefault();
+      handlePotBall('blue');
+      return;
+    }
+    if (key === '6' || code === 'Digit6' || code === 'Numpad6' || key === 'ArrowRight' || key === 'ุ') {
+      e.preventDefault();
+      handlePotBall('pink');
+      return;
+    }
+    if (key === '7' || code === 'Digit7' || code === 'Numpad7' || key === 'Home' || key === 'ึ') {
+      e.preventDefault();
+      handlePotBall('black');
+      return;
+    }
+
+    // 3. Backspace (⌫) or Asterisk (*) or Ctrl+Z -> ย้อนกลับ Undo
+    if (key === 'Backspace' || code === 'Backspace' || key === '*' || code === 'NumpadMultiply' || (e.ctrlKey && (key.toLowerCase() === 'z' || code === 'KeyZ'))) {
+      e.preventDefault();
+      handleUndo();
+      return;
+    }
+
+    // 4. Slash (/) or Equal (=) or 'E' -> จบเฟรม (End Frame Modal / End Electric Game)
+    if (key === '/' || code === 'NumpadDivide' || code === 'Slash' || key === '=' || code === 'NumpadEqual' || code === 'Equal' || key === 'LaunchApplication2' || key === 'Calculator' || key === 'e' || key === 'E' || code === 'KeyE' || key === 'ำ') {
+      e.preventDefault();
+      if (match.gameMode === 'electric-count') {
+        handleEndElectricGame();
+      } else {
+        setIsFrameEndModalOpen(true);
+      }
+      return;
+    }
+
+    // Shoot Out Controls: 0 (Ins) or Space -> Toggle Pause/Resume
+    if (match.gameMode === 'shoot-out' && (key === '0' || code === 'Numpad0' || code === 'Digit0' || key === ' ' || code === 'Space' || key === 'Insert')) {
+      e.preventDefault();
+      handleTogglePauseShootOut();
+      return;
+    }
+
+    // Shoot Out Controls: Key 8 -> Reset Shot Clock immediately
+    if (match.gameMode === 'shoot-out' && (key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ArrowUp')) {
+      e.preventDefault();
+      resetShootOutShotClock();
+      return;
+    }
+
+    // Shoot Out Controls: Key - -> Immediate 5-pt Foul + Ball in Hand
+    if (match.gameMode === 'shoot-out' && (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์')) {
+      e.preventDefault();
+      handleSubmitFoul(match.shootOutConfig?.minFoulPenalty || 5, {
+        switchStriker: true,
+        note: 'ฟาวล์ 5 แต้ม (บอลอินแฮนด์)',
+      });
+      setBallInHandActive(true);
+      soundManager.speakBallInHand();
+      resetShootOutShotClock();
+      return;
+    }
+
+    // 5. Enter / Space / Tab -> เปลี่ยนเทิร์น (Switch Striker / End Turn)
+    if (key === 'Enter' || code === 'NumpadEnter' || code === 'Enter' || key === 'Tab' || code === 'Tab' || key === 'ใ' || (match.gameMode !== 'shoot-out' && (key === ' ' || code === 'Space'))) {
+      e.preventDefault();
+      handleEndTurn('miss');
+      return;
+    }
+
+    // 6. Period (.) / Del / Clear / Escape -> ยกเลิก (Cancel / Reset)
+    if (key === '.' || code === 'NumpadDecimal' || code === 'Period' || key === 'Delete' || key === 'Escape' || key === 'Clear') {
+      e.preventDefault();
+      if (isFoulMode) {
+        setIsFoulMode(false);
+        return;
+      }
+      setIsFrameEndModalOpen(false);
+      setIsKeypadGuideOpen(false);
+      return;
+    }
+
+    // 7. Plus (+) or F11 -> ขยายหน้าจอ / ย่อหน้าจอกลับ (Toggle Fullscreen)
+    if (key === '+' || code === 'NumpadAdd' || (code === 'Equal' && e.shiftKey) || key === 'F11' || code === 'F11') {
+      e.preventDefault();
+      toggleFullscreen();
+      return;
+    }
+
+    // 8. Minus (-) -> Open Foul Mode or Electric Foul
+    if (key === '-' || key === '_' || code === 'NumpadSubtract' || code === 'Minus' || key === 'f' || key === 'F' || code === 'KeyF' || key === 'ด' || key === '์') {
+      e.preventDefault();
+      if (match.gameMode === 'electric-count') {
+        handleElectricFoul();
+      } else {
+        setIsFoulMode(true);
+      }
+      return;
+    }
+
+    // 9. Key 8 / 'S' -> Safety shot (แทงกัน)
+    if (key === '8' || code === 'Digit8' || code === 'Numpad8' || key === 'ArrowUp' || key === 's' || key === 'S' || code === 'KeyS' || key === 'ห') {
+      e.preventDefault();
+      handleEndTurn('safety');
+      return;
+    }
+
+    // 10. Key 9 / PageUp -> Multi-red pot (ตบแดงซ้อน +1)
+    if (key === '9' || code === 'Digit9' || code === 'Numpad9' || key === 'PageUp') {
+      e.preventDefault();
+      handleMultiRedPot(1);
+      return;
+    }
+
+    // 11. NumLock or H / ? -> Open Keypad Guide
+    if (code === 'NumLock' || key === 'NumLock' || key === '?' || key === 'h' || key === 'H') {
+      e.preventDefault();
+      setIsKeypadGuideOpen(prev => !prev);
+      return;
+    }
+
+    // 12. Key 'T' -> Toggle Theme (โทนมืด / โทนสว่าง)
+    if (key === 't' || key === 'T' || code === 'KeyT' || key === 'ะ') {
+      e.preventDefault();
+      toggleTheme();
+      return;
+    }
   }, [
     isNewMatchModalOpen,
     isFrameEndModalOpen,
@@ -1467,6 +1505,19 @@ export function App() {
     toggleFullscreen,
     toggleTheme,
   ]);
+
+  const handleKeyDownRef = useRef<(e: KeyboardEvent) => void>(handleKeyDown);
+  useEffect(() => {
+    handleKeyDownRef.current = handleKeyDown;
+  }, [handleKeyDown]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      handleKeyDownRef.current(e);
+    };
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => window.removeEventListener('keydown', onKeyDown, true);
+  }, []);
 
   const handleStartNewMatch = (config: {
     player1Name: string;
@@ -1831,10 +1882,15 @@ export function App() {
               <button
                 type="button"
                 onClick={() => setPotWarningModal(null)}
-                className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer hover:border-slate-500"
+                className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 border border-slate-700 font-bold text-xs sm:text-sm flex flex-col items-center justify-center gap-1 shadow transition-all cursor-pointer hover:border-slate-500"
               >
-                <RotateCcw className="w-4 h-4 text-slate-400" />
-                <span>↩️ ย้อนกลับ (ยกเลิก)</span>
+                <div className="flex items-center gap-1.5">
+                  <RotateCcw className="w-4 h-4 text-slate-400" />
+                  <span>↩️ ย้อนกลับ (ยกเลิก)</span>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-black/50 border border-slate-600 font-mono text-[11px] text-amber-300 font-bold">
+                  [+ หรือ ⌫]
+                </span>
               </button>
 
               <button
@@ -1844,9 +1900,14 @@ export function App() {
                   setPotWarningModal(null);
                   executePotBall(ball, pocket);
                 }}
-                className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-amber-600/30 transition-all cursor-pointer"
+                className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 active:scale-95 text-white font-black text-xs sm:text-sm flex flex-col items-center justify-center gap-1 shadow-lg shadow-amber-600/30 transition-all cursor-pointer"
               >
-                <span>🟢 ทำต่อ (บันทึกแต้ม)</span>
+                <div className="flex items-center gap-1.5">
+                  <span>🟢 ทำต่อ (บันทึกแต้ม)</span>
+                </div>
+                <span className="px-2.5 py-0.5 rounded bg-slate-950/40 border border-amber-900/40 font-mono text-[11px] text-amber-100 font-black">
+                  [Enter ↵]
+                </span>
               </button>
             </div>
 
@@ -1859,10 +1920,13 @@ export function App() {
                     setPotWarningModal(null);
                     handleUndo();
                   }}
-                  className="text-[11px] sm:text-xs text-slate-400 hover:text-amber-400 flex items-center justify-center gap-1 mx-auto transition-colors cursor-pointer"
+                  className="py-1.5 px-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[11px] sm:text-xs text-slate-300 hover:text-amber-300 flex items-center justify-center gap-1.5 mx-auto transition-colors cursor-pointer border border-slate-700/60"
                 >
-                  <Undo2 className="w-3.5 h-3.5" />
-                  <span>หรือย้อนกลับช็อตก่อนหน้า (Undo)</span>
+                  <Undo2 className="w-3.5 h-3.5 text-amber-400" />
+                  <span>ย้อนกลับช็อตก่อนหน้า (Undo)</span>
+                  <span className="px-1.5 py-0.2 rounded bg-black/40 border border-slate-600 font-mono text-[10px] text-amber-300 font-bold">
+                    [*]
+                  </span>
                 </button>
               </div>
             )}

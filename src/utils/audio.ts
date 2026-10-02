@@ -210,7 +210,9 @@ class SoundManager {
       this.currentAudio = audio;
       const playPromise = audio.play();
       if (playPromise !== undefined) {
-        playPromise.catch(() => {
+        playPromise.catch((err) => {
+          // If playback was aborted due to new audio being played quickly, do not fallback to TTS
+          if (err && (err.name === 'AbortError' || err.code === 20)) return;
           if (fallbackText) {
             this.speakWithTTS(fallbackText);
           }
